@@ -6,11 +6,11 @@ public class BuildAction {
     private model.EntityType entityType;
     public model.EntityType getEntityType() { return entityType; }
     public void setEntityType(model.EntityType entityType) { this.entityType = entityType; }
-    private model.Vec2Int position;
-    public model.Vec2Int getPosition() { return position; }
-    public void setPosition(model.Vec2Int position) { this.position = position; }
+    private Coordinate position;
+    public Coordinate getPosition() { return position; }
+    public void setPosition(Coordinate position) { this.position = position; }
     public BuildAction() {}
-    public BuildAction(model.EntityType entityType, model.Vec2Int position) {
+    public BuildAction(model.EntityType entityType, Coordinate position) {
         this.entityType = entityType;
         this.position = position;
     }
@@ -50,7 +50,7 @@ public class BuildAction {
         default:
             throw new java.io.IOException("Unexpected tag value");
         }
-        result.position = model.Vec2Int.readFrom(stream);
+        result.position = Coordinate.readFrom(stream);
         return result;
     }
     public void writeTo(java.io.OutputStream stream) throws java.io.IOException {

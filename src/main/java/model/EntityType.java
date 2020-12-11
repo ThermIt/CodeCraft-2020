@@ -1,20 +1,26 @@
 package model;
 
-import util.StreamUtil;
-
 public enum EntityType {
-    WALL(0),
-    HOUSE(1),
-    BUILDER_BASE(2),
-    BUILDER_UNIT(3),
-    MELEE_BASE(4),
-    MELEE_UNIT(5),
-    RANGED_BASE(6),
-    RANGED_UNIT(7),
-    RESOURCE(8),
-    TURRET(9);
+    INPENETRABLE(-1, false),
+    WALL(0, true),
+    HOUSE(1, true),
+    BUILDER_BASE(2, true),
+    BUILDER_UNIT(3, false),
+    MELEE_BASE(4, true),
+    MELEE_UNIT(5, false),
+    RANGED_BASE(6, true),
+    RANGED_UNIT(7, false),
+    RESOURCE(8, false),
+    TURRET(9, true);
     public int tag;
-    EntityType(int tag) {
-      this.tag = tag;
+    private boolean isBuilding;
+
+    EntityType(int tag, boolean isBuilding) {
+        this.tag = tag;
+        this.isBuilding = isBuilding;
+    }
+
+    public boolean isBuilding() {
+        return isBuilding;
     }
 }

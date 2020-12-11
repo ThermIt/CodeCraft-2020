@@ -12,9 +12,9 @@ public class Entity {
     private model.EntityType entityType;
     public model.EntityType getEntityType() { return entityType; }
     public void setEntityType(model.EntityType entityType) { this.entityType = entityType; }
-    private model.Vec2Int position;
-    public model.Vec2Int getPosition() { return position; }
-    public void setPosition(model.Vec2Int position) { this.position = position; }
+    private Coordinate position;
+    public Coordinate getPosition() { return position; }
+    public void setPosition(Coordinate position) { this.position = position; }
     private int health;
     public int getHealth() { return health; }
     public void setHealth(int health) { this.health = health; }
@@ -22,7 +22,7 @@ public class Entity {
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
     public Entity() {}
-    public Entity(int id, Integer playerId, model.EntityType entityType, model.Vec2Int position, int health, boolean active) {
+    public Entity(int id, Integer playerId, model.EntityType entityType, Coordinate position, int health, boolean active) {
         this.id = id;
         this.playerId = playerId;
         this.entityType = entityType;
@@ -72,7 +72,7 @@ public class Entity {
         default:
             throw new java.io.IOException("Unexpected tag value");
         }
-        result.position = model.Vec2Int.readFrom(stream);
+        result.position = Coordinate.readFrom(stream);
         result.health = StreamUtil.readInt(stream);
         result.active = StreamUtil.readBoolean(stream);
         return result;
@@ -89,5 +89,13 @@ public class Entity {
         position.writeTo(stream);
         StreamUtil.writeInt(stream, health);
         StreamUtil.writeBoolean(stream, active);
+    }
+
+    public boolean isPlayer(int myId) {
+        return playerId != null && playerId == myId;
+    }
+
+    public boolean isBuilding() {
+        return getEntityType().isBuilding();
     }
 }

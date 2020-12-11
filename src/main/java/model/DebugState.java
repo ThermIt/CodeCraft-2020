@@ -3,9 +3,9 @@ package model;
 import util.StreamUtil;
 
 public class DebugState {
-    private model.Vec2Int windowSize;
-    public model.Vec2Int getWindowSize() { return windowSize; }
-    public void setWindowSize(model.Vec2Int windowSize) { this.windowSize = windowSize; }
+    private Coordinate windowSize;
+    public Coordinate getWindowSize() { return windowSize; }
+    public void setWindowSize(Coordinate windowSize) { this.windowSize = windowSize; }
     private model.Vec2Float mousePosWindow;
     public model.Vec2Float getMousePosWindow() { return mousePosWindow; }
     public void setMousePosWindow(model.Vec2Float mousePosWindow) { this.mousePosWindow = mousePosWindow; }
@@ -22,7 +22,7 @@ public class DebugState {
     public int getPlayerIndex() { return playerIndex; }
     public void setPlayerIndex(int playerIndex) { this.playerIndex = playerIndex; }
     public DebugState() {}
-    public DebugState(model.Vec2Int windowSize, model.Vec2Float mousePosWindow, model.Vec2Float mousePosWorld, String[] pressedKeys, model.Camera camera, int playerIndex) {
+    public DebugState(Coordinate windowSize, model.Vec2Float mousePosWindow, model.Vec2Float mousePosWorld, String[] pressedKeys, model.Camera camera, int playerIndex) {
         this.windowSize = windowSize;
         this.mousePosWindow = mousePosWindow;
         this.mousePosWorld = mousePosWorld;
@@ -32,7 +32,7 @@ public class DebugState {
     }
     public static DebugState readFrom(java.io.InputStream stream) throws java.io.IOException {
         DebugState result = new DebugState();
-        result.windowSize = model.Vec2Int.readFrom(stream);
+        result.windowSize = Coordinate.readFrom(stream);
         result.mousePosWindow = model.Vec2Float.readFrom(stream);
         result.mousePosWorld = model.Vec2Float.readFrom(stream);
         result.pressedKeys = new String[StreamUtil.readInt(stream)];

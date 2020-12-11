@@ -1,3 +1,4 @@
+import older.MyOlderStrategy;
 import util.DebugInterface;
 import util.Strategy;
 import util.StreamUtil;
@@ -54,7 +55,7 @@ public class Runner {
 
     void run(boolean older) throws IOException {
         try {
-            Strategy myStrategy = older ? new MyStrategy() : new MyStrategy();
+            Strategy myStrategy = older ? new MyOlderStrategy() : new MyStrategy();
             DebugInterface debugInterface = new DebugInterface(inputStream, outputStream);
             while (true) {
                 model.ServerMessage message = model.ServerMessage.readFrom(inputStream);
