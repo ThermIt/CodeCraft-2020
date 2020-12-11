@@ -1,6 +1,8 @@
 import model.*;
+import util.DebugInterface;
+import util.Strategy;
 
-public class MyStrategy {
+public class MyStrategy implements Strategy {
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
         Action result = new Action(new java.util.HashMap<>());
         int myId = playerView.getMyId();

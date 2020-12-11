@@ -1,17 +1,36 @@
+package util;
+
+import model.DebugState;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 public class DebugInterface {
+
+    private static final DebugState EMPTY_STATE = new DebugState();
+
     private InputStream inputStream;
     private OutputStream outputStream;
+    private static boolean debugEnabled = true;
 
     public DebugInterface(InputStream inputStream, OutputStream outputStream) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
     }
 
+    public static boolean isDebugEnabled() {
+        return debugEnabled;
+    }
+
+    public static void setDebugEnabled() {
+        debugEnabled = true;
+    }
+
     public void send(model.DebugCommand command) {
+        if (!debugEnabled) {
+            return;
+        }
         try {
             new model.ClientMessage.DebugMessage(command).writeTo(outputStream);
             outputStream.flush();
@@ -21,6 +40,9 @@ public class DebugInterface {
     }
 
     public model.DebugState getState() {
+        if (!debugEnabled) {
+            return EMPTY_STATE;
+        }
         try {
             new model.ClientMessage.RequestDebugState().writeTo(outputStream);
             outputStream.flush();
