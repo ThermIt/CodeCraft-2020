@@ -37,7 +37,7 @@ public class EnemiesMap {
 
 
     public Coordinate getMinOfTwoPositions(Coordinate old, Coordinate newPosition) {
-        if (newPosition.getX() < 0 || newPosition.getY() < 0 || newPosition.getX() > mapSize || newPosition.getY() > mapSize) {
+        if (newPosition.getX() < 0 || newPosition.getY() < 0 || newPosition.getX() >= mapSize || newPosition.getY() >= mapSize) {
             return old;
         }
         if (getDistance(newPosition) == 0) {
@@ -54,7 +54,7 @@ public class EnemiesMap {
     }
 
     public int getDistance(int x, int y) {
-        if (x < 0 || y < 0 || x > mapSize || y > mapSize) {
+        if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
             return 0;
         }
         return distanceByFoot[x][y];

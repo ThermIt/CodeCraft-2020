@@ -68,7 +68,7 @@ public class EntitiesMap {
     }
 
     public Entity getEntity(int x, int y) {
-        if (x < 0 || y < 0 || x > mapSize || y > mapSize) {
+        if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
             return null;
         }
         return entityAtPosition[x][y];
