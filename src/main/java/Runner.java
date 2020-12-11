@@ -21,6 +21,9 @@ public class Runner {
     private static void runOnce(String host, int port, String token, boolean older) {
         Runnable task = () -> {
             try {
+                if (DebugInterface.isDebugEnabled()) {
+                    System.out.println("run " + host + ":" + port);
+                }
                 new Runner(host, port, token).run(older);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -37,7 +40,7 @@ public class Runner {
         if (args.length > 4 && "debug".equals(args[4])) {
             DebugInterface.setDebugEnabled();
         }
-        if (args.length > 3 && "double".equals(args[3])) {
+        if (args.length > 3 && "multiply2".equals(args[3])) {
             runOnce(host, port, token, false);
             runOnce(host, port + 1, token, true);
         } else  {

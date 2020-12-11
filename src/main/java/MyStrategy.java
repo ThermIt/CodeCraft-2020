@@ -55,6 +55,7 @@ public class MyStrategy implements Strategy {
         }
         return result;
     }
+
     public void debugUpdate(PlayerView playerView, DebugInterface debugInterface) {
         debugInterface.send(new DebugCommand.Clear());
         debugInterface.getState();
