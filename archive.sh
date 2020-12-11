@@ -1,0 +1,1 @@
+rm archive.zip;zip archive.zip ./pom.xml -R '*.java' -x src/main/java/Vector2D.java -x 'archive/*'
