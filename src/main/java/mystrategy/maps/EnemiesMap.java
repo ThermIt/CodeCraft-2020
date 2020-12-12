@@ -111,4 +111,11 @@ public class EnemiesMap {
     }
 
 
+    public Coordinate getPositionClosestToEnemy(Coordinate from, List<Coordinate> coordinateList) {
+        Coordinate position = from;
+        for (Coordinate newPosition : coordinateList) {
+            position = getMinOfTwoPositions(position, newPosition);
+        }
+        return position;
+    }
 }

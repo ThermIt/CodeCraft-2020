@@ -8,6 +8,7 @@ import util.Strategy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MyStrategy implements Strategy {
@@ -160,11 +161,16 @@ public class MyStrategy implements Strategy {
                 adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() + size, entity.getPosition().getY() + i));
                 adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() + size));
             }
-
             adjustentFreePoints = adjustentFreePoints.stream()
                     .filter(point -> !entitiesMap.isOutOfBounds(point))
                     .filter(point -> entitiesMap.isEmpty(point))
                     .collect(Collectors.toList());
+
+            // get any free point
+            Optional<Coordinate> any = adjustentFreePoints.stream().findAny();
+            if (any.isPresent()) {
+                buildPosition = any.get();
+            }
 
             buildPosition = resourceMap.getPositionClosestToResource(buildPosition, adjustentFreePoints);
             buildAction = new BuildAction(
@@ -172,9 +178,29 @@ public class MyStrategy implements Strategy {
                     buildPosition
             );
         } else {
+            Coordinate buildPosition = defaultBuildPosition;
+            List<Coordinate> adjustentFreePoints = new ArrayList<>();
+            int size = entity.getProperties().getSize();
+            for (int i = 0; i < size; i++) {
+                adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() - 1, entity.getPosition().getY() + i));
+                adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() - 1));
+                adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() + size, entity.getPosition().getY() + i));
+                adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() + size));
+            }
+            adjustentFreePoints = adjustentFreePoints.stream()
+                    .filter(point -> !entitiesMap.isOutOfBounds(point))
+                    .filter(point -> entitiesMap.isEmpty(point))
+                    .collect(Collectors.toList());
+
+            // get any free point
+            Optional<Coordinate> any = adjustentFreePoints.stream().findAny();
+            if (any.isPresent()) {
+                buildPosition = any.get();
+            }
+            buildPosition = enemiesMap.getPositionClosestToEnemy(buildPosition, adjustentFreePoints);
             buildAction = new BuildAction(
                     entityType,
-                    defaultBuildPosition
+                    buildPosition
             );
         }
         return buildAction;
