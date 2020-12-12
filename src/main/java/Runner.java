@@ -66,9 +66,11 @@ public class Runner {
                     outputStream.flush();
                 } else if (message instanceof model.ServerMessage.Finish) {
                     break;
-                } else if (debugInterface.isDebugEnabled() && message instanceof model.ServerMessage.DebugUpdate) {
-                    model.ServerMessage.DebugUpdate debugUpdateMessage = (model.ServerMessage.DebugUpdate) message;
-                    myStrategy.debugUpdate(debugUpdateMessage.getPlayerView(), debugInterface);
+                } else if (message instanceof model.ServerMessage.DebugUpdate) {
+                    if (!older) {
+                        model.ServerMessage.DebugUpdate debugUpdateMessage = (model.ServerMessage.DebugUpdate) message;
+                        myStrategy.debugUpdate(debugUpdateMessage.getPlayerView(), debugInterface);
+                    }
                     new model.ClientMessage.DebugUpdateDone().writeTo(outputStream);
                     outputStream.flush();
                 } else {

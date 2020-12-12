@@ -23,6 +23,7 @@ public class MyStrategy implements Strategy {
     private PlayerView playerView;
     private DebugInterface debugInterface;
 
+    @Override
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
         this.playerView = playerView;
         this.debugInterface = debugInterface;
@@ -137,6 +138,7 @@ public class MyStrategy implements Strategy {
         return buildAction;
     }
 
+    @Override
     public void debugUpdate(PlayerView playerView, DebugInterface debugInterface) {
         debugInterface.send(new DebugCommand.Clear());
         debugInterface.getState();

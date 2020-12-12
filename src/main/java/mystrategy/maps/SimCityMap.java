@@ -55,7 +55,7 @@ public class SimCityMap {
                             int canBuildY = j + 1 + l;
                             coordinates.add(new Coordinate(canBuildX, canBuildY));
 /*
-                            if (DebugInterface.isDebugEnabled()) {
+                            if (debugInterface.isDebugEnabled()) {
                                 DebugCommand.Add command = new DebugCommand.Add();
                                 ColoredVertex[] arra = new ColoredVertex[3];
                                 arra[0] = new ColoredVertex(new Vec2Float(canBuildX,canBuildY), new Vec2Float(0, 0), new Color(0, 1, 1, 0.5f));

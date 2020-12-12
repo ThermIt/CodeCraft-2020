@@ -112,6 +112,7 @@ public class Older1GreedyRusher implements Strategy {
         return buildAction;
     }
 
+    @Override
     public void debugUpdate(PlayerView playerView, DebugInterface debugInterface) {
         debugInterface.send(new DebugCommand.Clear());
         debugInterface.getState();

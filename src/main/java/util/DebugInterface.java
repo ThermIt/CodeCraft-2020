@@ -9,10 +9,9 @@ import java.io.OutputStream;
 public class DebugInterface {
 
     private static final DebugState EMPTY_STATE = new DebugState();
-
+    private static boolean debugEnabled = true;
     private InputStream inputStream;
     private OutputStream outputStream;
-    private static boolean debugEnabled = true;
 
     public DebugInterface(InputStream inputStream, OutputStream outputStream) {
         this.inputStream = inputStream;
