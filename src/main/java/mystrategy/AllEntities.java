@@ -15,6 +15,7 @@ public class AllEntities {
     private List<Entity> resources = new ArrayList<>();
 
     private List<Entity> myUnits = new ArrayList<>();
+    private List<Entity> myAttackers = new ArrayList<>();
     private List<Entity> myBuildings = new ArrayList<>();
 
     private List<Entity> enemyUnits = new ArrayList<>();
@@ -47,6 +48,10 @@ public class AllEntities {
                 if (entity.getEntityType().isUnit()) {
                     myUnits.add(entity);
                 }
+                if (entity.getProperties().getAttack() != null && entity.getProperties().getAttack().getDamage() > 0) {
+                    myAttackers.add(entity);
+                }
+
             } else {
                 if (entity.getEntityType().isBuilding()) {
                     enemyBuildings.add(entity);
@@ -72,6 +77,10 @@ public class AllEntities {
 
     public List<Entity> getMyUnits() {
         return myUnits;
+    }
+
+    public List<Entity> getMyAttackers() {
+        return myAttackers;
     }
 
     public List<Entity> getEnemyBuildings() {

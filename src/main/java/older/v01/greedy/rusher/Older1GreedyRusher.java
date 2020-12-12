@@ -13,6 +13,7 @@ public class Older1GreedyRusher implements Strategy {
     private RepairMap repairMap;
     private EnemiesMap enemiesMap;
 
+    @Override
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
 
         int currentUnits = 0;
@@ -62,7 +63,7 @@ public class Older1GreedyRusher implements Strategy {
                     repairAction = new RepairAction(canRepairThisId);
                 }
                 Coordinate buildCoordinates = simCityMap.getBuildCoordinates(entity.getPosition());
-                if ((maxUnits - currentUnits) * 100 / maxUnits < 10
+                if ((maxUnits == 0 || (maxUnits - currentUnits) * 100 / maxUnits < 10)
                         && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
                         && buildCoordinates != null && simCityMap.getDistance(entity.getPosition()) == 2) {
                     buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);

@@ -67,10 +67,26 @@ public class EntitiesMap {
         return true;
     }
 
+    public Entity getEntity(Coordinate coordinate) {
+        return getEntity(coordinate.getX(), coordinate.getY());
+    }
+
     public Entity getEntity(int x, int y) {
         if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
             return null;
         }
         return entityAtPosition[x][y];
+    }
+
+    public boolean getIsResource(Coordinate coordinate) {
+        return entityAtPosition[coordinate.getX()][coordinate.getY()].getEntityType() == EntityType.RESOURCE;
+    }
+
+    public boolean isOutOfBounds(Coordinate coordinate) {
+        return coordinate.getX() < 0 || coordinate.getY() < 0 || coordinate.getX() >= mapSize || coordinate.getY() >= mapSize;
+    }
+
+    public boolean isEmpty(Coordinate coordinate) {
+        return entityAtPosition[coordinate.getX()][coordinate.getY()] == null;
     }
 }
