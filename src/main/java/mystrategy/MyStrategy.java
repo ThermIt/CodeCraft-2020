@@ -1,6 +1,10 @@
 package mystrategy;
 
 import model.*;
+import mystrategy.maps.EnemiesMap;
+import mystrategy.maps.EntitiesMap;
+import mystrategy.maps.RepairMap;
+import mystrategy.maps.SimCityMap;
 import util.DebugInterface;
 import util.Strategy;
 

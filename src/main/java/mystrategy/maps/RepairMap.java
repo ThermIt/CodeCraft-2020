@@ -1,4 +1,4 @@
-package mystrategy;
+package mystrategy.maps;
 
 import model.Entity;
 import model.PlayerView;
