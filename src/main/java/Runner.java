@@ -1,4 +1,5 @@
-import older.Older1GreedyRusher;
+import mystrategy.MyStrategy;
+import older.v01.greedy.rusher.Older1GreedyRusher;
 import util.DebugInterface;
 import util.Strategy;
 import util.StreamUtil;

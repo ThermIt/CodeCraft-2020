@@ -1,4 +1,4 @@
-package maps;
+package mystrategy;
 
 import model.*;
 import util.DebugInterface;

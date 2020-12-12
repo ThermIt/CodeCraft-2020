@@ -1,26 +1,24 @@
-package older;
+package mystrategy;
 
-import maps.EnemiesMap;
-import maps.EntitiesMap;
-import maps.RepairMap;
-import maps.SimCityMap;
 import model.*;
 import util.DebugInterface;
 import util.Strategy;
 
 import java.util.Arrays;
 
-public class Older1GreedyRusher implements Strategy {
+public class MyStrategy implements Strategy {
 
     private EntitiesMap entitiesMap;
     private SimCityMap simCityMap;
     private RepairMap repairMap;
     private EnemiesMap enemiesMap;
+    private int currentUnits;
+    private int maxUnits;
 
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
 
-        int currentUnits = 0;
-        int maxUnits = 0;
+        currentUnits = 0;
+        maxUnits = 0;
         for (Entity otherEntity : playerView.getEntities()) {
             if (otherEntity.getPlayerId() != null && otherEntity.getPlayerId() == playerView.getMyId()) {
                 currentUnits += playerView.getEntityProperties().get(otherEntity.getEntityType()).getPopulationUse();
@@ -66,10 +64,11 @@ public class Older1GreedyRusher implements Strategy {
                     repairAction = new RepairAction(canRepairThisId);
                 }
                 Coordinate buildCoordinates = simCityMap.getBuildCoordinates(entity.getPosition());
-                if ((maxUnits - currentUnits) * 100 / maxUnits < 10
+                if ((maxUnits - currentUnits) * 100 / maxUnits < 33
                         && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
                         && buildCoordinates != null && simCityMap.getDistance(entity.getPosition()) == 2) {
                     buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
+                    maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
                     validAutoAttackTargets = new EntityType[0];
                 } else {
                     validAutoAttackTargets = new EntityType[]{EntityType.RESOURCE};
@@ -95,6 +94,7 @@ public class Older1GreedyRusher implements Strategy {
         if (entityType != EntityType.BUILDER_UNIT && playerView.getCurrentTick() < 20) {
             return buildAction;
         }
+
 /*
         int currentUnits = 0;
         for (Entity otherEntity : playerView.getEntities()) {
