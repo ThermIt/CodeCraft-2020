@@ -98,4 +98,8 @@ public class Entity {
     public boolean isBuilding() {
         return getEntityType().isBuilding();
     }
+
+    public EntityProperties getProperties() {
+        return getEntityType().getProperties();
+    }
 }

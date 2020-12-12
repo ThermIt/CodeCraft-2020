@@ -19,40 +19,39 @@ public class MyStrategy implements Strategy {
     private int currentUnits;
     private int maxUnits;
     private AllEntities allEntities;
+    private Player me;
+    private PlayerView playerView;
+    private DebugInterface debugInterface;
 
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
+        this.playerView = playerView;
+        this.debugInterface = debugInterface;
         new Initializer(playerView, debugInterface).initStatic();
         allEntities = new AllEntities(playerView, debugInterface);
         entitiesMap = new EntitiesMap(playerView, debugInterface);
+        me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
 
-        currentUnits = 0;
-        maxUnits = 0;
-        for (Entity otherEntity : playerView.getEntities()) {
-            if (otherEntity.getPlayerId() != null && otherEntity.getPlayerId() == playerView.getMyId()) {
-                currentUnits += otherEntity.getEntityType().getProperties().getPopulationUse();
-                maxUnits += otherEntity.getEntityType().getProperties().getPopulationProvide();
-            }
-        }
+        currentUnits = allEntities.getCurrentUnits();
+        maxUnits = allEntities.getMaxUnits();
 
         enemiesMap = new EnemiesMap(playerView, entitiesMap, debugInterface);
         simCityMap = new SimCityMap(playerView, entitiesMap, debugInterface);
         repairMap = new RepairMap(playerView, entitiesMap, debugInterface);
-        boolean isFirstBuilder = true;
-        Player me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
 
         Action result = new Action(new java.util.HashMap<>());
-        int myId = playerView.getMyId();
-        for (Entity entity : playerView.getEntities()) {
-            if (entity.getPlayerId() == null || entity.getPlayerId() != myId) {
-                continue;
-            }
-            EntityProperties properties = playerView.getEntityProperties().get(entity.getEntityType());
+
+        // buildings
+        handleBuildings(result);
+
+        // units
+        for (Entity unit : allEntities.getMyUnits()) {
+            EntityProperties properties = unit.getProperties();
 
             MoveAction moveAction = null;
             BuildAction buildAction = null;
             RepairAction repairAction = null;
             if (properties.isCanMove()) {
-                Coordinate moveTo = enemiesMap.getPositionClosestToEnemy(entity.getPosition());
+                Coordinate moveTo = enemiesMap.getPositionClosestToEnemy(unit.getPosition());
                 if (moveTo == null) {
                     moveTo = new Coordinate(35, 35);
                 }
@@ -60,31 +59,28 @@ public class MyStrategy implements Strategy {
                         new MoveAction(moveTo,
                                 true,
                                 false);
-            } else if (properties.getBuild() != null) {
-                buildAction = getBuildAction(playerView, entity, properties, buildAction);
             }
             EntityType[] validAutoAttackTargets;
-            if (entity.getEntityType() == EntityType.BUILDER_UNIT) {
-                Integer canRepairThisId = repairMap.canRepairId(entity.getPosition());
+            if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
+                Integer canRepairThisId = repairMap.canRepairId(unit.getPosition());
                 if (canRepairThisId != null) {
                     moveAction = null;
                     repairAction = new RepairAction(canRepairThisId);
                 }
-                Coordinate buildCoordinates = simCityMap.getBuildCoordinates(entity.getPosition());
+                Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
                 if ((maxUnits - currentUnits) * 100 / maxUnits < 33
                         && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
-                        && buildCoordinates != null && simCityMap.getDistance(entity.getPosition()) == 2) {
+                        && buildCoordinates != null && simCityMap.getDistance(unit.getPosition()) == 2) {
                     buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
                     maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
                     validAutoAttackTargets = new EntityType[0];
                 } else {
                     validAutoAttackTargets = new EntityType[]{EntityType.RESOURCE};
                 }
-                isFirstBuilder = false;
             } else {
                 validAutoAttackTargets = new EntityType[0];
             }
-            result.getEntityActions().put(entity.getId(), new EntityAction(
+            result.getEntityActions().put(unit.getId(), new EntityAction(
                     moveAction,
                     buildAction,
                     new AttackAction(
@@ -94,6 +90,24 @@ public class MyStrategy implements Strategy {
             ));
         }
         return result;
+    }
+
+    private void handleBuildings(Action result) {
+        for (Entity building : allEntities.getMyBuildings()) {
+            BuildAction buildAction = null;
+            if (building.getProperties().getBuild() != null) {
+                buildAction = getBuildAction(playerView, building, building.getProperties(), null);
+            }
+            result.getEntityActions().put(building.getId(), new EntityAction(
+                    null,
+                    buildAction,
+                    new AttackAction(
+                            null, new AutoAttack(building.getProperties().getSightRange(), new EntityType[0])
+                    ),
+                    null
+            ));
+
+        }
     }
 
     private BuildAction getBuildAction(PlayerView playerView, Entity entity, EntityProperties properties, BuildAction buildAction) {

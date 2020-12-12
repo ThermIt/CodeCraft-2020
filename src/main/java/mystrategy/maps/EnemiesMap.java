@@ -101,7 +101,7 @@ public class EnemiesMap {
     public Coordinate getPositionClosestToEnemy(Coordinate from) {
         Coordinate position = from;
 
-        int radius = 1;
+        int radius = 5;
         for (int i = -radius; i <= radius; i++) {
             for (int j = -radius; j <= radius; j++) {
                 position = getMinOfTwoPositions(position, new Coordinate(from.getX() + i, from.getY() + j));

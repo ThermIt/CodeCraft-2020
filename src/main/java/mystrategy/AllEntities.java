@@ -20,8 +20,20 @@ public class AllEntities {
     private List<Entity> enemyUnits = new ArrayList<>();
     private List<Entity> enemyBuildings = new ArrayList<>();
 
+    private int currentUnits;
+    private int maxUnits;
+
     public AllEntities(PlayerView playerView, DebugInterface debugInterface) {
         myId = playerView.getMyId();
+
+        currentUnits = 0;
+        maxUnits = 0;
+        for (Entity otherEntity : playerView.getEntities()) {
+            if (otherEntity.getPlayerId() != null && otherEntity.getPlayerId() == playerView.getMyId()) {
+                currentUnits += otherEntity.getProperties().getPopulationUse();
+                maxUnits += otherEntity.getProperties().getPopulationProvide();
+            }
+        }
 
         for (Entity entity : playerView.getEntities()) {
             if (entity.getEntityType() == EntityType.RESOURCE) {
@@ -68,5 +80,13 @@ public class AllEntities {
 
     public List<Entity> getMyBuildings() {
         return myBuildings;
+    }
+
+    public int getCurrentUnits() {
+        return currentUnits;
+    }
+
+    public int getMaxUnits() {
+        return maxUnits;
     }
 }
