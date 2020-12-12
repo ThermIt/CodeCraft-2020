@@ -18,19 +18,22 @@ public class MyStrategy implements Strategy {
     private EnemiesMap enemiesMap;
     private int currentUnits;
     private int maxUnits;
+    private AllEntities allEntities;
 
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
+        new Initializer(playerView, debugInterface).initStatic();
+        allEntities = new AllEntities(playerView, debugInterface);
+        entitiesMap = new EntitiesMap(playerView, debugInterface);
 
         currentUnits = 0;
         maxUnits = 0;
         for (Entity otherEntity : playerView.getEntities()) {
             if (otherEntity.getPlayerId() != null && otherEntity.getPlayerId() == playerView.getMyId()) {
-                currentUnits += playerView.getEntityProperties().get(otherEntity.getEntityType()).getPopulationUse();
-                maxUnits += playerView.getEntityProperties().get(otherEntity.getEntityType()).getPopulationProvide();
+                currentUnits += otherEntity.getEntityType().getProperties().getPopulationUse();
+                maxUnits += otherEntity.getEntityType().getProperties().getPopulationProvide();
             }
         }
 
-        entitiesMap = new EntitiesMap(playerView, debugInterface);
         enemiesMap = new EnemiesMap(playerView, entitiesMap, debugInterface);
         simCityMap = new SimCityMap(playerView, entitiesMap, debugInterface);
         repairMap = new RepairMap(playerView, entitiesMap, debugInterface);
