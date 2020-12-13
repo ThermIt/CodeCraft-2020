@@ -1,12 +1,13 @@
 package mystrategy.maps;
 
+import model.Coordinate;
 import model.Entity;
 import model.PlayerView;
-import model.Coordinate;
 import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RepairMap {
     private int[][] distanceByFoot;
@@ -70,7 +71,27 @@ public class RepairMap {
         return this.entitiesMap.isPassable(coordinate.getX(), coordinate.getY());
     }
 
-    public Integer canRepairId(Coordinate position) {
+    public Integer canRepairId(Coordinate from) {
+        List<Coordinate> coordinateList = new ArrayList<>();
+        coordinateList.add(new Coordinate(from.getX() - 1, from.getY() + 0));
+        coordinateList.add(new Coordinate(from.getX() + 0, from.getY() + 1));
+        coordinateList.add(new Coordinate(from.getX() + 0, from.getY() - 1));
+        coordinateList.add(new Coordinate(from.getX() + 1, from.getY() + 0));
+        coordinateList.add(new Coordinate(from.getX(), from.getY()));
+
+        return coordinateList.stream().map(this::repairRequired).filter(Objects::nonNull).findFirst().orElse(null);
+    }
+
+    private Integer repairRequired(Coordinate position) {
+        Entity entity = entitiesMap.getEntity(position);
+        if (entity != null && entity.isPlayer(myId)
+                && entity.getHealth() < entity.getProperties().getMaxHealth()) {
+            return entity.getId();
+        }
+        return null;
+    }
+
+    public Integer canBuildId(Coordinate position) {
         int x = position.getX();
         int y = position.getY();
         Integer entity = buildingRequired(x-1, y);

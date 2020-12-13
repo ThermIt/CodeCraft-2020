@@ -53,7 +53,7 @@ public class MyStrategy implements Strategy {
 
         // units
         for (Entity unit : allEntities.getMyUnits()) {
-            if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
+            if (/*allEntities.getResources().size() > 0 && */unit.getEntityType() == EntityType.BUILDER_UNIT) {
                 MoveAction moveAction = null;
                 BuildAction buildAction = null;
                 RepairAction repairAction = null;
@@ -68,10 +68,15 @@ public class MyStrategy implements Strategy {
                                 true,
                                 false);
                 EntityType[] validAutoAttackTargets;
-                Integer canRepairThisId = repairMap.canRepairId(unit.getPosition());
-                if (canRepairThisId != null) {
+                Integer canBuildId = repairMap.canBuildId(unit.getPosition());
+                if (canBuildId != null) {
                     moveAction = null;
-                    repairAction = new RepairAction(canRepairThisId);
+                    repairAction = new RepairAction(canBuildId);
+                } else {
+                    Integer canRepairId = repairMap.canRepairId(unit.getPosition());
+                    if (canRepairId != null) {
+                        repairAction = new RepairAction(canRepairId);
+                    }
                 }
                 Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
                 if ((maxUnits == 0 || (maxUnits - currentUnits) * 100 / maxUnits < 33)
@@ -81,7 +86,11 @@ public class MyStrategy implements Strategy {
                     maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
                     validAutoAttackTargets = new EntityType[0];
                 } else {
+//                    if (resourceMap.getDistance(unit.getPosition(), false) == 2) {
                     validAutoAttackTargets = new EntityType[]{EntityType.RESOURCE};
+//                    } else {
+//                        validAutoAttackTargets = new EntityType[0]; // only after removing autoattack
+//                    }
                 }
                 attackAction = new AttackAction(
                         null, new AutoAttack(1, validAutoAttackTargets)
@@ -144,6 +153,14 @@ public class MyStrategy implements Strategy {
     private BuildAction getBuildingAction(PlayerView playerView, Entity entity, EntityProperties properties, BuildAction buildAction) {
         EntityType entityType = properties.getBuild().getOptions()[0];
         if (entityType != EntityType.BUILDER_UNIT && playerView.getCurrentTick() < 20) {
+            return buildAction;
+        }
+
+        System.out.println(allEntities.getMyBuilders().size());
+
+        if (!playerView.isFogOfWar()
+                && entityType == EntityType.BUILDER_UNIT
+                && allEntities.getMyBuilders().size() - 20 > allEntities.getEnemyBuilders().size()) {
             return buildAction;
         }
 
