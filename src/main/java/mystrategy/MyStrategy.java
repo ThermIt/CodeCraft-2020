@@ -38,7 +38,7 @@ public class MyStrategy implements Strategy {
         maxUnits = allEntities.getMaxUnits();
 
         enemiesMap = new EnemiesMap(playerView, entitiesMap, debugInterface);
-        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, debugInterface);
+        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
         simCityMap = new SimCityMap(playerView, entitiesMap, debugInterface);
         repairMap = new RepairMap(playerView, entitiesMap, debugInterface);
 
@@ -58,6 +58,17 @@ public class MyStrategy implements Strategy {
                 BuildAction buildAction = null;
                 RepairAction repairAction = null;
                 AttackAction attackAction = null;
+
+                Entity resource = entitiesMap.getResource(unit.getPosition());
+                if (resource != null) {
+                    attackAction = new AttackAction(resource.getId(), null);
+/* stops the unit
+                    attackAction = new AttackAction(
+                            null, new AutoAttack(1, validAutoAttackTargets)
+                    );
+*/
+
+                }
 
                 Coordinate moveTo = resourceMap.getPositionClosestToResource(unit.getPosition());
                 if (moveTo == null) {
@@ -92,9 +103,6 @@ public class MyStrategy implements Strategy {
 //                        validAutoAttackTargets = new EntityType[0]; // only after removing autoattack
 //                    }
                 }
-                attackAction = new AttackAction(
-                        null, new AutoAttack(1, validAutoAttackTargets)
-                );
                 result.getEntityActions().put(unit.getId(), new EntityAction(
                         moveAction,
                         buildAction,
@@ -178,7 +186,7 @@ public class MyStrategy implements Strategy {
                 adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() + size));
             }
             adjustentFreePoints = adjustentFreePoints.stream()
-                    .filter(point -> !entitiesMap.isOutOfBounds(point))
+                    .filter(point -> !point.isOutOfBounds())
                     .filter(point -> entitiesMap.isEmpty(point))
                     .collect(Collectors.toList());
 
@@ -204,7 +212,7 @@ public class MyStrategy implements Strategy {
                 adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() + size));
             }
             adjustentFreePoints = adjustentFreePoints.stream()
-                    .filter(point -> !entitiesMap.isOutOfBounds(point))
+                    .filter(point -> !point.isOutOfBounds())
                     .filter(point -> entitiesMap.isEmpty(point))
                     .collect(Collectors.toList());
 

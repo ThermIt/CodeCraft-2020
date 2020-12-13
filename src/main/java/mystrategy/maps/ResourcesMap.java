@@ -7,6 +7,7 @@ import util.DebugInterface;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ResourcesMap {
     private int[][] distanceByFoot;
@@ -14,12 +15,14 @@ public class ResourcesMap {
     private EntitiesMap entitiesMap;
     private int mapSize;
     private AllEntities allEntities;
+    private EnemiesMap enemiesMap;
     private DebugInterface debugInterface;
 
-    public ResourcesMap(PlayerView playerView, EntitiesMap entitiesMap, AllEntities allEntities, DebugInterface debugInterface) {
+    public ResourcesMap(PlayerView playerView, EntitiesMap entitiesMap, AllEntities allEntities, EnemiesMap enemiesMap, DebugInterface debugInterface) {
         this.entitiesMap = entitiesMap;
         mapSize = playerView.getMapSize();
         this.allEntities = allEntities;
+        this.enemiesMap = enemiesMap;
         this.debugInterface = debugInterface;
         distanceByFoot = new int[mapSize][mapSize];
         distanceByFootWithObstacles = new int[mapSize][mapSize];
@@ -104,16 +107,18 @@ public class ResourcesMap {
     }
 
     public Coordinate getPositionClosestToResource(Coordinate from) {
-        List<Coordinate> coordinateList = new ArrayList<>();
-        coordinateList.add(new Coordinate(from.getX() - 1, from.getY() + 0));
-        coordinateList.add(new Coordinate(from.getX() + 0, from.getY() + 1));
-        coordinateList.add(new Coordinate(from.getX() + 0, from.getY() - 1));
-        coordinateList.add(new Coordinate(from.getX() + 1, from.getY() + 0));
-
-        return getPositionClosestToResource(from, coordinateList);
+        return getPositionClosestToResource(from, from.getAdjacentList());
     }
 
     public Coordinate getPositionClosestToResource(Coordinate from, List<Coordinate> coordinateList) {
+        List<Coordinate> newList = coordinateList.stream()
+                .filter(pos -> !pos.isOutOfBounds())
+                .filter(pos -> enemiesMap.getDangerLevel(pos) == 0)
+                .collect(Collectors.toList());
+
+        if (!newList.isEmpty()) {
+            coordinateList = newList;
+        }
         Coordinate position = from;
         for (Coordinate newPosition : coordinateList) {
             position = getMinOfTwoPositions(position, newPosition, true);

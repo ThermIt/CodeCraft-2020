@@ -8,6 +8,7 @@ public class Initializer {
     private PlayerView playerView;
     private DebugInterface debugInterface;
     private static int myId;
+    private static int mapSize;
 
     public Initializer(PlayerView playerView, DebugInterface debugInterface) {
         this.playerView = playerView;
@@ -16,6 +17,7 @@ public class Initializer {
 
     public void initStatic() {
         myId = playerView.getMyId();
+        mapSize = playerView.getMapSize();
         if (playerView.getCurrentTick() == 0) {
             for (EntityType entityType : EntityType.values()) {
                 entityType.setProperties(playerView.getEntityProperties().get(entityType));
@@ -25,5 +27,9 @@ public class Initializer {
 
     public static int getMyId() {
         return myId;
+    }
+
+    public static int getMapSize() {
+        return mapSize;
     }
 }

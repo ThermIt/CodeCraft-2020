@@ -3,6 +3,8 @@ package mystrategy.maps;
 import model.*;
 import util.DebugInterface;
 
+import java.util.Objects;
+
 public class EntitiesMap {
     private Entity[][] entityAtPosition;
     private EntityType[][] entityType;
@@ -82,11 +84,18 @@ public class EntitiesMap {
         return entityAtPosition[coordinate.getX()][coordinate.getY()].getEntityType() == EntityType.RESOURCE;
     }
 
-    public boolean isOutOfBounds(Coordinate coordinate) {
-        return coordinate.getX() < 0 || coordinate.getY() < 0 || coordinate.getX() >= mapSize || coordinate.getY() >= mapSize;
-    }
-
     public boolean isEmpty(Coordinate coordinate) {
         return entityAtPosition[coordinate.getX()][coordinate.getY()] == null;
+    }
+
+    public Entity getResource(Coordinate position) {
+        return position
+                .getAdjacentList()
+                .stream()
+                .map(this::getEntity)
+                .filter(Objects::nonNull)
+                .filter(ent -> ent.getEntityType() == EntityType.RESOURCE)
+                .findAny()
+                .orElse(null);
     }
 }
