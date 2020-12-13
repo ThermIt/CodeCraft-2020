@@ -1,5 +1,6 @@
 import mystrategy.MyStrategy;
 import older.v01.greedy.rusher.Older1GreedyRusher;
+import older.v02.manage.workers.Older2WorkerManager;
 import util.DebugInterface;
 import util.Strategy;
 import util.StreamUtil;
@@ -20,13 +21,13 @@ public class Runner {
         outputStream.flush();
     }
 
-    private static void runOnce(String host, int port, String token, boolean older) {
+    private static void runOnce(String host, int port, String token, Strategy myStrategy) {
         Runnable task = () -> {
             try {
                 if (DebugInterface.isDebugEnabled()) {
                     System.out.println("run " + host + ":" + port);
                 }
-                new Runner(host, port, token).run(older);
+                new Runner(host, port, token).run(myStrategy);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -43,20 +44,19 @@ public class Runner {
             DebugInterface.setDebugEnabled();
         }
         if (args.length > 3 && "multiply2".equals(args[3])) {
-            runOnce(host, port, token, false);
-            runOnce(host, port + 1, token, true);
+            runOnce(host, port, token, new MyStrategy());
+            runOnce(host, port + 1, token, new Older1GreedyRusher());
+        } else if (args.length > 3 && "multiply3".equals(args[3])) {
+            runOnce(host, port, token, new MyStrategy());
+            runOnce(host, port + 1, token, new Older2WorkerManager());
+            runOnce(host, port + 2, token, new Older1GreedyRusher());
         } else  {
-            new Runner(host, port, token).run();
+            runOnce(host, port, token, new MyStrategy());
         }
     }
 
-    void run() throws IOException {
-        run(false);
-    }
-
-    void run(boolean older) throws IOException {
+    void run(Strategy myStrategy) throws IOException {
         try {
-            Strategy myStrategy = older ? new Older1GreedyRusher() : new MyStrategy();
             DebugInterface debugInterface = new DebugInterface(inputStream, outputStream);
             while (true) {
                 model.ServerMessage message = model.ServerMessage.readFrom(inputStream);
@@ -67,7 +67,7 @@ public class Runner {
                 } else if (message instanceof model.ServerMessage.Finish) {
                     break;
                 } else if (message instanceof model.ServerMessage.DebugUpdate) {
-                    if (!older) {
+                    if (!(myStrategy instanceof MyStrategy)) {
                         model.ServerMessage.DebugUpdate debugUpdateMessage = (model.ServerMessage.DebugUpdate) message;
                         myStrategy.debugUpdate(debugUpdateMessage.getPlayerView(), debugInterface);
                     }
