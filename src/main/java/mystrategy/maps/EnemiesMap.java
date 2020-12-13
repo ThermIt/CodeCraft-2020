@@ -150,15 +150,14 @@ public class EnemiesMap {
     }
 
     public Coordinate getPositionClosestToEnemy(Coordinate from) {
-        Coordinate position = from;
-
+//        return getPositionClosestToEnemy(from, from.getAdjacentList());
         int radius = 5;
         for (int i = -radius; i <= radius; i++) {
             for (int j = -radius; j <= radius; j++) {
-                position = getMinOfTwoPositions(position, new Coordinate(from.getX() + i, from.getY() + j));
+                from = getMinOfTwoPositions(from, new Coordinate(from.getX() + i, from.getY() + j));
             }
         }
-        return position;
+        return from;
     }
 
     public int getDangerLevel(Coordinate from) {

@@ -5,6 +5,7 @@ import util.StreamUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Coordinate {
     private int x;
@@ -57,5 +58,28 @@ public class Coordinate {
     public void writeTo(java.io.OutputStream stream) throws java.io.IOException {
         StreamUtil.writeInt(stream, x);
         StreamUtil.writeInt(stream, y);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Coordinate that = (Coordinate) o;
+        return x == that.x &&
+                y == that.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return "Pos{" + x + "," + y + '}';
     }
 }

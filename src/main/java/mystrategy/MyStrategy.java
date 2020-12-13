@@ -25,6 +25,9 @@ public class MyStrategy implements Strategy {
     private DebugInterface debugInterface;
     private ResourcesMap resourceMap;
 
+    /**
+     * attack -> build -> repair -> move
+     */
     @Override
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
         this.playerView = playerView;
@@ -53,35 +56,36 @@ public class MyStrategy implements Strategy {
 
         // units
         for (Entity unit : allEntities.getMyUnits()) {
-            if (/*allEntities.getResources().size() > 0 && */unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                MoveAction moveAction = null;
-                BuildAction buildAction = null;
-                RepairAction repairAction = null;
-                AttackAction attackAction = null;
-
-                Entity resource = entitiesMap.getResource(unit.getPosition());
-                if (resource != null) {
-                    attackAction = new AttackAction(resource.getId(), null);
-/* stops the unit
-                    attackAction = new AttackAction(
-                            null, new AutoAttack(1, validAutoAttackTargets)
-                    );
-*/
-
-                }
-
+            MoveAction moveAction;
+            if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
                 Coordinate moveTo = resourceMap.getPositionClosestToResource(unit.getPosition());
                 if (moveTo == null) {
                     moveTo = new Coordinate(35, 35);
                 }
-                moveAction =
-                        new MoveAction(moveTo,
-                                true,
-                                false);
-                EntityType[] validAutoAttackTargets;
+                moveAction = new MoveAction(moveTo, true, true);
+                unit.setMoveAction(moveAction);
+            } else {
+                Coordinate moveTo = enemiesMap.getPositionClosestToEnemy(unit.getPosition());
+                if (moveTo == null) {
+                    moveTo = new Coordinate(35, 35);
+                }
+                moveAction = new MoveAction(moveTo, true, true);
+                unit.setMoveAction(moveAction);
+            }
+        }
+
+        for (Entity unit : allEntities.getMyUnits()) {
+            BuildAction buildAction = null;
+            RepairAction repairAction = null;
+            AttackAction attackAction = null;
+            if (/*allEntities.getResources().size() > 0 && */unit.getEntityType() == EntityType.BUILDER_UNIT) {
+                Entity resource = entitiesMap.getResource(unit.getPosition());
+                if (resource != null) {
+                    attackAction = new AttackAction(resource.getId(), null);
+                }
+
                 Integer canBuildId = repairMap.canBuildId(unit.getPosition());
                 if (canBuildId != null) {
-                    moveAction = null;
                     repairAction = new RepairAction(canBuildId);
                 } else {
                     Integer canRepairId = repairMap.canRepairId(unit.getPosition());
@@ -95,44 +99,28 @@ public class MyStrategy implements Strategy {
                         && buildCoordinates != null && simCityMap.getDistance(unit.getPosition()) == 2) {
                     buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
                     maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
-                    validAutoAttackTargets = new EntityType[0];
-                } else {
-//                    if (resourceMap.getDistance(unit.getPosition(), false) == 2) {
-                    validAutoAttackTargets = new EntityType[]{EntityType.RESOURCE};
-//                    } else {
-//                        validAutoAttackTargets = new EntityType[0]; // only after removing autoattack
-//                    }
                 }
-                result.getEntityActions().put(unit.getId(), new EntityAction(
-                        moveAction,
-                        buildAction,
-                        attackAction,
-                        repairAction
-                ));
-
+                unit.setAttackAction(attackAction);
+                unit.setBuildAction(buildAction);
+                unit.setRepairAction(repairAction);
             } else {
                 EntityProperties properties = unit.getProperties();
-                MoveAction moveAction = null;
-                BuildAction buildAction = null;
-                RepairAction repairAction = null;
-                Coordinate moveTo = enemiesMap.getPositionClosestToEnemy(unit.getPosition());
-                if (moveTo == null) {
-                    moveTo = new Coordinate(35, 35);
-                }
-                moveAction = new MoveAction(moveTo, true, true);
                 EntityType[] validAutoAttackTargets;
                 validAutoAttackTargets = new EntityType[0];
-                AttackAction attackAction = new AttackAction(
+                attackAction = new AttackAction(
                         null, new AutoAttack(properties.getSightRange(), validAutoAttackTargets)
                 );
-                result.getEntityActions().put(unit.getId(), new EntityAction(
-                        moveAction,
-                        buildAction,
-                        attackAction,
-                        repairAction
-                ));
+                unit.setAttackAction(attackAction);
+                unit.setBuildAction(buildAction);
+                unit.setRepairAction(repairAction);
             }
 
+            result.getEntityActions().put(unit.getId(), new EntityAction(
+                    unit.getMoveAction(),
+                    unit.getBuildAction(),
+                    unit.getAttackAction(),
+                    unit.getRepairAction()
+            ));
         }
 
         // buildings

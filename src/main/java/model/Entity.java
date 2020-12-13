@@ -4,24 +4,21 @@ import util.StreamUtil;
 
 public class Entity {
     private int id;
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
     private Integer playerId;
-    public Integer getPlayerId() { return playerId; }
-    public void setPlayerId(Integer playerId) { this.playerId = playerId; }
     private model.EntityType entityType;
-    public model.EntityType getEntityType() { return entityType; }
-    public void setEntityType(model.EntityType entityType) { this.entityType = entityType; }
     private Coordinate position;
-    public Coordinate getPosition() { return position; }
-    public void setPosition(Coordinate position) { this.position = position; }
     private int health;
-    public int getHealth() { return health; }
-    public void setHealth(int health) { this.health = health; }
     private boolean active;
-    public boolean isActive() { return active; }
-    public void setActive(boolean active) { this.active = active; }
-    public Entity() {}
+
+    // attack -> build -> repair -> move
+    private AttackAction attackAction = null;
+    private BuildAction buildAction = null;
+    private RepairAction repairAction = null;
+    private MoveAction moveAction = null;
+
+    public Entity() {
+    }
+
     public Entity(int id, Integer playerId, model.EntityType entityType, Coordinate position, int health, boolean active) {
         this.id = id;
         this.playerId = playerId;
@@ -30,6 +27,7 @@ public class Entity {
         this.health = health;
         this.active = active;
     }
+
     public static Entity readFrom(java.io.InputStream stream) throws java.io.IOException {
         Entity result = new Entity();
         result.id = StreamUtil.readInt(stream);
@@ -39,44 +37,93 @@ public class Entity {
             result.playerId = null;
         }
         switch (StreamUtil.readInt(stream)) {
-        case 0:
-            result.entityType = model.EntityType.WALL;
-            break;
-        case 1:
-            result.entityType = model.EntityType.HOUSE;
-            break;
-        case 2:
-            result.entityType = model.EntityType.BUILDER_BASE;
-            break;
-        case 3:
-            result.entityType = model.EntityType.BUILDER_UNIT;
-            break;
-        case 4:
-            result.entityType = model.EntityType.MELEE_BASE;
-            break;
-        case 5:
-            result.entityType = model.EntityType.MELEE_UNIT;
-            break;
-        case 6:
-            result.entityType = model.EntityType.RANGED_BASE;
-            break;
-        case 7:
-            result.entityType = model.EntityType.RANGED_UNIT;
-            break;
-        case 8:
-            result.entityType = model.EntityType.RESOURCE;
-            break;
-        case 9:
-            result.entityType = model.EntityType.TURRET;
-            break;
-        default:
-            throw new java.io.IOException("Unexpected tag value");
+            case 0:
+                result.entityType = model.EntityType.WALL;
+                break;
+            case 1:
+                result.entityType = model.EntityType.HOUSE;
+                break;
+            case 2:
+                result.entityType = model.EntityType.BUILDER_BASE;
+                break;
+            case 3:
+                result.entityType = model.EntityType.BUILDER_UNIT;
+                break;
+            case 4:
+                result.entityType = model.EntityType.MELEE_BASE;
+                break;
+            case 5:
+                result.entityType = model.EntityType.MELEE_UNIT;
+                break;
+            case 6:
+                result.entityType = model.EntityType.RANGED_BASE;
+                break;
+            case 7:
+                result.entityType = model.EntityType.RANGED_UNIT;
+                break;
+            case 8:
+                result.entityType = model.EntityType.RESOURCE;
+                break;
+            case 9:
+                result.entityType = model.EntityType.TURRET;
+                break;
+            default:
+                throw new java.io.IOException("Unexpected tag value");
         }
         result.position = Coordinate.readFrom(stream);
         result.health = StreamUtil.readInt(stream);
         result.active = StreamUtil.readBoolean(stream);
         return result;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Integer getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(Integer playerId) {
+        this.playerId = playerId;
+    }
+
+    public model.EntityType getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(model.EntityType entityType) {
+        this.entityType = entityType;
+    }
+
+    public Coordinate getPosition() {
+        return position;
+    }
+
+    public void setPosition(Coordinate position) {
+        this.position = position;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public void writeTo(java.io.OutputStream stream) throws java.io.IOException {
         StreamUtil.writeInt(stream, id);
         if (playerId == null) {
@@ -101,5 +148,37 @@ public class Entity {
 
     public EntityProperties getProperties() {
         return getEntityType().getProperties();
+    }
+
+    public MoveAction getMoveAction() {
+        return moveAction;
+    }
+
+    public void setMoveAction(MoveAction moveAction) {
+        this.moveAction = moveAction;
+    }
+
+    public BuildAction getBuildAction() {
+        return buildAction;
+    }
+
+    public void setBuildAction(BuildAction buildAction) {
+        this.buildAction = buildAction;
+    }
+
+    public RepairAction getRepairAction() {
+        return repairAction;
+    }
+
+    public void setRepairAction(RepairAction repairAction) {
+        this.repairAction = repairAction;
+    }
+
+    public AttackAction getAttackAction() {
+        return attackAction;
+    }
+
+    public void setAttackAction(AttackAction attackAction) {
+        this.attackAction = attackAction;
     }
 }
