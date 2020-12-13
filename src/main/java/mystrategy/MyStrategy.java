@@ -158,9 +158,8 @@ public class MyStrategy implements Strategy {
 
         System.out.println(allEntities.getMyBuilders().size());
 
-        if (!playerView.isFogOfWar()
-                && entityType == EntityType.BUILDER_UNIT
-                && allEntities.getMyBuilders().size() - 20 > allEntities.getEnemyBuilders().size()) {
+        if (entityType == EntityType.BUILDER_UNIT
+                && allEntities.getMyBuilders().size() > (playerView.isFogOfWar() ? 60 : allEntities.getEnemyBuilders().size() + 20)) {
             return buildAction;
         }
 
