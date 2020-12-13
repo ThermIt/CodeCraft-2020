@@ -80,7 +80,7 @@ public class MyStrategy implements Strategy {
                 }
                 Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
                 if ((maxUnits == 0 || (maxUnits - currentUnits) * 100 / maxUnits < 33)
-                        && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
+                        /*&& me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost() does not matter*/
                         && buildCoordinates != null && simCityMap.getDistance(unit.getPosition()) == 2) {
                     buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
                     maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
