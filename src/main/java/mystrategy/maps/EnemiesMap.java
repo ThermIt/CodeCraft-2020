@@ -96,18 +96,19 @@ public class EnemiesMap {
             coordinateList = coordinateListNext;
         }
 
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled() && shootDanger[i][j] > 0) {
-                    DebugCommand.Add command = new DebugCommand.Add();
-                    ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(i, j), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
-                    DebugData data = new DebugData.PlacedText(coloredVertex, Integer.toString(shootDanger[i][j]), -1, 12);
-                    command.setData(data);
-                    debugInterface.send(command);
+        if (DebugInterface.isDebugEnabled()) {
+            for (int i = 0; i < mapSize; i++) {
+                for (int j = 0; j < mapSize; j++) {
+                    if (shootDanger[i][j] > 0) {
+                        DebugCommand.Add command = new DebugCommand.Add();
+                        ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(i, j), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
+                        DebugData data = new DebugData.PlacedText(coloredVertex, Integer.toString(shootDanger[i][j]), -1, 12);
+                        command.setData(data);
+                        debugInterface.send(command);
+                    }
                 }
             }
         }
-
     }
 
     private void fillDistances(int[][] distanceMap, List<Coordinate> coordinateList) {

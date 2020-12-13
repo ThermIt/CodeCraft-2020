@@ -9,7 +9,7 @@ import java.io.OutputStream;
 public class DebugInterface {
 
     private static final DebugState EMPTY_STATE = new DebugState();
-    private static boolean debugEnabled = true;
+    private static boolean debugEnabled = false;
     private InputStream inputStream;
     private OutputStream outputStream;
 
