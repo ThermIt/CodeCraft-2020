@@ -115,7 +115,7 @@ public class MyStrategy implements Strategy {
                     buildAction = new BuildAction(EntityType.RANGED_BASE, rbBuildCoordinates);
 //                    maxUnits += playerView.getEntityProperties().get(EntityType.RANGED_BASE).getPopulationProvide();
 
-                    simCityMap.setNeedBarracks(false);
+//                    simCityMap.setNeedBarracks(false);
                 }
                 if (needMoreHouses()
                         && !(simCityMap.isNeedBarracks() && maxUnits >= 20)
