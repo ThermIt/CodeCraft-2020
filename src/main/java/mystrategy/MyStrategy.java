@@ -5,10 +5,7 @@ import mystrategy.maps.*;
 import util.DebugInterface;
 import util.Strategy;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MyStrategy implements Strategy {
@@ -30,6 +27,19 @@ public class MyStrategy implements Strategy {
      */
     @Override
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
+        // определить фронт работ (добыча/постройка/починка/атака/расчистка/разведка/защита)
+        // резервирование ресурсов
+        // определить кто что делает сейчас // забрать работы
+        // определить кто что можеет делать после пробежки
+        // пометить ресурсы как добываемые
+        // билд ордер с учётом доступных ресурсов (4 рабочих - барак - 5 рабочих - барак - ...) учитывая рост стоимости
+        // определить где что строить
+        // выгнать всех с потенциальных построек
+        // определит кто куда идёт
+        // рабочими идти только к новым патчам
+        // (рабочие могу проходить сквозь друг-друга)
+        // биться по правилам финала уже.
+
         this.playerView = playerView;
         this.debugInterface = debugInterface;
         new Initializer(playerView, debugInterface).initStatic();
@@ -42,7 +52,7 @@ public class MyStrategy implements Strategy {
 
         enemiesMap = new EnemiesMap(playerView, entitiesMap, debugInterface);
         resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
-        simCityMap = new SimCityMap(playerView, entitiesMap, debugInterface);
+        simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, debugInterface);
         repairMap = new RepairMap(playerView, entitiesMap, debugInterface);
 
         Action result = new Action(new java.util.HashMap<>());
@@ -66,7 +76,7 @@ public class MyStrategy implements Strategy {
                 unit.setMoveAction(moveAction);
             } else {
                 Coordinate moveTo = enemiesMap.getPositionClosestToEnemy(unit.getPosition());
-                if (moveTo == null) {
+                if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
                     moveTo = new Coordinate(35, 35);
                 }
                 moveAction = new MoveAction(moveTo, true, true);
@@ -96,9 +106,21 @@ public class MyStrategy implements Strategy {
                     }
                 }
                 Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
+                Coordinate rbBuildCoordinates = simCityMap.getRangedBaseBuildCoordinates(unit.getPosition());
+                if (simCityMap.isNeedBarracks() // hack
+                        && me.getResource() >= playerView.getEntityProperties().get(EntityType.RANGED_BASE).getInitialCost()
+                        && rbBuildCoordinates != null) {
+                    attackAction = null;
+                    unit.setMoveAction(null); // bugfix this
+                    buildAction = new BuildAction(EntityType.RANGED_BASE, rbBuildCoordinates);
+//                    maxUnits += playerView.getEntityProperties().get(EntityType.RANGED_BASE).getPopulationProvide();
+
+                    simCityMap.setNeedBarracks(false);
+                }
                 if (needMoreHouses()
+                        && !(simCityMap.isNeedBarracks() && maxUnits >= 20)
                         && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
-                        && buildCoordinates != null && simCityMap.getDistance(unit.getPosition()) == 2) {
+                        && buildCoordinates != null) {
                     attackAction = null;
                     unit.setMoveAction(null); // bugfix this
                     buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
@@ -133,7 +155,7 @@ public class MyStrategy implements Strategy {
     }
 
     private boolean needMoreHouses() {
-        return maxUnits == 0 || (maxUnits - (currentUnits + me.getResource()/50)) * 100 / maxUnits < 20;
+        return maxUnits == 0 || (maxUnits - (currentUnits + me.getResource() / (maxUnits <= 150 ? 10 : 50))) * 100 / maxUnits < 20;
     }
 
     private void handleBuildings(Action result) {
