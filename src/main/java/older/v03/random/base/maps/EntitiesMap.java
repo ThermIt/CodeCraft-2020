@@ -1,6 +1,8 @@
-package older.v01.greedy.rusher;
+package older.v03.random.base.maps;
 
 import model.*;
+
+import java.util.Objects;
 
 public class EntitiesMap {
     private Entity[][] entityAtPosition;
@@ -66,10 +68,33 @@ public class EntitiesMap {
         return true;
     }
 
+    public Entity getEntity(Coordinate coordinate) {
+        return getEntity(coordinate.getX(), coordinate.getY());
+    }
+
     public Entity getEntity(int x, int y) {
         if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
             return null;
         }
         return entityAtPosition[x][y];
+    }
+
+    public boolean getIsResource(Coordinate coordinate) {
+        return entityAtPosition[coordinate.getX()][coordinate.getY()].getEntityType() == EntityType.RESOURCE;
+    }
+
+    public boolean isEmpty(Coordinate coordinate) {
+        return entityAtPosition[coordinate.getX()][coordinate.getY()] == null;
+    }
+
+    public Entity getResource(Coordinate position) {
+        return position
+                .getAdjacentList()
+                .stream()
+                .map(this::getEntity)
+                .filter(Objects::nonNull)
+                .filter(ent -> ent.getEntityType() == EntityType.RESOURCE)
+                .findAny()
+                .orElse(null);
     }
 }

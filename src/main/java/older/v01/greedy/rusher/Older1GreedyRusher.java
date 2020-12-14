@@ -25,10 +25,10 @@ public class Older1GreedyRusher implements Strategy {
             }
         }
 
-        entitiesMap = new EntitiesMap(playerView, debugInterface);
-        enemiesMap = new EnemiesMap(playerView, entitiesMap, debugInterface);
-        simCityMap = new SimCityMap(playerView, entitiesMap, debugInterface);
-        repairMap = new RepairMap(playerView, entitiesMap, debugInterface);
+        entitiesMap = new EntitiesMap(playerView);
+        enemiesMap = new EnemiesMap(playerView, entitiesMap);
+        simCityMap = new SimCityMap(playerView, entitiesMap);
+        repairMap = new RepairMap(playerView, entitiesMap);
         boolean isFirstBuilder = true;
         Player me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
 

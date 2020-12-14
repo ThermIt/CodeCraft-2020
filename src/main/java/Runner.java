@@ -1,6 +1,7 @@
 import mystrategy.MyStrategy;
 import older.v01.greedy.rusher.Older1GreedyRusher;
 import older.v02.manage.workers.Older2WorkerManager;
+import older.v03.random.base.Older3RandomBaseBuilder;
 import util.DebugInterface;
 import util.Strategy;
 import util.StreamUtil;
@@ -50,6 +51,11 @@ public class Runner {
             runOnce(host, port, token, new MyStrategy());
             runOnce(host, port + 1, token, new Older2WorkerManager());
             runOnce(host, port + 2, token, new Older1GreedyRusher());
+        } else if (args.length > 3 && "multiply4".equals(args[3])) {
+            runOnce(host, port, token, new MyStrategy());
+            runOnce(host, port + 1, token, new Older3RandomBaseBuilder());
+            runOnce(host, port + 2, token, new Older3RandomBaseBuilder());
+            runOnce(host, port + 3, token, new Older3RandomBaseBuilder());
         } else  {
             runOnce(host, port, token, new MyStrategy());
         }
