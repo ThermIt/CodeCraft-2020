@@ -86,6 +86,8 @@ public class MyStrategy implements Strategy {
 
                 Integer canBuildId = repairMap.canBuildId(unit.getPosition());
                 if (canBuildId != null) {
+                    attackAction = null;
+                    unit.setMoveAction(null); // bugfix this
                     repairAction = new RepairAction(canBuildId);
                 } else {
                     Integer canRepairId = repairMap.canRepairId(unit.getPosition());
@@ -95,8 +97,10 @@ public class MyStrategy implements Strategy {
                 }
                 Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
                 if ((maxUnits == 0 || (maxUnits - currentUnits) * 100 / maxUnits < 33)
-                        /*&& me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost() does not matter*/
+                        && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
                         && buildCoordinates != null && simCityMap.getDistance(unit.getPosition()) == 2) {
+                    attackAction = null;
+                    unit.setMoveAction(null); // bugfix this
                     buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
                     maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
                 }
@@ -157,7 +161,7 @@ public class MyStrategy implements Strategy {
         }
 
         if (entityType == EntityType.BUILDER_UNIT
-                && allEntities.getMyBuilders().size() > (playerView.isFogOfWar() ? 60 : allEntities.getEnemyBuilders().size() + 20)) {
+                && allEntities.getMyBuilders().size() > (playerView.isFogOfWar() ? 500 : allEntities.getEnemyBuilders().size() + 20)) {
             return buildAction;
         }
 

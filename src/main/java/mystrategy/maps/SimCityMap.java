@@ -12,10 +12,12 @@ public class SimCityMap {
     private Coordinate[][] buildCoordinates;
     private EntitiesMap entitiesMap;
     private int mapSize;
+    private DebugInterface debugInterface;
 
     public SimCityMap(PlayerView playerView, EntitiesMap entitiesMap, DebugInterface debugInterface) {
         this.entitiesMap = entitiesMap;
         mapSize = playerView.getMapSize();
+        this.debugInterface = debugInterface;
         distanceByFoot = new int[mapSize][mapSize];
         buildCoordinates = new Coordinate[mapSize][mapSize];
 
@@ -68,8 +70,12 @@ public class SimCityMap {
 */
                         }
                     }
-                    for (int k = 0; k < houseSize; k++) {
-                        for (int l = 0; l < houseSize; l++) {
+                    for (int k = 1; k <= houseSize; k++) {
+                        buildCoordinates[i + k][j + 0] = new Coordinate(i + 1, j + 1);
+                        buildCoordinates[i + 0][j + k] = new Coordinate(i + 1, j + 1);
+                        buildCoordinates[i + k][j + houseSize + 1] = new Coordinate(i + 1, j + 1);
+                        buildCoordinates[i + houseSize + 1][j + k] = new Coordinate(i + 1, j + 1);
+                        for (int l = 1; l <= houseSize; l++) {
                             if (buildCoordinates[i + k][j + l] == null) {
                                 buildCoordinates[i + k][j + l] = new Coordinate(i + 1, j + 1);
                             }
@@ -78,6 +84,20 @@ public class SimCityMap {
                 }
             }
         }
+
+/*
+        for (int i = 0; i < mapSize; i++) {
+            for (int j = 0; j < mapSize; j++) {
+                if (debugInterface.isDebugEnabled() && buildCoordinates[i][j] != null) {
+                    DebugCommand.Add command = new DebugCommand.Add();
+                    ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(i, j), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
+                    DebugData data = new DebugData.PlacedText(coloredVertex, Objects.toString(buildCoordinates[i][j]), -1, 12);
+                    command.setData(data);
+                    debugInterface.send(command);
+                }
+            }
+        }
+*/
 
         fillDistances(distanceByFoot, coordinates);
 
@@ -129,6 +149,13 @@ public class SimCityMap {
     }
 
     public int getDistance(model.Coordinate position) {
+/*
+        DebugCommand.Add command = new DebugCommand.Add();
+        ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(position.getX(), position.getY()), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
+        DebugData data = new DebugData.PlacedText(coloredVertex, Integer.toString(getDistance(position.getX(), position.getY())), -1, 12);
+        command.setData(data);
+        debugInterface.send(command);
+*/
         return getDistance(position.getX(), position.getY());
     }
 
