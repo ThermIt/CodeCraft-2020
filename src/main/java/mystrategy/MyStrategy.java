@@ -96,7 +96,7 @@ public class MyStrategy implements Strategy {
                     }
                 }
                 Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
-                if ((maxUnits == 0 || (maxUnits - currentUnits) * 100 / maxUnits < 33)
+                if (needMoreHouses()
                         && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
                         && buildCoordinates != null && simCityMap.getDistance(unit.getPosition()) == 2) {
                     attackAction = null;
@@ -130,6 +130,10 @@ public class MyStrategy implements Strategy {
         // buildings
         handleBuildings(result);
         return result;
+    }
+
+    private boolean needMoreHouses() {
+        return maxUnits == 0 || (maxUnits - (currentUnits + me.getResource()/50)) * 100 / maxUnits < 20;
     }
 
     private void handleBuildings(Action result) {
