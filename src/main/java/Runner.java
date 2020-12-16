@@ -1,5 +1,5 @@
-import mystrategy.strategies.DelegatingStrategy;
 import mystrategy.strategies.DefaultStrategy;
+import mystrategy.strategies.DelegatingStrategy;
 import older.v01.greedy.rusher.Older1GreedyRusher;
 import older.v02.manage.workers.Older2WorkerManager;
 import older.v03.random.base.Older3RandomBaseBuilder;
@@ -23,19 +23,23 @@ public class Runner {
         outputStream.flush();
     }
 
-    private static void runOnce(String host, int port, String token, Strategy myStrategy) {
+    private static void runOnceMultithreaded(String host, int port, String token, Strategy myStrategy) {
         Runnable task = () -> {
-            try {
-                if (DebugInterface.isDebugEnabled()) {
-                    System.out.println("run " + host + ":" + port);
-                }
-                new Runner(host, port, token).run(myStrategy);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            runOnceSameThread(host, port, token, myStrategy);
         };
         Thread thread = new Thread(task);
         thread.start();
+    }
+
+    private static void runOnceSameThread(String host, int port, String token, Strategy myStrategy) {
+        try {
+            if (DebugInterface.isDebugEnabled()) {
+                System.out.println("run " + host + ":" + port);
+            }
+            new Runner(host, port, token).run(myStrategy);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws IOException {
@@ -46,19 +50,19 @@ public class Runner {
             DebugInterface.setDebugEnabled();
         }
         if (args.length > 3 && "multiply2".equals(args[3])) {
-            runOnce(host, port, token, new DefaultStrategy());
-            runOnce(host, port + 1, token, new Older1GreedyRusher());
+            runOnceMultithreaded(host, port, token, new DelegatingStrategy());
+            runOnceMultithreaded(host, port + 1, token, new Older1GreedyRusher());
         } else if (args.length > 3 && "multiply3".equals(args[3])) {
-            runOnce(host, port, token, new DefaultStrategy());
-            runOnce(host, port + 1, token, new Older2WorkerManager());
-            runOnce(host, port + 2, token, new Older1GreedyRusher());
+            runOnceMultithreaded(host, port, token, new DelegatingStrategy());
+            runOnceMultithreaded(host, port + 1, token, new Older2WorkerManager());
+            runOnceMultithreaded(host, port + 2, token, new Older1GreedyRusher());
         } else if (args.length > 3 && "multiply4".equals(args[3])) {
-            runOnce(host, port, token, new DelegatingStrategy());
-            runOnce(host, port + 1, token, new Older3RandomBaseBuilder());
-            runOnce(host, port + 2, token, new Older3RandomBaseBuilder());
-            runOnce(host, port + 3, token, new Older3RandomBaseBuilder());
-        } else  {
-            runOnce(host, port, token, new DefaultStrategy());
+            runOnceMultithreaded(host, port, token, new DelegatingStrategy());
+            runOnceMultithreaded(host, port + 1, token, new Older3RandomBaseBuilder());
+            runOnceMultithreaded(host, port + 2, token, new Older3RandomBaseBuilder());
+            runOnceMultithreaded(host, port + 3, token, new Older3RandomBaseBuilder());
+        } else {
+            runOnceSameThread(host, port, token, new DelegatingStrategy());
         }
     }
 
@@ -66,22 +70,8 @@ public class Runner {
         try {
             DebugInterface debugInterface = new DebugInterface(inputStream, outputStream);
             while (true) {
-                model.ServerMessage message = model.ServerMessage.readFrom(inputStream);
-                if (message instanceof model.ServerMessage.GetAction) {
-                    model.ServerMessage.GetAction getActionMessage = (model.ServerMessage.GetAction) message;
-                    new model.ClientMessage.ActionMessage(myStrategy.getAction(getActionMessage.getPlayerView(), getActionMessage.isDebugAvailable() ? debugInterface : null)).writeTo(outputStream);
-                    outputStream.flush();
-                } else if (message instanceof model.ServerMessage.Finish) {
+                if (syncRun(myStrategy, debugInterface)) {
                     break;
-                } else if (message instanceof model.ServerMessage.DebugUpdate) {
-                    if (!(myStrategy instanceof DefaultStrategy)) {
-                        model.ServerMessage.DebugUpdate debugUpdateMessage = (model.ServerMessage.DebugUpdate) message;
-                        myStrategy.debugUpdate(debugUpdateMessage.getPlayerView(), debugInterface);
-                    }
-                    new model.ClientMessage.DebugUpdateDone().writeTo(outputStream);
-                    outputStream.flush();
-                } else {
-                    throw new IOException("Unexpected server message");
                 }
             }
         } catch (IOException e) {
@@ -89,5 +79,26 @@ public class Runner {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    private synchronized boolean syncRun(Strategy myStrategy, DebugInterface debugInterface) throws IOException {
+        model.ServerMessage message = model.ServerMessage.readFrom(inputStream);
+        if (message instanceof model.ServerMessage.GetAction) {
+            model.ServerMessage.GetAction getActionMessage = (model.ServerMessage.GetAction) message;
+            new model.ClientMessage.ActionMessage(myStrategy.getAction(getActionMessage.getPlayerView(), getActionMessage.isDebugAvailable() ? debugInterface : null)).writeTo(outputStream);
+            outputStream.flush();
+        } else if (message instanceof model.ServerMessage.Finish) {
+            return true;
+        } else if (message instanceof model.ServerMessage.DebugUpdate) {
+            if (!(myStrategy instanceof DefaultStrategy)) {
+                model.ServerMessage.DebugUpdate debugUpdateMessage = (model.ServerMessage.DebugUpdate) message;
+                myStrategy.debugUpdate(debugUpdateMessage.getPlayerView(), debugInterface);
+            }
+            new model.ClientMessage.DebugUpdateDone().writeTo(outputStream);
+            outputStream.flush();
+        } else {
+            throw new IOException("Unexpected server message");
+        }
+        return false;
     }
 }

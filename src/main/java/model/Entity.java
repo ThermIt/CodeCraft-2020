@@ -2,6 +2,8 @@ package model;
 
 import util.StreamUtil;
 
+import static util.Initializer.getMyId;
+
 public class Entity {
     private int id;
     private Integer playerId;
@@ -138,8 +140,20 @@ public class Entity {
         StreamUtil.writeBoolean(stream, active);
     }
 
-    public boolean isPlayer(int myId) {
-        return playerId != null && playerId == myId;
+    public boolean isPlayer(int playerId) {
+        return this.playerId != null && this.playerId == playerId;
+    }
+
+    public boolean isMy() {
+        return this.playerId != null && this.playerId == getMyId();
+    }
+
+    public boolean isMy(EntityType entityType) {
+        return this.playerId != null && this.playerId == getMyId() && getEntityType() == entityType;
+    }
+
+    public boolean isEnemy() {
+        return this.playerId != null && this.playerId != getMyId();
     }
 
     public boolean isBuilding() {
@@ -180,5 +194,9 @@ public class Entity {
 
     public void setAttackAction(AttackAction attackAction) {
         this.attackAction = attackAction;
+    }
+
+    public boolean hasAction() {
+        return attackAction != null || repairAction != null || moveAction != null || buildAction != null;
     }
 }

@@ -17,6 +17,7 @@ public class AllEntities {
     private List<Entity> myUnits = new ArrayList<>();
     private List<Entity> myAttackers = new ArrayList<>();
     private List<Entity> myBuildings = new ArrayList<>();
+    private List<Entity> myActors = new ArrayList<>();
 
     private List<Entity> enemyUnits = new ArrayList<>();
     private List<Entity> enemyBuildings = new ArrayList<>();
@@ -46,12 +47,15 @@ public class AllEntities {
             if (entity.getPlayerId() == myId) {
                 if (entity.getEntityType().isBuilding()) {
                     myBuildings.add(entity);
-                }
-                if (entity.getEntityType().isUnit()) {
+                    if (entity.getEntityType() != EntityType.HOUSE) {
+                        myActors.add(entity);
+                    }
+                } else if (entity.getEntityType().isUnit()) {
                     if (entity.getEntityType() == EntityType.BUILDER_UNIT) {
                         myBuilders.add(entity);
                     }
                     myUnits.add(entity);
+                    myActors.add(entity);
                 }
                 if (entity.getProperties().getAttack() != null && entity.getProperties().getAttack().getDamage() > 0) {
                     myAttackers.add(entity);
@@ -113,5 +117,9 @@ public class AllEntities {
 
     public int getMaxUnits() {
         return maxUnits;
+    }
+
+    public List<Entity> getMyActors() {
+        return myActors;
     }
 }

@@ -3,9 +3,8 @@ package mystrategy.maps;
 import model.*;
 import util.DebugInterface;
 
-import java.util.Objects;
-
 public class EntitiesMap {
+    private static final Entity FREE = new Entity(-1001, null, EntityType.FREE, null, 0, false);
     private Entity[][] entityAtPosition;
     private EntityType[][] entityType;
     private boolean[][] isEnemy;
@@ -75,9 +74,13 @@ public class EntitiesMap {
 
     public Entity getEntity(int x, int y) {
         if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
-            return null;
+            return FREE;
         }
-        return entityAtPosition[x][y];
+        Entity entity = entityAtPosition[x][y];
+        if (entity == null) {
+            return FREE;
+        }
+        return entity;
     }
 
     public boolean getIsResource(Coordinate coordinate) {
@@ -93,7 +96,6 @@ public class EntitiesMap {
                 .getAdjacentList()
                 .stream()
                 .map(this::getEntity)
-                .filter(Objects::nonNull)
                 .filter(ent -> ent.getEntityType() == EntityType.RESOURCE)
                 .findAny()
                 .orElse(null);

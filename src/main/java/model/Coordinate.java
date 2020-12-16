@@ -1,6 +1,6 @@
 package model;
 
-import mystrategy.utils.Initializer;
+import util.Initializer;
 import util.StreamUtil;
 
 import java.util.ArrayList;
@@ -28,10 +28,18 @@ public class Coordinate {
 
     public List<Coordinate> getAdjacentList() {
         List<Coordinate> coordinateList = new ArrayList<>();
-        coordinateList.add(new Coordinate(getX() - 1, getY() + 0));
-        coordinateList.add(new Coordinate(getX() + 0, getY() + 1));
-        coordinateList.add(new Coordinate(getX() + 0, getY() - 1));
-        coordinateList.add(new Coordinate(getX() + 1, getY() + 0));
+        if (x - 1 >= 0) {
+            coordinateList.add(new Coordinate(x - 1, y));
+        }
+        if (y - 1 >= 0) {
+            coordinateList.add(new Coordinate(x, y - 1));
+        }
+        if (y + 1 < Initializer.getMapSize()) {
+            coordinateList.add(new Coordinate(x, y + 1));
+        }
+        if (x + 1 < Initializer.getMapSize()) {
+            coordinateList.add(new Coordinate(x + 1, y));
+        }
         return coordinateList;
     }
 

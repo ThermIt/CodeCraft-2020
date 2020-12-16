@@ -1,18 +1,18 @@
-package mystrategy.utils;
+package util;
 
 import model.EntityType;
 import model.PlayerView;
-import util.DebugInterface;
 
 public class Initializer {
     private PlayerView playerView;
-    private DebugInterface debugInterface;
+    private static DebugInterface debugInterface;
     private static int myId;
     private static int mapSize;
 
     public Initializer(PlayerView playerView, DebugInterface debugInterface) {
         this.playerView = playerView;
         this.debugInterface = debugInterface;
+        initStatic();
     }
 
     public void initStatic() {
@@ -25,11 +25,19 @@ public class Initializer {
         }
     }
 
+    public static DebugInterface getDebugInterface() {
+        return debugInterface;
+    }
+
     public static int getMyId() {
         return myId;
     }
 
     public static int getMapSize() {
         return mapSize;
+    }
+
+    public void run() {
+        // done;
     }
 }

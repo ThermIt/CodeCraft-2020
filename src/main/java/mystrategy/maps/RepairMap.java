@@ -84,7 +84,7 @@ public class RepairMap {
 
     private Integer repairRequired(Coordinate position) {
         Entity entity = entitiesMap.getEntity(position);
-        if (entity != null && entity.isPlayer(myId)
+        if (entity.isPlayer(myId)
                 && entity.getHealth() < entity.getProperties().getMaxHealth()) {
             return entity.getId();
         }
@@ -109,9 +109,7 @@ public class RepairMap {
 
     private Integer buildingRequired(int x, int y) {
         Entity entity = entitiesMap.getEntity(x, y);
-        if (entity != null && entity.isPlayer(myId)
-                && entity.isBuilding()
-                && !entity.isActive()) {
+        if (entity.isMy() && entity.isBuilding() && !entity.isActive()) {
             return entity.getId();
         }
         return null;

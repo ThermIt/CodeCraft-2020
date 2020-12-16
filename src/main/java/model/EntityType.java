@@ -1,6 +1,7 @@
 package model;
 
 public enum EntityType {
+    FREE(-1, false, false),
     INPENETRABLE(-1, false, false),
     WALL(0, true, false),
     HOUSE(1, true, false),
