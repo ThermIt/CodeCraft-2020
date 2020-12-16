@@ -64,6 +64,7 @@ public class FirstStageStrategy implements Strategy, StrategyTrigger {
                 Entity resource = jobs.getResource(unit.getPosition());
                 if (resource != null) {
                     attackAction = new AttackAction(resource.getId(), null);
+                    resource.increaseDamage(unit.getProperties().getAttack().getDamage());
                 }
 
 /*

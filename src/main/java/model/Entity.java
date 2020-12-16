@@ -10,6 +10,7 @@ public class Entity {
     private model.EntityType entityType;
     private Coordinate position;
     private int health;
+    private int accumulatedDamage;
     private boolean active;
 
     // attack -> build -> repair -> move
@@ -198,5 +199,13 @@ public class Entity {
 
     public boolean hasAction() {
         return attackAction != null || repairAction != null || moveAction != null || buildAction != null;
+    }
+
+    public int getHealthAfterDamage() {
+        return health - accumulatedDamage;
+    }
+
+    public void increaseDamage(int damage) {
+        accumulatedDamage += damage;
     }
 }

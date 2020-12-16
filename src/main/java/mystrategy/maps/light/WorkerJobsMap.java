@@ -90,7 +90,7 @@ public class WorkerJobsMap {
                 .stream()
                 .sorted(Comparator.comparingInt(pos -> workers[pos.getX()][pos.getY()]))
                 .map(entitiesMap::getEntity)
-                .filter(ent -> ent.getEntityType() == EntityType.RESOURCE)
+                .filter(ent -> ent.getEntityType() == EntityType.RESOURCE && ent.getHealthAfterDamage() > 0)
                 .findAny()
                 .orElse(null);
     }
