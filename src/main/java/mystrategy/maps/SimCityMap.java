@@ -3,7 +3,7 @@ package mystrategy.maps;
 import model.Coordinate;
 import model.EntityType;
 import model.PlayerView;
-import mystrategy.AllEntities;
+import mystrategy.collections.AllEntities;
 import util.DebugInterface;
 
 import java.util.ArrayList;

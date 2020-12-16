@@ -1,4 +1,4 @@
-package mystrategy;
+package mystrategy.collections;
 
 import model.Entity;
 import model.EntityType;

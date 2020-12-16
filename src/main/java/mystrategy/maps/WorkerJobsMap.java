@@ -1,6 +1,8 @@
 package mystrategy.maps;
 
-import model.*;
+import model.Coordinate;
+import model.Entity;
+import model.PlayerView;
 import mystrategy.collections.AllEntities;
 import util.DebugInterface;
 
@@ -9,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class ResourcesMap {
+public class WorkerJobsMap {
     private int[][] distanceByFoot;
     private int[][] distanceByFootWithObstacles;
     private EntitiesMap entitiesMap;
@@ -18,7 +20,7 @@ public class ResourcesMap {
     private EnemiesMap enemiesMap;
     private DebugInterface debugInterface;
 
-    public ResourcesMap(PlayerView playerView, EntitiesMap entitiesMap, AllEntities allEntities, EnemiesMap enemiesMap, DebugInterface debugInterface) {
+    public WorkerJobsMap(PlayerView playerView, EntitiesMap entitiesMap, AllEntities allEntities, EnemiesMap enemiesMap, DebugInterface debugInterface) {
         this.entitiesMap = entitiesMap;
         mapSize = playerView.getMapSize();
         this.allEntities = allEntities;

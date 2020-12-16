@@ -1,6 +1,8 @@
-package mystrategy;
+package mystrategy.strategies;
 
 import model.*;
+import util.StrategyTrigger;
+import mystrategy.collections.AllEntities;
 import mystrategy.maps.*;
 import util.DebugInterface;
 import util.Strategy;
@@ -8,7 +10,7 @@ import util.Strategy;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MyStrategy implements Strategy {
+public class DefaultStrategy implements Strategy, StrategyTrigger {
 
     private EntitiesMap entitiesMap;
     private SimCityMap simCityMap;
@@ -21,6 +23,7 @@ public class MyStrategy implements Strategy {
     private PlayerView playerView;
     private DebugInterface debugInterface;
     private ResourcesMap resourceMap;
+    private boolean done;
 
     /**
      * attack -> build -> repair -> move
@@ -30,7 +33,7 @@ public class MyStrategy implements Strategy {
         // определить фронт работ (добыча/постройка/починка/атака/расчистка/разведка/защита)
         // резервирование ресурсов
         // определить кто что делает сейчас // забрать работы
-        // определить кто что можеет делать после пробежки
+        // определить кто что может делать после пробежки
         // пометить ресурсы как добываемые
         // билд ордер с учётом доступных ресурсов (4 рабочих - барак - 5 рабочих - барак - ...) учитывая рост стоимости
         // определить где что строить
@@ -39,10 +42,12 @@ public class MyStrategy implements Strategy {
         // рабочими идти только к новым патчам
         // (рабочие могу проходить сквозь друг-друга)
         // биться по правилам финала уже.
+        // делеать милишников пачками по 5 штук
+        // разбавлять лучников рабочими
+        // сохранять стоимость юнитов низкой?
 
         this.playerView = playerView;
         this.debugInterface = debugInterface;
-        new Initializer(playerView, debugInterface).initStatic();
         allEntities = new AllEntities(playerView, debugInterface);
         entitiesMap = new EntitiesMap(playerView, debugInterface);
         me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
@@ -252,7 +257,15 @@ public class MyStrategy implements Strategy {
 
     @Override
     public void debugUpdate(PlayerView playerView, DebugInterface debugInterface) {
-        debugInterface.send(new DebugCommand.Clear());
-        debugInterface.getState();
+    }
+
+    @Override
+    public boolean isDone() {
+        return done;
+    }
+
+    @Override
+    public Strategy getNextStage() {
+        return null;
     }
 }

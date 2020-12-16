@@ -1,4 +1,5 @@
-import mystrategy.MyStrategy;
+import mystrategy.strategies.DelegatingStrategy;
+import mystrategy.strategies.DefaultStrategy;
 import older.v01.greedy.rusher.Older1GreedyRusher;
 import older.v02.manage.workers.Older2WorkerManager;
 import older.v03.random.base.Older3RandomBaseBuilder;
@@ -45,19 +46,19 @@ public class Runner {
             DebugInterface.setDebugEnabled();
         }
         if (args.length > 3 && "multiply2".equals(args[3])) {
-            runOnce(host, port, token, new MyStrategy());
+            runOnce(host, port, token, new DefaultStrategy());
             runOnce(host, port + 1, token, new Older1GreedyRusher());
         } else if (args.length > 3 && "multiply3".equals(args[3])) {
-            runOnce(host, port, token, new MyStrategy());
+            runOnce(host, port, token, new DefaultStrategy());
             runOnce(host, port + 1, token, new Older2WorkerManager());
             runOnce(host, port + 2, token, new Older1GreedyRusher());
         } else if (args.length > 3 && "multiply4".equals(args[3])) {
-            runOnce(host, port, token, new MyStrategy());
+            runOnce(host, port, token, new DelegatingStrategy());
             runOnce(host, port + 1, token, new Older3RandomBaseBuilder());
             runOnce(host, port + 2, token, new Older3RandomBaseBuilder());
             runOnce(host, port + 3, token, new Older3RandomBaseBuilder());
         } else  {
-            runOnce(host, port, token, new MyStrategy());
+            runOnce(host, port, token, new DefaultStrategy());
         }
     }
 
@@ -73,7 +74,7 @@ public class Runner {
                 } else if (message instanceof model.ServerMessage.Finish) {
                     break;
                 } else if (message instanceof model.ServerMessage.DebugUpdate) {
-                    if (!(myStrategy instanceof MyStrategy)) {
+                    if (!(myStrategy instanceof DefaultStrategy)) {
                         model.ServerMessage.DebugUpdate debugUpdateMessage = (model.ServerMessage.DebugUpdate) message;
                         myStrategy.debugUpdate(debugUpdateMessage.getPlayerView(), debugInterface);
                     }

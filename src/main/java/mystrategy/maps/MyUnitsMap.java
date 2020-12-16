@@ -2,7 +2,7 @@ package mystrategy.maps;
 
 import model.Entity;
 import model.PlayerView;
-import mystrategy.AllEntities;
+import mystrategy.collections.AllEntities;
 import util.DebugInterface;
 
 public class MyUnitsMap {

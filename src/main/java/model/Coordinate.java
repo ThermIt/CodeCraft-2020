@@ -1,6 +1,6 @@
 package model;
 
-import mystrategy.Initializer;
+import mystrategy.utils.Initializer;
 import util.StreamUtil;
 
 import java.util.ArrayList;
