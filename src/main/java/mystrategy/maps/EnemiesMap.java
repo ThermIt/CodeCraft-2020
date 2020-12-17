@@ -1,7 +1,8 @@
 package mystrategy.maps;
 
-import model.*;
-import util.DebugInterface;
+import model.Coordinate;
+import model.EntityProperties;
+import model.PlayerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,15 +95,15 @@ public class EnemiesMap {
             coordinateList = coordinateListNext;
         }
 
-        if (DebugInterface.isDebugEnabled()) {
-            for (int i = 0; i < mapSize; i++) {
-                for (int j = 0; j < mapSize; j++) {
-                    if (shootDanger[i][j] > 0) {
-                        DebugInterface.print(Integer.toString(shootDanger[i][j]), i, j);
-                    }
-                }
-            }
-        }
+//        if (DebugInterface.isDebugEnabled()) {
+//            for (int i = 0; i < mapSize; i++) {
+//                for (int j = 0; j < mapSize; j++) {
+//                    if (shootDanger[i][j] > 0) {
+//                        DebugInterface.print(Integer.toString(shootDanger[i][j]), i, j);
+//                    }
+//                }
+//            }
+//        }
     }
 
     private void fillDistances(int[][] distanceMap, List<Coordinate> coordinateList) {

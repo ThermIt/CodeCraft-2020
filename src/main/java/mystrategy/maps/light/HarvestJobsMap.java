@@ -114,8 +114,7 @@ public class HarvestJobsMap {
         for (int i = 1; !coordinateList.isEmpty(); i++) {
             Set<Coordinate> coordinateListNext = new HashSet<>();
             for (Coordinate coordinate : coordinateList) {
-                if (coordinate.getX() >= 0 && coordinate.getX() < mapSize
-                        && coordinate.getY() >= 0 && coordinate.getY() < mapSize
+                if (coordinate.isInBounds()
                         && getDistance(coordinate, distanceMap) == 0
                         && (withObstacles ? isPassableWithObstacles(coordinate) : isPassable(coordinate))) {
                     distanceMap[coordinate.getX()][coordinate.getY()] = i;

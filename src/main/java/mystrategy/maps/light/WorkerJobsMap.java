@@ -5,7 +5,6 @@ import mystrategy.Task;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
-import util.DebugInterface;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -81,7 +80,7 @@ public class WorkerJobsMap {
                         && getDistanceUnsafe(distanceMap, coordinate) == 0
                         && isPassable(coordinate)) {
                     Entity entity = entitiesMap.getEntity(coordinate);
-                    DebugInterface.print(Integer.toString(i), coordinate);
+//                    DebugInterface.print(Integer.toString(i), coordinate); // build distance
                     if (entity.isMy(EntityType.BUILDER_UNIT)) {
                         if (entity.getTask() == Task.IDLE) {
                             entity.setTask(i == 1 ? Task.BUILD : Task.MOVE_TO_BUILD);

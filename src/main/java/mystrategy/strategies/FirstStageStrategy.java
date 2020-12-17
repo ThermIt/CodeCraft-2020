@@ -7,6 +7,7 @@ import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import mystrategy.maps.light.BuildOrders;
 import mystrategy.maps.light.HarvestJobsMap;
+import mystrategy.maps.light.VisibilityMap;
 import mystrategy.maps.light.WorkerJobsMap;
 import util.StrategyDelegate;
 
@@ -26,6 +27,7 @@ public class FirstStageStrategy implements StrategyDelegate {
     private PlayerView playerView;
     private Player me;
     private BuildOrders buildOrders;
+    private VisibilityMap visibility;
 
     public FirstStageStrategy(BuildOrders buildOrders) {
         this.buildOrders = buildOrders;
@@ -47,6 +49,8 @@ public class FirstStageStrategy implements StrategyDelegate {
         this.playerView = playerView;
         this.entitiesMap = new EntitiesMap(playerView);
         this.allEntities = new AllEntities(playerView);
+        this.visibility = new VisibilityMap(playerView, allEntities);
+
         EnemiesMap enemiesMap = new EnemiesMap(playerView, entitiesMap);
         this.jobs = new WorkerJobsMap(
                 playerView,
@@ -78,7 +82,7 @@ public class FirstStageStrategy implements StrategyDelegate {
                         moveTo = new Coordinate(35, 35);
                     }
                 }
-                if (moveTo != null){
+                if (moveTo != null) {
                     moveAction = new MoveAction(moveTo, true, true);
                     unit.setMoveAction(moveAction);
                 }

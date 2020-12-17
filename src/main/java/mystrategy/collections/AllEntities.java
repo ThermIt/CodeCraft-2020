@@ -13,6 +13,7 @@ public class AllEntities {
 
     private List<Entity> resources = new ArrayList<>();
 
+    private List<Entity> myEntities = new ArrayList<>();
     private List<Entity> myUnits = new ArrayList<>();
     private List<Entity> myAttackers = new ArrayList<>();
     private List<Entity> myBuildings = new ArrayList<>();
@@ -44,6 +45,7 @@ public class AllEntities {
                 continue;
             }
             if (entity.getPlayerId() == myId) {
+                myEntities.add(entity);
                 if (entity.getEntityType().isBuilding()) {
                     myBuildings.add(entity);
                     if (entity.getEntityType() != EntityType.HOUSE) {
@@ -120,5 +122,9 @@ public class AllEntities {
 
     public List<Entity> getMyActors() {
         return myActors;
+    }
+
+    public List<Entity> getMyEntities() {
+        return myEntities;
     }
 }

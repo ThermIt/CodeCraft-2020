@@ -7,6 +7,7 @@ import mystrategy.maps.EntitiesMap;
 import mystrategy.maps.RepairMap;
 import mystrategy.maps.SimCityMap;
 import mystrategy.maps.light.HarvestJobsMap;
+import mystrategy.maps.light.VisibilityMap;
 import util.DebugInterface;
 import util.StrategyDelegate;
 
@@ -30,6 +31,7 @@ public class DefaultStrategy implements StrategyDelegate {
     private boolean done;
     private boolean first;
     private boolean second;
+    private VisibilityMap visibility;
 
     /**
      * attack -> build -> repair -> move
@@ -63,6 +65,7 @@ public class DefaultStrategy implements StrategyDelegate {
         allEntities = new AllEntities(playerView);
         entitiesMap = new EntitiesMap(playerView);
         me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
+        this.visibility = new VisibilityMap(playerView, allEntities);
 
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();
