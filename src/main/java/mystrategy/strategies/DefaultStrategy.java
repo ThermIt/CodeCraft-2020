@@ -2,7 +2,11 @@ package mystrategy.strategies;
 
 import model.*;
 import mystrategy.collections.AllEntities;
-import mystrategy.maps.*;
+import mystrategy.maps.EnemiesMap;
+import mystrategy.maps.EntitiesMap;
+import mystrategy.maps.RepairMap;
+import mystrategy.maps.SimCityMap;
+import mystrategy.maps.light.HarvestJobsMap;
 import util.DebugInterface;
 import util.StrategyDelegate;
 
@@ -21,7 +25,8 @@ public class DefaultStrategy implements StrategyDelegate {
     private Player me;
     private PlayerView playerView;
     private DebugInterface debugInterface;
-    private ResourcesMap resourceMap;
+    //    private ResourcesMap resourceMap;
+    private HarvestJobsMap harvestJobs;
     private boolean done;
     private boolean first;
     private boolean second;
@@ -31,7 +36,7 @@ public class DefaultStrategy implements StrategyDelegate {
      */
     @Override
     public Action getAction(PlayerView playerView) {
-        if(!first) {
+        if (!first) {
             first = true;
             if (DebugInterface.isDebugEnabled()) {
                 System.out.println(playerView.getCurrentTick() + "SW");
@@ -63,13 +68,14 @@ public class DefaultStrategy implements StrategyDelegate {
         maxUnits = allEntities.getMaxUnits();
 
         enemiesMap = new EnemiesMap(playerView, entitiesMap);
-        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
+//        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
+        harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me);
         simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, debugInterface);
         repairMap = new RepairMap(playerView, entitiesMap, debugInterface);
 
         boolean barracksNotFinished = allEntities.getMyBuildings().stream()
                 .noneMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive());
-        if(!second && !barracksNotFinished) {
+        if (!second && !barracksNotFinished) {
             second = true;
             if (DebugInterface.isDebugEnabled()) {
                 System.out.println(playerView.getCurrentTick() + "BR");
@@ -89,7 +95,7 @@ public class DefaultStrategy implements StrategyDelegate {
         for (Entity unit : allEntities.getMyUnits()) {
             MoveAction moveAction;
             if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Coordinate moveTo = resourceMap.getPositionClosestToResource(unit.getPosition());
+                Coordinate moveTo = harvestJobs.getPositionClosestToResource(unit.getPosition());
                 if (moveTo == null) {
                     moveTo = new Coordinate(35, 35);
                 }
@@ -161,6 +167,19 @@ public class DefaultStrategy implements StrategyDelegate {
                 unit.setBuildAction(buildAction);
                 unit.setRepairAction(repairAction);
             }
+
+            if (unit.getAttackAction() != null) {
+                DebugInterface.print("AK", unit.getPosition());
+            } else if (unit.getBuildAction() != null) {
+                DebugInterface.print("BD", unit.getPosition());
+            } else if (unit.getRepairAction() != null) {
+                DebugInterface.print("RR", unit.getPosition());
+            } else if (unit.getMoveAction() != null) {
+                DebugInterface.print("MV", unit.getPosition());
+                DebugInterface.line(unit.getPosition(), unit.getMoveAction().getTarget());
+
+            }
+
 
             result.getEntityActions().put(unit.getId(), new EntityAction(
                     unit.getMoveAction(),
@@ -239,7 +258,7 @@ public class DefaultStrategy implements StrategyDelegate {
                 buildPosition = any.get();
             }
 
-            buildPosition = resourceMap.getPositionClosestToResource(buildPosition, adjustentFreePoints);
+            buildPosition = harvestJobs.getPositionClosestToResource(buildPosition, adjustentFreePoints);
             buildAction = new BuildAction(
                     EntityType.BUILDER_UNIT,
                     buildPosition

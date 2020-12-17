@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class ResourcesMap {
     private int[][] distanceByFoot;
     private int[][] distanceByFootWithObstacles;

@@ -6,6 +6,7 @@ import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import mystrategy.maps.light.BuildOrders;
+import mystrategy.maps.light.HarvestJobsMap;
 import mystrategy.maps.light.WorkerJobsMap;
 import util.StrategyDelegate;
 
@@ -21,6 +22,7 @@ public class FirstStageStrategy implements StrategyDelegate {
     private EntitiesMap entitiesMap;
     private AllEntities allEntities;
     private WorkerJobsMap jobs;
+    private HarvestJobsMap harvestJobs;
     private PlayerView playerView;
     private Player me;
     private BuildOrders buildOrders;
@@ -45,13 +47,21 @@ public class FirstStageStrategy implements StrategyDelegate {
         this.playerView = playerView;
         this.entitiesMap = new EntitiesMap(playerView);
         this.allEntities = new AllEntities(playerView);
+        EnemiesMap enemiesMap = new EnemiesMap(playerView, entitiesMap);
         this.jobs = new WorkerJobsMap(
                 playerView,
                 entitiesMap,
                 allEntities,
-                new EnemiesMap(playerView, entitiesMap),
+                enemiesMap,
                 me,
                 buildOrders
+        );
+        this.harvestJobs = new HarvestJobsMap(
+                playerView,
+                entitiesMap,
+                allEntities,
+                enemiesMap,
+                me
         );
 
         for (Entity unit : allEntities.getMyUnits()) {
@@ -63,7 +73,7 @@ public class FirstStageStrategy implements StrategyDelegate {
                 } else if (unit.getTask() == Task.MOVE_TO_BUILD) {
                     moveTo = jobs.getPositionClosestToBuild(unit.getPosition());
                 } else { // idle workers
-                    moveTo = jobs.getPositionClosestToResource(unit.getPosition());
+                    moveTo = harvestJobs.getPositionClosestToResource(unit.getPosition());
                     if (moveTo == null) {
                         moveTo = new Coordinate(35, 35);
                     }
@@ -82,7 +92,7 @@ public class FirstStageStrategy implements StrategyDelegate {
             if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
                 if (unit.getTask() == Task.IDLE) {
                     // assign idle workers to harvest
-                    Entity resource = jobs.getResource(unit.getPosition());
+                    Entity resource = harvestJobs.getResource(unit.getPosition());
                     if (resource != null) {
                         attackAction = new AttackAction(resource.getId(), null);
                         resource.increaseDamage(unit.getProperties().getAttack().getDamage());
@@ -195,7 +205,7 @@ public class FirstStageStrategy implements StrategyDelegate {
             buildPosition = any.get();
         }
 
-        buildPosition = jobs.getPositionClosestToResource(buildPosition, adjustentFreePoints);
+        buildPosition = harvestJobs.getPositionClosestToResource(buildPosition, adjustentFreePoints);
         BuildAction buildAction = new BuildAction(
                 EntityType.BUILDER_UNIT,
                 buildPosition
