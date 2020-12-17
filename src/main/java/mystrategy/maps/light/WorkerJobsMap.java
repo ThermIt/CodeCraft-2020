@@ -1,9 +1,7 @@
 package mystrategy.maps.light;
 
-import model.Coordinate;
-import model.Entity;
-import model.EntityType;
-import model.PlayerView;
+import model.*;
+import mystrategy.Task;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
@@ -19,21 +17,29 @@ public class WorkerJobsMap {
     private int[][] workers;
     private int[][] build;
 
-    private int[][] distanceByFoot;
-    private int[][] distanceByFootWithObstacles;
+    private int[][] buildDistanceByFoot;
+    private int[][] resourceDistanceByFoot;
+    private int[][] resourceDistanceByFootWithObstacles;
     private EntitiesMap entitiesMap;
     private AllEntities allEntities;
     private EnemiesMap enemiesMap;
-    private DebugInterface debugInterface;
+    private Player me;
 
-    public WorkerJobsMap(PlayerView playerView, EntitiesMap entitiesMap, AllEntities allEntities, EnemiesMap enemiesMap, DebugInterface debugInterface) {
+    public WorkerJobsMap(
+            PlayerView playerView,
+            EntitiesMap entitiesMap,
+            AllEntities allEntities,
+            EnemiesMap enemiesMap,
+            Player me
+    ) {
         this.entitiesMap = entitiesMap;
         this.mapSize = playerView.getMapSize();
         this.allEntities = allEntities;
         this.enemiesMap = enemiesMap;
-        this.debugInterface = debugInterface;
-        this.distanceByFoot = new int[mapSize][mapSize];
-        this.distanceByFootWithObstacles = new int[mapSize][mapSize];
+        this.me = me;
+        this.resourceDistanceByFoot = new int[mapSize][mapSize];
+        this.resourceDistanceByFootWithObstacles = new int[mapSize][mapSize];
+        this.buildDistanceByFoot = new int[mapSize][mapSize];
 
         this.repair = new int[mapSize][mapSize];
         this.harvest = new int[mapSize][mapSize];
@@ -61,25 +67,31 @@ public class WorkerJobsMap {
                     });
         }
 
-        List<Coordinate> rapairEntitiesCoordinates = new ArrayList<>();
-        for (Entity resource : allEntities.getResources()) {
-            resourceCoordinates.add(new Coordinate(resource.getPosition().getX(), resource.getPosition().getY()));
+        Set<Coordinate> repairEntitiesCoordinates = new HashSet<>();
+        for (Entity resource : allEntities.getMyUnits()) {
+//            repairEntitiesCoordinates.add(new Coordinate(resource.getPosition().getX(), resource.getPosition().getY()));
         }
 
-        List<Coordinate> buildCoordinates = new ArrayList<>();
-        for (Entity resource : allEntities.getResources()) {
-            resourceCoordinates.add(new Coordinate(resource.getPosition().getX(), resource.getPosition().getY()));
+        Set<Coordinate> buildCoordinates = new HashSet<>();
+        for (Entity order : BuildMap.INSTANCE.updateAndGetActiveOrders(entitiesMap, me)) {
+            List<Coordinate> adjacentCoordinates = order.getAdjacentCoordinates();
+            buildCoordinates.addAll(adjacentCoordinates);
         }
 
-        fillDistances(distanceByFoot, resourceCoordinates, false);
-        fillDistances(distanceByFootWithObstacles, resourceCoordinates, true);
+        fillDistances(resourceDistanceByFoot, resourceCoordinates, false);
+        fillDistances(resourceDistanceByFootWithObstacles, resourceCoordinates, true);
+
+        fillBuildOrderDistance(buildDistanceByFoot, buildCoordinates);
 /*
         if (DebugInterface.isDebugEnabled()) {
-            for (int i = 0; i < mapSize; i++) {
-                for (int j = 0; j < mapSize; j++) {
-                    DebugInterface.print(Integer.toString(distanceByFoot[i][j]), i, j);
-                }
+            for (Coordinate pos:buildCoordinates) {
+                    DebugInterface.print("X", pos.getX(), pos.getY());
             }
+//            for (int i = 0; i < mapSize; i++) {
+//                for (int j = 0; j < mapSize; j++) {
+//                    DebugInterface.print(Integer.toString(distanceByFoot[i][j]), i, j);
+//                }
+//            }
         }
 */
     }
@@ -120,11 +132,48 @@ public class WorkerJobsMap {
         return getDistance(position.getX(), position.getY(), withObstacles);
     }
 
+    public int getDistanceUnsafe(int[][] distanceMap, Coordinate position) {
+        return distanceMap[position.getX()][position.getY()];
+    }
+
     public int getDistance(int x, int y, boolean withObstacles) {
         if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
             return 0;
         }
-        return withObstacles ? distanceByFootWithObstacles[x][y] : distanceByFoot[x][y];
+        return withObstacles ? resourceDistanceByFootWithObstacles[x][y] : resourceDistanceByFoot[x][y];
+    }
+
+    private void fillBuildOrderDistance(int[][] distanceMap, Set<Coordinate> coordinateList) {
+        int workerCount = 0;
+        for (int i = 1; !coordinateList.isEmpty(); i++) {
+            Set<Coordinate> coordinateListNext = new HashSet<>();
+            for (Coordinate coordinate : coordinateList) {
+                if (coordinate.isInBounds()
+                        && getDistanceUnsafe(distanceMap, coordinate) == 0
+                        && isPassable(coordinate)) {
+                    Entity entity = entitiesMap.getEntity(coordinate);
+                    DebugInterface.print(Integer.toString(i), coordinate);
+                    if (entity.isMy(EntityType.BUILDER_UNIT)) {
+                        if (entity.getTask() == Task.IDLE) {
+                            entity.setTask(i == 1 ? Task.BUILD : Task.MOVE_TO_BUILD);
+                            workerCount++;
+                        }
+                        if (i > 2 && workerCount >= 3) {
+                            return;
+                        }
+                        if (entity.getTask() == Task.BUILD) {
+                            continue;
+                        }
+                    }
+                    distanceMap[coordinate.getX()][coordinate.getY()] = i;
+                    coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
+                    coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
+                    coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
+                    coordinateListNext.add(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
+                }
+            }
+            coordinateList = coordinateListNext;
+        }
     }
 
     private void fillDistances(int[][] distanceMap, Set<Coordinate> coordinateList, boolean withObstacles) {
@@ -184,9 +233,9 @@ public class WorkerJobsMap {
             coordinateList = newList;
         }
 
-
-        Coordinate coordinate = newList.stream().max((Comparator.comparingInt(o -> harvest[o.getX()][o.getY()]))).get();
-        if (harvest[coordinate.getX()][coordinate.getY()] > 0) { // go ro max resources
+        Coordinate coordinate = newList.stream().max(Comparator.comparingInt(o -> harvest[o.getX()][o.getY()]))
+                .orElse(from);
+        if (harvest[coordinate.getX()][coordinate.getY()] > 0) { // go to max resources
             return coordinate;
         }
 
@@ -204,5 +253,12 @@ public class WorkerJobsMap {
         }
 
         return position;
+    }
+
+    public Coordinate getPositionClosestToBuild(Coordinate position) {
+        return position.getAdjacentListWithSelf().stream()
+                .filter(pos -> enemiesMap.getDangerLevel(pos) == 0
+                        && buildDistanceByFoot[pos.getX()][pos.getY()] != 0)
+                .min(Comparator.comparingInt(o -> buildDistanceByFoot[o.getX()][o.getY()])).orElse(null);
     }
 }

@@ -1,6 +1,11 @@
 package model;
 
+import mystrategy.Task;
+import util.Initializer;
 import util.StreamUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static util.Initializer.getMyId;
 
@@ -18,6 +23,8 @@ public class Entity {
     private BuildAction buildAction = null;
     private RepairAction repairAction = null;
     private MoveAction moveAction = null;
+
+    private Task task = Task.IDLE;
 
     public Entity() {
     }
@@ -207,5 +214,39 @@ public class Entity {
 
     public void increaseDamage(int damage) {
         accumulatedDamage += damage;
+    }
+
+
+    public List<Coordinate> getAdjacentCoordinates() {
+        int size = getProperties().getSize();
+        if (size == 1) {
+            return position.getAdjacentList();
+        }
+        List<Coordinate> coordinateList = new ArrayList<>();
+        int i = position.getX();
+        int j = position.getY();
+        for (int k = 0; k < size; k++) {
+            if (i - 1 >= 0) {
+                coordinateList.add(new Coordinate(i - 1, j + k));
+            }
+            if (j - 1 >= 0) {
+                coordinateList.add(new Coordinate(i + k, j - 1));
+            }
+            if (j + size < Initializer.getMapSize()) {
+                coordinateList.add(new Coordinate(i + k, j + size));
+            }
+            if (i + size < Initializer.getMapSize()) {
+                coordinateList.add(new Coordinate(i + size, j + k));
+            }
+        }
+        return coordinateList;
+    }
+
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
     }
 }

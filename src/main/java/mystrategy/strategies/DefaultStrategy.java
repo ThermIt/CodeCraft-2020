@@ -1,16 +1,15 @@
 package mystrategy.strategies;
 
 import model.*;
-import util.StrategyTrigger;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.*;
 import util.DebugInterface;
-import util.Strategy;
+import util.StrategyDelegate;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DefaultStrategy implements Strategy, StrategyTrigger {
+public class DefaultStrategy implements StrategyDelegate {
 
     private EntitiesMap entitiesMap;
     private SimCityMap simCityMap;
@@ -24,12 +23,20 @@ public class DefaultStrategy implements Strategy, StrategyTrigger {
     private DebugInterface debugInterface;
     private ResourcesMap resourceMap;
     private boolean done;
+    private boolean first;
+    private boolean second;
 
     /**
      * attack -> build -> repair -> move
      */
     @Override
-    public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
+    public Action getAction(PlayerView playerView) {
+        if(!first) {
+            first = true;
+            if (DebugInterface.isDebugEnabled()) {
+                System.out.println(playerView.getCurrentTick() + "SW");
+            }
+        }
         // определить фронт работ (добыча/постройка/починка/атака/расчистка/разведка/защита)
         // резервирование ресурсов
         // определить кто что делает сейчас // забрать работы
@@ -48,17 +55,26 @@ public class DefaultStrategy implements Strategy, StrategyTrigger {
 
         this.playerView = playerView;
         this.debugInterface = debugInterface;
-        allEntities = new AllEntities(playerView, debugInterface);
-        entitiesMap = new EntitiesMap(playerView, debugInterface);
+        allEntities = new AllEntities(playerView);
+        entitiesMap = new EntitiesMap(playerView);
         me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
 
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();
 
-        enemiesMap = new EnemiesMap(playerView, entitiesMap, debugInterface);
+        enemiesMap = new EnemiesMap(playerView, entitiesMap);
         resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
         simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, debugInterface);
         repairMap = new RepairMap(playerView, entitiesMap, debugInterface);
+
+        boolean barracksNotFinished = allEntities.getMyBuildings().stream()
+                .noneMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive());
+        if(!second && !barracksNotFinished) {
+            second = true;
+            if (DebugInterface.isDebugEnabled()) {
+                System.out.println(playerView.getCurrentTick() + "BR");
+            }
+        }
 
         Action result = new Action(new java.util.HashMap<>());
 
@@ -187,12 +203,14 @@ public class DefaultStrategy implements Strategy, StrategyTrigger {
             return buildAction;
         }
 
+/*
         if (DebugInterface.isDebugEnabled()) {
-            System.out.println(allEntities.getMyBuilders().size());
+            System.out.println(playerView.getCurrentTick() + ":" + allEntities.getMyBuilders().size());
         }
 
+*/
         if (entityType == EntityType.BUILDER_UNIT
-                && allEntities.getMyBuilders().size() > (playerView.isFogOfWar() ? 500 : allEntities.getEnemyBuilders().size() + 20)) {
+                && allEntities.getMyBuilders().size() > (playerView.isFogOfWar() ? 60 : allEntities.getEnemyBuilders().size() + 20)) {
             return buildAction;
         }
 
@@ -256,16 +274,12 @@ public class DefaultStrategy implements Strategy, StrategyTrigger {
     }
 
     @Override
-    public void debugUpdate(PlayerView playerView, DebugInterface debugInterface) {
-    }
-
-    @Override
     public boolean isDone() {
         return done;
     }
 
     @Override
-    public Strategy getNextStage() {
+    public StrategyDelegate getNextStage() {
         return null;
     }
 }

@@ -1,33 +1,45 @@
 package mystrategy.maps.light;
 
-import model.Coordinate;
-import model.Entity;
-import model.EntityType;
-import model.PlayerView;
+import model.*;
+import mystrategy.maps.EntitiesMap;
+import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static util.Initializer.getMyId;
 
 public class BuildMap {
+    public static final BuildMap INSTANCE = new BuildMap();
     private List<Entity> orderList;
     private Entity[][] orderMap;
     private int mapSize;
 
-    public BuildMap(PlayerView playerView) {
+    public void init(PlayerView playerView) {
+        if (mapSize != 0) {
+            return;
+        }
         mapSize = playerView.getMapSize();
-        orderMap = new Entity[mapSize][mapSize];
         orderList = new ArrayList<>();
 
-        orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 2), 0, false));
+        orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 2), 0, true));
         orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(5, 2), 0, false));
         orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 5), 0, false));
         orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(8, 2), 0, false));
         orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 8), 0, false));
 
-        for (Entity order : orderList) {
+        markActiveOrders();
+    }
 
+    private void markActiveOrders() {
+        orderMap = new Entity[mapSize][mapSize];
+        for (Entity order : getActiveOrders()) {
+            List<Coordinate> adjacentCoordinates = order.getAdjacentCoordinates();
+            for (Coordinate location :
+                    adjacentCoordinates) {
+                orderMap[location.getX()][location.getY()] = order;
+            }
         }
     }
 
@@ -44,5 +56,35 @@ public class BuildMap {
 
     public boolean isEmpty(Coordinate coordinate) {
         return getOrder(coordinate) == null;
+    }
+
+    public List<Entity> getActiveOrders() {
+        return orderList.stream().filter(Entity::isActive).collect(Collectors.toList());
+    }
+
+    public List<Entity> updateAndGetActiveOrders(EntitiesMap entitiesMap, Player me) {
+        boolean single = true;
+        for (int i = 0; i < orderList.size(); i++) {
+            Entity order = orderList.get(i);
+            if (!single) {
+                order.setActive(false);
+                continue;
+            }
+            Entity entity = entitiesMap.getEntity(order.getPosition());
+            if (entity.isMy(order.getEntityType()) && !entity.isActive()) {
+                order.setActive(true);
+                DebugInterface.print("A+", order.getPosition());
+                single = false;
+            } else if (me.getResource() >= order.getProperties().getInitialCost() - 2
+                    && !entity.isMy(order.getEntityType())) {
+                order.setActive(true);
+                DebugInterface.print("A", order.getPosition());
+                single = false;
+            } else {
+                order.setActive(false);
+            }
+        }
+        markActiveOrders();
+        return orderList.stream().filter(Entity::isActive).collect(Collectors.toList());
     }
 }

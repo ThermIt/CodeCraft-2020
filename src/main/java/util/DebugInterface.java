@@ -28,6 +28,21 @@ public class DebugInterface {
         debugEnabled = true;
     }
 
+    public static void print(String test, Coordinate pos) {
+        print(test, pos.getX(), pos.getY());
+    }
+
+    public static void print(String test, int x, int y) {
+        if (!isDebugEnabled()) {
+            return;
+        }
+        DebugCommand.Add command = new DebugCommand.Add();
+        ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(x, y), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
+        DebugData data = new DebugData.PlacedText(coloredVertex, test, -1, 24);
+        command.setData(data);
+        getDebugInterface().send(command);
+    }
+
     public void send(model.DebugCommand command) {
         if (!debugEnabled) {
             return;
@@ -51,16 +66,5 @@ public class DebugInterface {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void print(String test, int x, int y) {
-        if (!isDebugEnabled()) {
-            return;
-        }
-        DebugCommand.Add command = new DebugCommand.Add();
-        ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(x, y), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
-        DebugData data = new DebugData.PlacedText(coloredVertex, test, -1, 12);
-        command.setData(data);
-        getDebugInterface().send(command);
     }
 }

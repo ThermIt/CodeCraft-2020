@@ -11,12 +11,10 @@ public class EnemiesMap {
     private int[][] shootDanger;
     private EntitiesMap entitiesMap;
     private int mapSize;
-    private DebugInterface debugInterface;
 
-    public EnemiesMap(PlayerView playerView, EntitiesMap entitiesMap, DebugInterface debugInterface) {
+    public EnemiesMap(PlayerView playerView, EntitiesMap entitiesMap) {
         this.entitiesMap = entitiesMap;
         mapSize = playerView.getMapSize();
-        this.debugInterface = debugInterface;
         distanceByFoot = new int[mapSize][mapSize];
         shootDanger = new int[mapSize][mapSize];
 
@@ -100,11 +98,7 @@ public class EnemiesMap {
             for (int i = 0; i < mapSize; i++) {
                 for (int j = 0; j < mapSize; j++) {
                     if (shootDanger[i][j] > 0) {
-                        DebugCommand.Add command = new DebugCommand.Add();
-                        ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(i, j), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
-                        DebugData data = new DebugData.PlacedText(coloredVertex, Integer.toString(shootDanger[i][j]), -1, 12);
-                        command.setData(data);
-                        debugInterface.send(command);
+                        DebugInterface.print(Integer.toString(shootDanger[i][j]), i, j);
                     }
                 }
             }

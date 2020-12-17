@@ -43,8 +43,30 @@ public class Coordinate {
         return coordinateList;
     }
 
+    public List<Coordinate> getAdjacentListWithSelf() {
+        List<Coordinate> coordinateList = new ArrayList<>();
+        coordinateList.add(this);
+        if (x - 1 >= 0) {
+            coordinateList.add(new Coordinate(x - 1, y));
+        }
+        if (y - 1 >= 0) {
+            coordinateList.add(new Coordinate(x, y - 1));
+        }
+        if (y + 1 < Initializer.getMapSize()) {
+            coordinateList.add(new Coordinate(x, y + 1));
+        }
+        if (x + 1 < Initializer.getMapSize()) {
+            coordinateList.add(new Coordinate(x + 1, y));
+        }
+        return coordinateList;
+    }
+
     public boolean isOutOfBounds() {
         return getX() < 0 || getY() < 0 || getX() >= Initializer.getMapSize() || getY() >= Initializer.getMapSize();
+    }
+
+    public boolean isInBounds() {
+        return getX() >= 0 && getY() >= 0 && getX() < Initializer.getMapSize() && getY() < Initializer.getMapSize();
     }
 
     public int getX() {

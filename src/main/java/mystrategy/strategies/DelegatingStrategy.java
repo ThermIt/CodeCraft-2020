@@ -3,20 +3,20 @@ package mystrategy.strategies;
 import model.Action;
 import model.DebugCommand;
 import model.PlayerView;
-import util.Initializer;
-import util.StrategyTrigger;
-import util.DebugInterface;
-import util.Strategy;
+import mystrategy.maps.light.BuildMap;
+import util.*;
 
 public class DelegatingStrategy implements Strategy {
 
-    private Strategy currentStrategy;
+    private StrategyDelegate currentStrategy;
 
     private StrategyTrigger trigger;
 
     @Override
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
         new Initializer(playerView, debugInterface).run();
+        BuildMap.INSTANCE.init(playerView); // once on start because we don't have settings outside of a round
+
         if (currentStrategy == null) {
             if (playerView.isFogOfWar()) {
                 initFogStrategy();
@@ -25,10 +25,12 @@ public class DelegatingStrategy implements Strategy {
             }
         } else {
             if (trigger.isDone()) {
-                currentStrategy = trigger.getNextStage();
+                StrategyDelegate nextStage = trigger.getNextStage();
+                currentStrategy = nextStage;
+                trigger = (StrategyTrigger) nextStage;
             }
         }
-        return currentStrategy.getAction(playerView, debugInterface);
+        return currentStrategy.getAction(playerView);
     }
 
     private void initDefaultStrategy() {

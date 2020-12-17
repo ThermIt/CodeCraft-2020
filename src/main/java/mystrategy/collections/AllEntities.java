@@ -3,7 +3,6 @@ package mystrategy.collections;
 import model.Entity;
 import model.EntityType;
 import model.PlayerView;
-import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ public class AllEntities {
     private int currentUnits;
     private int maxUnits;
 
-    public AllEntities(PlayerView playerView, DebugInterface debugInterface) {
+    public AllEntities(PlayerView playerView) {
         myId = playerView.getMyId();
 
         currentUnits = 0;

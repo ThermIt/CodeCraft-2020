@@ -1,26 +1,28 @@
 package mystrategy.strategies;
 
 import model.*;
+import mystrategy.Task;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
+import mystrategy.maps.light.BuildMap;
 import mystrategy.maps.light.WorkerJobsMap;
-import util.DebugInterface;
-import util.Strategy;
-import util.StrategyTrigger;
+import util.StrategyDelegate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FirstStageStrategy implements Strategy, StrategyTrigger {
+public class FirstStageStrategy implements StrategyDelegate {
 
     private boolean done;
     private EntitiesMap entitiesMap;
     private AllEntities allEntities;
     private WorkerJobsMap jobs;
     private PlayerView playerView;
+    private Player me;
 
     @Override
     public boolean isDone() {
@@ -28,31 +30,42 @@ public class FirstStageStrategy implements Strategy, StrategyTrigger {
     }
 
     @Override
-    public Strategy getNextStage() {
+    public StrategyDelegate getNextStage() {
         return new DefaultStrategy();
     }
 
     @Override
-    public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
+    public Action getAction(PlayerView playerView) {
+        me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
         this.playerView = playerView;
-        this.entitiesMap = new EntitiesMap(playerView, debugInterface);
-        this.allEntities = new AllEntities(playerView, debugInterface);
+        this.entitiesMap = new EntitiesMap(playerView);
+        this.allEntities = new AllEntities(playerView);
         this.jobs = new WorkerJobsMap(
                 playerView,
                 entitiesMap,
                 allEntities,
-                new EnemiesMap(playerView, entitiesMap, debugInterface),
-                debugInterface);
+                new EnemiesMap(playerView, entitiesMap),
+                me
+        );
 
         for (Entity unit : allEntities.getMyUnits()) {
             MoveAction moveAction;
             if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Coordinate moveTo = jobs.getPositionClosestToResource(unit.getPosition());
-                if (moveTo == null) {
-                    moveTo = new Coordinate(35, 35);
+                Coordinate moveTo;
+                if (unit.getTask() == Task.BUILD) {
+                    moveTo = null;
+                } else if (unit.getTask() == Task.MOVE_TO_BUILD) {
+                    moveTo = jobs.getPositionClosestToBuild(unit.getPosition());
+                } else { // idle workers
+                    moveTo = jobs.getPositionClosestToResource(unit.getPosition());
+                    if (moveTo == null) {
+                        moveTo = new Coordinate(35, 35);
+                    }
                 }
-                moveAction = new MoveAction(moveTo, true, true);
-                unit.setMoveAction(moveAction);
+                if (moveTo != null){
+                    moveAction = new MoveAction(moveTo, true, true);
+                    unit.setMoveAction(moveAction);
+                }
             }
         }
 
@@ -60,11 +73,25 @@ public class FirstStageStrategy implements Strategy, StrategyTrigger {
             BuildAction buildAction = null;
             RepairAction repairAction = null;
             AttackAction attackAction = null;
-            if (/*allEntities.getResources().size() > 0 && */unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Entity resource = jobs.getResource(unit.getPosition());
-                if (resource != null) {
-                    attackAction = new AttackAction(resource.getId(), null);
-                    resource.increaseDamage(unit.getProperties().getAttack().getDamage());
+            if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
+                if (unit.getTask() == Task.IDLE) {
+                    // assign idle workers to harvest
+                    Entity resource = jobs.getResource(unit.getPosition());
+                    if (resource != null) {
+                        attackAction = new AttackAction(resource.getId(), null);
+                        resource.increaseDamage(unit.getProperties().getAttack().getDamage());
+                    }
+                } else if (unit.getTask() == Task.BUILD) {
+//                    DebugInterface.print("B", unit.getPosition());
+                    Entity order = BuildMap.INSTANCE.getOrder(unit.getPosition());
+                    if (order != null) {
+                        Entity entity = entitiesMap.getEntity(order.getPosition());
+                        if (entity.getEntityType() == order.getEntityType()) {
+                            repairAction = new RepairAction(entity.getId());
+                        } else {
+                            buildAction = new BuildAction(order.getEntityType(), order.getPosition());
+                        }
+                    }
                 }
 
 /*
@@ -109,17 +136,15 @@ public class FirstStageStrategy implements Strategy, StrategyTrigger {
             }
         }
 
-
-        done = allEntities.getMyBuildings().stream()
-                .anyMatch(ent -> ent.getEntityType() == EntityType.RANGED_BASE && ent.isActive());
-
         allEntities.getMyBuildings().stream()
                 .filter(ent -> ent.getEntityType() == EntityType.BUILDER_BASE && ent.isActive())
                 .forEach(ent -> ent.setBuildAction(getBuilderBaseBuildingAction(ent)));
 
+/*
         if (DebugInterface.isDebugEnabled()) {
             System.out.println(allEntities.getMyBuilders().size());
         }
+*/
 
         Action result = new Action(new java.util.HashMap<>());
         for (Entity actor : allEntities.getMyActors()) {
@@ -132,6 +157,10 @@ public class FirstStageStrategy implements Strategy, StrategyTrigger {
                 ));
             }
         }
+
+        done = allEntities.getMyBuildings().stream().filter(ent -> ent.getEntityType() == EntityType.HOUSE && ent.isActive())
+                .count() >= 3;
+
         return result;
     }
 
@@ -166,9 +195,5 @@ public class FirstStageStrategy implements Strategy, StrategyTrigger {
                 buildPosition
         );
         return buildAction;
-    }
-
-    @Override
-    public void debugUpdate(PlayerView playerView, DebugInterface debugInterface) {
     }
 }

@@ -1,7 +1,6 @@
 package mystrategy.maps;
 
 import model.*;
-import util.DebugInterface;
 
 public class EntitiesMap {
     private static final Entity FREE = new Entity(-1001, null, EntityType.FREE, null, 0, false);
@@ -10,7 +9,7 @@ public class EntitiesMap {
     private boolean[][] isEnemy;
     private int mapSize;
 
-    public EntitiesMap(PlayerView playerView, DebugInterface debugInterface) {
+    public EntitiesMap(PlayerView playerView) {
         mapSize = playerView.getMapSize();
         entityType = new EntityType[mapSize][mapSize];
         entityAtPosition = new Entity[mapSize][mapSize];
