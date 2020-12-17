@@ -98,7 +98,7 @@ public class DefaultStrategy implements StrategyDelegate {
             } else {
                 Coordinate moveTo = enemiesMap.getPositionClosestToEnemy(unit.getPosition());
                 if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
-                    moveTo = new Coordinate(35, 35);
+                    moveTo = new Coordinate(7, 72);
                 }
                 moveAction = new MoveAction(moveTo, true, true);
                 unit.setMoveAction(moveAction);
