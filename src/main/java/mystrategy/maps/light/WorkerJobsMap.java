@@ -30,7 +30,8 @@ public class WorkerJobsMap {
             EntitiesMap entitiesMap,
             AllEntities allEntities,
             EnemiesMap enemiesMap,
-            Player me
+            Player me,
+            BuildOrders buildOrders
     ) {
         this.entitiesMap = entitiesMap;
         this.mapSize = playerView.getMapSize();
@@ -73,7 +74,7 @@ public class WorkerJobsMap {
         }
 
         Set<Coordinate> buildCoordinates = new HashSet<>();
-        for (Entity order : BuildMap.INSTANCE.updateAndGetActiveOrders(entitiesMap, me)) {
+        for (Entity order : buildOrders.updateAndGetActiveOrders(entitiesMap, me)) {
             List<Coordinate> adjacentCoordinates = order.getAdjacentCoordinates();
             buildCoordinates.addAll(adjacentCoordinates);
         }

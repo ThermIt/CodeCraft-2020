@@ -10,8 +10,7 @@ import java.util.stream.Collectors;
 
 import static util.Initializer.getMyId;
 
-public class BuildMap {
-    public static final BuildMap INSTANCE = new BuildMap();
+public class BuildOrders {
     private List<Entity> orderList;
     private Entity[][] orderMap;
     private int mapSize;

@@ -3,19 +3,19 @@ package mystrategy.strategies;
 import model.Action;
 import model.DebugCommand;
 import model.PlayerView;
-import mystrategy.maps.light.BuildMap;
+import mystrategy.maps.light.BuildOrders;
 import util.*;
 
 public class DelegatingStrategy implements Strategy {
 
     private StrategyDelegate currentStrategy;
-
     private StrategyTrigger trigger;
+    private BuildOrders buildOrders = new BuildOrders();
 
     @Override
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
         new Initializer(playerView, debugInterface).run();
-        BuildMap.INSTANCE.init(playerView); // once on start because we don't have settings outside of a round
+        buildOrders.init(playerView); // once on start because we don't have settings outside of a round
 
         if (currentStrategy == null) {
             if (playerView.isFogOfWar()) {
@@ -40,7 +40,7 @@ public class DelegatingStrategy implements Strategy {
     }
 
     private void initFogStrategy() {
-        FirstStageStrategy currentStrategy = new FirstStageStrategy();
+        FirstStageStrategy currentStrategy = new FirstStageStrategy(buildOrders);
         this.currentStrategy = currentStrategy;
         this.trigger = currentStrategy;
     }

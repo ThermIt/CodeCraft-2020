@@ -5,7 +5,7 @@ import mystrategy.Task;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.light.BuildMap;
+import mystrategy.maps.light.BuildOrders;
 import mystrategy.maps.light.WorkerJobsMap;
 import util.StrategyDelegate;
 
@@ -23,6 +23,11 @@ public class FirstStageStrategy implements StrategyDelegate {
     private WorkerJobsMap jobs;
     private PlayerView playerView;
     private Player me;
+    private BuildOrders buildOrders;
+
+    public FirstStageStrategy(BuildOrders buildOrders) {
+        this.buildOrders = buildOrders;
+    }
 
     @Override
     public boolean isDone() {
@@ -45,7 +50,8 @@ public class FirstStageStrategy implements StrategyDelegate {
                 entitiesMap,
                 allEntities,
                 new EnemiesMap(playerView, entitiesMap),
-                me
+                me,
+                buildOrders
         );
 
         for (Entity unit : allEntities.getMyUnits()) {
@@ -83,7 +89,7 @@ public class FirstStageStrategy implements StrategyDelegate {
                     }
                 } else if (unit.getTask() == Task.BUILD) {
 //                    DebugInterface.print("B", unit.getPosition());
-                    Entity order = BuildMap.INSTANCE.getOrder(unit.getPosition());
+                    Entity order = buildOrders.getOrder(unit.getPosition());
                     if (order != null) {
                         Entity entity = entitiesMap.getEntity(order.getPosition());
                         if (entity.getEntityType() == order.getEntityType()) {
