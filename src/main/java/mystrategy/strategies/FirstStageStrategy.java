@@ -186,26 +186,26 @@ public class FirstStageStrategy implements StrategyDelegate {
                 entity.getPosition().getY() + entity.getProperties().getSize() - 1
         );
         Coordinate buildPosition = defaultBuildPosition;
-        List<Coordinate> adjustentFreePoints = new ArrayList<>();
+        List<Coordinate> adjacentFreePoints = new ArrayList<>();
         int size = entity.getProperties().getSize();
         for (int i = 0; i < size; i++) {
-            adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() - 1, entity.getPosition().getY() + i));
-            adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() - 1));
-            adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() + size, entity.getPosition().getY() + i));
-            adjustentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() + size));
+            adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() - 1, entity.getPosition().getY() + i));
+            adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() - 1));
+            adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + size, entity.getPosition().getY() + i));
+            adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() + size));
         }
-        adjustentFreePoints = adjustentFreePoints.stream()
+        adjacentFreePoints = adjacentFreePoints.stream()
                 .filter(point -> !point.isOutOfBounds())
                 .filter(point -> entitiesMap.isEmpty(point))
                 .collect(Collectors.toList());
 
         // get any free point
-        Optional<Coordinate> any = adjustentFreePoints.stream().findAny();
+        Optional<Coordinate> any = adjacentFreePoints.stream().findAny();
         if (any.isPresent()) {
             buildPosition = any.get();
         }
 
-        buildPosition = harvestJobs.getPositionClosestToResource(buildPosition, adjustentFreePoints);
+        buildPosition = harvestJobs.getPositionClosestToResource(buildPosition, adjacentFreePoints);
         BuildAction buildAction = new BuildAction(
                 EntityType.BUILDER_UNIT,
                 buildPosition
