@@ -3,6 +3,8 @@ package older.v02.manage.workers.maps;
 import model.Coordinate;
 import model.EntityProperties;
 import model.PlayerView;
+import mystrategy.Constants;
+import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,6 +114,14 @@ public class EnemiesMap {
                 }
             }
             coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
         }
 
 /*

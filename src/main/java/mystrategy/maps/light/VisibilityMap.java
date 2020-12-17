@@ -3,7 +3,9 @@ package mystrategy.maps.light;
 import model.Coordinate;
 import model.Entity;
 import model.PlayerView;
+import mystrategy.Constants;
 import mystrategy.collections.AllEntities;
+import util.DebugInterface;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,13 +16,6 @@ public class VisibilityMap {
 
     private int[][] visibilityRange;
     private int mapSize;
-
-    public VisibilityMap(
-            PlayerView playerView,
-            AllEntities allEntities
-    ) {
-        init(playerView, allEntities);
-    }
 
     public void init(PlayerView playerView, AllEntities allEntities) {
         isFogOfWar = playerView.isFogOfWar();
@@ -61,6 +56,14 @@ public class VisibilityMap {
                 }
             }
             coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
         }
 
 /*

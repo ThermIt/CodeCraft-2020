@@ -3,6 +3,7 @@ package older.v03.random.base.maps;
 import model.Coordinate;
 import model.Entity;
 import model.PlayerView;
+import mystrategy.Constants;
 import older.v03.random.base.AllEntities;
 import util.DebugInterface;
 
@@ -79,6 +80,14 @@ public class ResourcesMap {
                 }
             }
             coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
         }
 
 /*

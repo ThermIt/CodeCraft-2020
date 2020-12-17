@@ -33,6 +33,10 @@ public class DefaultStrategy implements StrategyDelegate {
     private boolean second;
     private VisibilityMap visibility;
 
+    public DefaultStrategy(VisibilityMap visibility) {
+        this.visibility = visibility;
+    }
+
     /**
      * attack -> build -> repair -> move
      */
@@ -65,7 +69,7 @@ public class DefaultStrategy implements StrategyDelegate {
         allEntities = new AllEntities(playerView);
         entitiesMap = new EntitiesMap(playerView);
         me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
-        this.visibility = new VisibilityMap(playerView, allEntities);
+        this.visibility.init(playerView, allEntities);
 
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();

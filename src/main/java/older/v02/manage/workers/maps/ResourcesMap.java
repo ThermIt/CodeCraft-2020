@@ -3,7 +3,9 @@ package older.v02.manage.workers.maps;
 import model.Coordinate;
 import model.Entity;
 import model.PlayerView;
+import mystrategy.Constants;
 import older.v02.manage.workers.AllEntities;
+import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +80,14 @@ public class ResourcesMap {
                 }
             }
             coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
         }
 
 /*

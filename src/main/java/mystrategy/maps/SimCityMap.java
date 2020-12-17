@@ -3,6 +3,7 @@ package mystrategy.maps;
 import model.Coordinate;
 import model.EntityType;
 import model.PlayerView;
+import mystrategy.Constants;
 import mystrategy.collections.AllEntities;
 import util.DebugInterface;
 
@@ -158,6 +159,14 @@ public class SimCityMap {
                 }
             }
             coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
         }
     }
 

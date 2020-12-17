@@ -2,6 +2,7 @@ package older.v01.greedy.rusher;
 
 import model.Coordinate;
 import model.PlayerView;
+import mystrategy.Constants;
 import util.DebugInterface;
 
 import java.util.ArrayList;
@@ -74,6 +75,14 @@ public class EnemiesMap {
                 }
             }
             coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
         }
 
 /*

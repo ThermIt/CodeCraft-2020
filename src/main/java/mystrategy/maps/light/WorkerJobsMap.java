@@ -1,10 +1,12 @@
 package mystrategy.maps.light;
 
 import model.*;
+import mystrategy.Constants;
 import mystrategy.Task;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
+import util.DebugInterface;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -100,6 +102,15 @@ public class WorkerJobsMap {
                     coordinateListNext.add(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
                 }
             }
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
+
             coordinateList = coordinateListNext;
         }
     }

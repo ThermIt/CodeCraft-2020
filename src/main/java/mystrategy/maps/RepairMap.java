@@ -3,6 +3,7 @@ package mystrategy.maps;
 import model.Coordinate;
 import model.Entity;
 import model.PlayerView;
+import mystrategy.Constants;
 import util.DebugInterface;
 
 import java.util.ArrayList;
@@ -64,6 +65,14 @@ public class RepairMap {
                 }
             }
             coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
         }
     }
 

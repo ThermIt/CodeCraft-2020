@@ -1,9 +1,11 @@
 package mystrategy.maps.light;
 
 import model.*;
+import mystrategy.Constants;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
+import util.DebugInterface;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -125,6 +127,14 @@ public class HarvestJobsMap {
                 }
             }
             coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
         }
     }
 

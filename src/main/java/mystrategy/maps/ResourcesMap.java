@@ -1,6 +1,7 @@
 package mystrategy.maps;
 
 import model.*;
+import mystrategy.Constants;
 import mystrategy.collections.AllEntities;
 import util.DebugInterface;
 
@@ -80,6 +81,14 @@ public class ResourcesMap {
                 }
             }
             coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
         }
 
 /*

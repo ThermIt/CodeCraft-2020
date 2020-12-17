@@ -29,8 +29,9 @@ public class FirstStageStrategy implements StrategyDelegate {
     private BuildOrders buildOrders;
     private VisibilityMap visibility;
 
-    public FirstStageStrategy(BuildOrders buildOrders) {
+    public FirstStageStrategy(BuildOrders buildOrders, VisibilityMap visibility) {
         this.buildOrders = buildOrders;
+        this.visibility = visibility;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class FirstStageStrategy implements StrategyDelegate {
 
     @Override
     public StrategyDelegate getNextStage() {
-        return new DefaultStrategy();
+        return new DefaultStrategy(visibility);
     }
 
     @Override
@@ -49,7 +50,7 @@ public class FirstStageStrategy implements StrategyDelegate {
         this.playerView = playerView;
         this.entitiesMap = new EntitiesMap(playerView);
         this.allEntities = new AllEntities(playerView);
-        this.visibility = new VisibilityMap(playerView, allEntities);
+        this.visibility.init(playerView, allEntities);
 
         EnemiesMap enemiesMap = new EnemiesMap(playerView, entitiesMap);
         this.jobs = new WorkerJobsMap(
