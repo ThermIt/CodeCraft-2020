@@ -7,8 +7,8 @@ import mystrategy.Constants;
 import older.v03.random.base.AllEntities;
 import util.DebugInterface;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SimCityMap {
 
@@ -31,7 +31,7 @@ public class SimCityMap {
 
         int houseSize = playerView.getEntityProperties().get(EntityType.HOUSE).getSize();
         int houseSizeWithMargin = houseSize + 2;
-        List<Coordinate> coordinates = new ArrayList<>();
+        Set<Coordinate> coordinates = new HashSet<>();
 
         for (int i = 0; i < mapSize - houseSizeWithMargin + 1; i++) {
             for (int j = 0; j < mapSize - houseSizeWithMargin + 1; j++) {
@@ -141,9 +141,9 @@ public class SimCityMap {
         return distanceByFoot[x][y];
     }
 
-    private void fillDistances(int[][] distanceMap, List<Coordinate> coordinateList) {
+    private void fillDistances(int[][] distanceMap, Set<Coordinate> coordinateList) {
         for (int i = 1; !coordinateList.isEmpty(); i++) {
-            List<Coordinate> coordinateListNext = new ArrayList<>();
+            Set<Coordinate> coordinateListNext = new HashSet<>();
             for (Coordinate coordinate : coordinateList) {
                 if (coordinate.getX() >= 0 && coordinate.getX() < mapSize
                         && coordinate.getY() >= 0 && coordinate.getY() < mapSize
