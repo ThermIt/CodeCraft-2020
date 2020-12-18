@@ -131,11 +131,7 @@ public class DefaultStrategy implements StrategyDelegate {
             RepairAction repairAction = null;
             AttackAction attackAction = null;
             if (/*allEntities.getResources().size() > 0 && */unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Entity resource = entitiesMap.getResource(unit.getPosition());
-                if (resource != null) {
-                    attackAction = new AttackAction(resource.getId(), null);
-                }
-
+                Entity resource = harvestJobs.getResource(unit.getPosition());
                 Integer canBuildId = repairMap.canBuildId(unit.getPosition());
                 if (canBuildId != null) {
                     attackAction = null;
@@ -145,6 +141,9 @@ public class DefaultStrategy implements StrategyDelegate {
                     Integer canRepairId = repairMap.canRepairId(unit.getPosition());
                     if (canRepairId != null) {
                         repairAction = new RepairAction(canRepairId);
+                    } else if (resource != null) {
+                        attackAction = new AttackAction(resource.getId(), null);
+                        resource.increaseDamage(unit.getProperties().getAttack().getDamage());
                     }
                 }
                 Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());

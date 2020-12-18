@@ -93,14 +93,4 @@ public class EntitiesMap {
     public boolean isEmpty(Coordinate coordinate) {
         return entityAtPosition[coordinate.getX()][coordinate.getY()] == null;
     }
-
-    public Entity getResource(Coordinate position) {
-        return position
-                .getAdjacentList()
-                .stream()
-                .map(this::getEntity)
-                .filter(ent -> ent.getEntityType() == EntityType.RESOURCE)
-                .findAny()
-                .orElse(null);
-    }
 }
