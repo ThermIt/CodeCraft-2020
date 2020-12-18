@@ -2,6 +2,7 @@ package mystrategy.maps.light;
 
 import model.Coordinate;
 import model.Entity;
+import model.EntityType;
 import model.PlayerView;
 import mystrategy.Constants;
 import mystrategy.collections.AllEntities;
@@ -10,6 +11,7 @@ import util.DebugInterface;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class WarMap {
@@ -95,7 +97,7 @@ public class WarMap {
 
     private boolean isPassable(Coordinate coordinate) {
         Entity entity = this.entitiesMap.getEntity(coordinate);
-        return !(entity.isBuilding() && entity.isMy());
+        return !(entity.isBuilding() && entity.isMy()) && !entity.isMy(EntityType.BUILDER_UNIT);
     }
 
     private void fillDistances(Set<Coordinate> coordinateList) {
@@ -150,10 +152,16 @@ public class WarMap {
         if (newPosition.isOutOfBounds()) {
             return old;
         }
-        if (getDistance(newPosition) == 0) {
+        int newDistance = getDistance(newPosition);
+        if (newDistance == 0) {
             return old;
         }
-        if (getDistance(newPosition) < getDistance(old)) {
+        int oldDistance = getDistance(old);
+        if (newDistance < oldDistance) {
+            return newPosition;
+        }
+
+        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) {
             return newPosition;
         }
         return old;
@@ -180,4 +188,11 @@ public class WarMap {
         return from;
     }
 
+    public Coordinate getPositionClosestToEnemy(Coordinate from, List<Coordinate> coordinateList) {
+        Coordinate position = from;
+        for (Coordinate newPosition : coordinateList) {
+            position = getMinOfTwoPositions(position, newPosition);
+        }
+        return position;
+    }
 }

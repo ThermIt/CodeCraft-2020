@@ -1,6 +1,7 @@
 package model;
 
 import mystrategy.Task;
+import mystrategy.maps.EntitiesMap;
 import util.Initializer;
 import util.StreamUtil;
 
@@ -252,5 +253,16 @@ public class Entity {
 
     public boolean isUnit() {
         return getEntityType().isUnit();
+    }
+
+    public boolean isFree(EntitiesMap entitiesMap) {
+        int size = getProperties().getSize();
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (!entitiesMap.isEmpty(i + position.getX(), j+ position.getY()))
+                    return false;
+            }
+        }
+        return true;
     }
 }

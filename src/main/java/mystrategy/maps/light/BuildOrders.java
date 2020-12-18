@@ -22,7 +22,7 @@ public class BuildOrders {
         mapSize = playerView.getMapSize();
         orderList = new ArrayList<>();
 
-        orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 2), 0, true));
+        orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 2), 0, false));
         orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(5, 2), 0, false));
         orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 5), 0, false));
         orderList.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(8, 2), 0, false));
@@ -69,11 +69,14 @@ public class BuildOrders {
                 order.setActive(false);
                 continue;
             }
+
             Entity entity = entitiesMap.getEntity(order.getPosition());
             if (entity.isMy(order.getEntityType()) && !entity.isActive()) {
                 order.setActive(true);
                 DebugInterface.print("A+", order.getPosition());
                 single = false;
+            } else if (!order.isFree(entitiesMap)) {
+                order.setActive(false);
             } else if (me.getResource() >= order.getProperties().getInitialCost() - 2
                     && !entity.isMy(order.getEntityType())) {
                 order.setActive(true);

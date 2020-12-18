@@ -91,6 +91,10 @@ public class EntitiesMap {
     }
 
     public boolean isEmpty(Coordinate coordinate) {
-        return entityAtPosition[coordinate.getX()][coordinate.getY()] == null;
+        return isEmpty(coordinate.getX(), coordinate.getY());
+    }
+
+    public boolean isEmpty(int x, int y) {
+        return entityAtPosition[x][y] == null;
     }
 }

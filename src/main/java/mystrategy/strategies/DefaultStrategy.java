@@ -308,7 +308,7 @@ public class DefaultStrategy implements StrategyDelegate {
             if (any.isPresent()) {
                 buildPosition = any.get();
             }
-            buildPosition = enemiesMap.getPositionClosestToEnemy(buildPosition, adjacentFreePoints);
+            buildPosition = warMap.getPositionClosestToEnemy(buildPosition, adjacentFreePoints);
             buildAction = new BuildAction(
                     entityType,
                     buildPosition
