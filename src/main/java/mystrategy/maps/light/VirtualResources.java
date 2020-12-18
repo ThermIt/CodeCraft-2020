@@ -6,7 +6,6 @@ import model.EntityType;
 import model.PlayerView;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EntitiesMap;
-import util.DebugInterface;
 
 public class VirtualResources {
     private int mapSize;
@@ -67,6 +66,7 @@ public class VirtualResources {
             }
         }
 
+/*
         if (DebugInterface.isDebugEnabled()) {
             for (int i = 0; i < mapSize; i++) {
                 for (int j = 0; j < mapSize; j++) {
@@ -77,6 +77,7 @@ public class VirtualResources {
                 }
             }
         }
+*/
     }
 
     public int getResourceCount(int x, int y) {

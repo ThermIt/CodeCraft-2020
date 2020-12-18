@@ -81,15 +81,33 @@ public class SimCityMap {
                         }
                     }
 
-                    for (int k = 0; k <= houseSize + 1; k++) { // hack
-                        if (i - 1 >= 0)
-                        rangedBaseBuildCoordinates[i - 1][j + k] = new Coordinate(i, j);
-                        if (j - 1 >= 0)
-                        rangedBaseBuildCoordinates[i + k][j  - 1] = new Coordinate(i, j);
-                        if (j + houseSize + 2 < mapSize)
-                        rangedBaseBuildCoordinates[i + k][j + houseSize + 2] = new Coordinate(i, j);
-                        if (i + houseSize + 2 < mapSize)
-                        rangedBaseBuildCoordinates[i + houseSize + 2][j + k] = new Coordinate(i, j);
+                    boolean canBuildRangedBase = true; // totally hack
+                    for (int k = 0; k < houseSizeWithMargin; k++) {
+                        if (!canBuildRangedBase) {
+                            break;
+                        }
+                        for (int l = 0; l < houseSizeWithMargin; l++) {
+                            if (!isEmpty(i + k, j + l)) {
+                                canBuildRangedBase = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (canBuildRangedBase) {
+                        for (int k = 0; k <= houseSize + 1; k++) { // hack
+                            if (i - 1 >= 0) {
+                                rangedBaseBuildCoordinates[i - 1][j + k] = new Coordinate(i, j);
+                            }
+                            if (j - 1 >= 0) {
+                                rangedBaseBuildCoordinates[i + k][j - 1] = new Coordinate(i, j);
+                            }
+                            if (j + houseSize + 2 < mapSize) {
+                                rangedBaseBuildCoordinates[i + k][j + houseSize + 2] = new Coordinate(i, j);
+                            }
+                            if (i + houseSize + 2 < mapSize) {
+                                rangedBaseBuildCoordinates[i + houseSize + 2][j + k] = new Coordinate(i, j);
+                            }
+                        }
                     }
 
                     for (int k = 1; k <= houseSize; k++) {
@@ -112,12 +130,8 @@ public class SimCityMap {
 /*
         for (int i = 0; i < mapSize; i++) {
             for (int j = 0; j < mapSize; j++) {
-                if (debugInterface.isDebugEnabled() && rangedBaseBuildCoordinates[i][j] != null) {
-                    DebugCommand.Add command = new DebugCommand.Add();
-                    ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(i, j), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
-                    DebugData data = new DebugData.PlacedText(coloredVertex, Objects.toString(rangedBaseBuildCoordinates[i][j]), -1, 12);
-                    command.setData(data);
-                    debugInterface.send(command);
+                if (DebugInterface.isDebugEnabled() && rangedBaseBuildCoordinates[i][j] != null) {
+                    DebugInterface.print(rangedBaseBuildCoordinates[i][j].toString(), i, j);
                 }
             }
         }
