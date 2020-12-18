@@ -1,10 +1,12 @@
 package mystrategy.maps.light;
 
 import model.*;
+import mystrategy.collections.AllEntities;
 import mystrategy.maps.EntitiesMap;
 import util.DebugInterface;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,17 +63,25 @@ public class BuildOrders {
         return orderList.stream().filter(Entity::isActive).collect(Collectors.toList());
     }
 
-    public List<Entity> updateAndGetActiveOrders(EntitiesMap entitiesMap, Player me) {
+    public List<Entity> updateAndGetActiveOrders(AllEntities allEntities, EntitiesMap entitiesMap, Player me) {
+        for (Entity building : allEntities.getMyBuildings()) {
+            if (!building.isActive() && orderList.stream().allMatch(order -> order.getId() != building.getId())) {
+                orderList.add(new Entity(-1, getMyId(), building.getEntityType(), building.getPosition(), 0, false));
+            }
+        }
+
         boolean single = true;
-        for (int i = 0; i < orderList.size(); i++) {
-            Entity order = orderList.get(i);
+        for (Iterator<Entity> iterator = orderList.iterator(); iterator.hasNext(); ) {
+            Entity order = iterator.next();
             if (!single) {
                 order.setActive(false);
                 continue;
             }
 
             Entity entity = entitiesMap.getEntity(order.getPosition());
-            if (entity.isMy(order.getEntityType()) && !entity.isActive()) {
+            if (entity.isMy(order.getEntityType()) && entity.isActive()) {
+                iterator.remove();
+            } else if (entity.isMy(order.getEntityType()) && !entity.isActive()) {
                 order.setActive(true);
                 DebugInterface.print("A+", order.getPosition());
                 single = false;

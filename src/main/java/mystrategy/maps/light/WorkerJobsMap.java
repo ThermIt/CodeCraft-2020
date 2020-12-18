@@ -48,13 +48,17 @@ public class WorkerJobsMap {
 //            repairEntitiesCoordinates.add(new Coordinate(resource.getPosition().getX(), resource.getPosition().getY()));
         }
 
+        int minWorkers = 3;
         Set<Coordinate> buildCoordinates = new HashSet<>(128);
-        for (Entity order : buildOrders.updateAndGetActiveOrders(entitiesMap, me)) {
+        for (Entity order : buildOrders.updateAndGetActiveOrders(allEntities, entitiesMap, me)) {
+            if (order.getEntityType() == EntityType.RANGED_BASE) {
+                minWorkers = 5;
+            }
             List<Coordinate> adjacentCoordinates = order.getAdjacentCoordinates();
             buildCoordinates.addAll(adjacentCoordinates);
         }
 
-        fillBuildOrderDistance(buildDistanceByFoot, buildCoordinates);
+        fillBuildOrderDistance(buildDistanceByFoot, buildCoordinates, minWorkers);
 /*
         if (DebugInterface.isDebugEnabled()) {
             for (Coordinate pos:buildCoordinates) {
@@ -73,7 +77,7 @@ public class WorkerJobsMap {
         return distanceMap[position.getX()][position.getY()];
     }
 
-    private void fillBuildOrderDistance(int[][] distanceMap, Set<Coordinate> coordinateList) {
+    private void fillBuildOrderDistance(int[][] distanceMap, Set<Coordinate> coordinateList, int minWorkers) {
         int workerCount = 0;
         for (int i = 1; !coordinateList.isEmpty(); i++) {
             Set<Coordinate> coordinateListNext = new HashSet<>(128);
@@ -88,7 +92,7 @@ public class WorkerJobsMap {
                             entity.setTask(i == 1 ? Task.BUILD : Task.MOVE_TO_BUILD);
                             workerCount++;
                         }
-                        if (i > 2 && workerCount >= 3) {
+                        if (i > 2 && workerCount >= minWorkers) {
                             return;
                         }
                         if (entity.getTask() == Task.BUILD) {

@@ -40,7 +40,7 @@ public class DelegatingStrategy implements Strategy {
     }
 
     private void initDefaultStrategy() {
-        DefaultStrategy currentStrategy = new DefaultStrategy(visibility, resources, warMap);
+        DefaultStrategy currentStrategy = new DefaultStrategy(buildOrders, visibility, resources, warMap);
         this.currentStrategy = currentStrategy;
         this.trigger = currentStrategy;
     }

@@ -42,7 +42,7 @@ public class FirstStageStrategy implements StrategyDelegate {
 
     @Override
     public StrategyDelegate getNextStage() {
-        return new DefaultStrategy(visibility, resources, warMap);
+        return new DefaultStrategy(buildOrders, visibility, resources, warMap);
     }
 
     @Override

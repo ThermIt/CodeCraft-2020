@@ -1,15 +1,13 @@
 package mystrategy.strategies;
 
 import model.*;
+import mystrategy.Task;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import mystrategy.maps.RepairMap;
 import mystrategy.maps.SimCityMap;
-import mystrategy.maps.light.HarvestJobsMap;
-import mystrategy.maps.light.VirtualResources;
-import mystrategy.maps.light.VisibilityMap;
-import mystrategy.maps.light.WarMap;
+import mystrategy.maps.light.*;
 import util.DebugInterface;
 import util.StrategyDelegate;
 
@@ -33,11 +31,15 @@ public class DefaultStrategy implements StrategyDelegate {
     private boolean done;
     private boolean first;
     private boolean second;
+    private boolean third;
+    private BuildOrders buildOrders;
     private VisibilityMap visibility;
     private VirtualResources resources;
     private WarMap warMap;
+    private WorkerJobsMap jobs;
 
-    public DefaultStrategy(VisibilityMap visibility, VirtualResources resources, WarMap warMap) {
+    public DefaultStrategy(BuildOrders buildOrders, VisibilityMap visibility, VirtualResources resources, WarMap warMap) {
+        this.buildOrders = buildOrders;
         this.visibility = visibility;
         this.resources = resources;
         this.warMap = warMap;
@@ -78,22 +80,36 @@ public class DefaultStrategy implements StrategyDelegate {
         this.visibility.init(playerView, allEntities);
         this.resources.init(playerView, allEntities, entitiesMap);
         this.warMap.init(playerView, entitiesMap, allEntities);
-
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();
-
         enemiesMap = new EnemiesMap(playerView, entitiesMap);
+
+        this.jobs = new WorkerJobsMap(
+                playerView,
+                entitiesMap,
+                allEntities,
+                enemiesMap,
+                me,
+                buildOrders
+        );
+
 //        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
         harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me);
         simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, debugInterface);
         repairMap = new RepairMap(playerView, entitiesMap, debugInterface);
 
-        boolean barracksNotFinished = allEntities.getMyBuildings().stream()
-                .noneMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive());
-        if (!second && !barracksNotFinished) {
+        if (!second && allEntities.getMyBuildings().stream()
+                .anyMatch(ent1 -> ent1.isMy(EntityType.RANGED_BASE) && !ent1.isActive())) {
             second = true;
             if (DebugInterface.isDebugEnabled()) {
                 System.out.println(playerView.getCurrentTick() + "BR");
+            }
+        }
+        if (!third && allEntities.getMyBuildings().stream()
+                .anyMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive())) {
+            third = true;
+            if (DebugInterface.isDebugEnabled()) {
+                System.out.println(playerView.getCurrentTick() + "BR+");
             }
         }
 
@@ -110,12 +126,21 @@ public class DefaultStrategy implements StrategyDelegate {
         for (Entity unit : allEntities.getMyUnits()) {
             MoveAction moveAction;
             if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Coordinate moveTo = harvestJobs.getPositionClosestToResource(unit.getPosition());
-                if (moveTo == null) {
-                    moveTo = new Coordinate(35, 35);
+                Coordinate moveTo;
+                if (unit.getTask() == Task.BUILD) {
+                    moveTo = null;
+                } else if (unit.getTask() == Task.MOVE_TO_BUILD) {
+                    moveTo = jobs.getPositionClosestToBuild(unit.getPosition());
+                } else { // idle workers
+                    moveTo = harvestJobs.getPositionClosestToResource(unit.getPosition());
+                    if (moveTo == null) {
+                        moveTo = new Coordinate(35, 35);
+                    }
                 }
-                moveAction = new MoveAction(moveTo, true, true);
-                unit.setMoveAction(moveAction);
+                if (moveTo != null) {
+                    moveAction = new MoveAction(moveTo, true, true);
+                    unit.setMoveAction(moveAction);
+                }
             } else {
                 Coordinate moveTo = warMap.getPositionClosestToEnemy(unit.getPosition());
                 if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
@@ -135,42 +160,60 @@ public class DefaultStrategy implements StrategyDelegate {
             RepairAction repairAction = null;
             AttackAction attackAction = null;
             if (/*allEntities.getResources().size() > 0 && */unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Entity resource = harvestJobs.getResource(unit.getPosition());
-                Integer canBuildId = repairMap.canBuildId(unit.getPosition());
-                if (canBuildId != null) {
-                    attackAction = null;
-                    unit.setMoveAction(null); // bugfix this
-                    repairAction = new RepairAction(canBuildId);
-                } else {
-                    Integer canRepairId = repairMap.canRepairId(unit.getPosition());
-                    if (canRepairId != null) {
-                        repairAction = new RepairAction(canRepairId);
-                    } else if (resource != null) {
-                        attackAction = new AttackAction(resource.getId(), null);
-                        resource.increaseDamage(unit.getProperties().getAttack().getDamage());
+
+                if (unit.getTask() == Task.IDLE) {
+
+                    // assign idle workers to harvest
+                    Entity resource = harvestJobs.getResource(unit.getPosition());
+                    Integer canBuildId = repairMap.canBuildId(unit.getPosition());
+                    if (canBuildId != null) {
+                        attackAction = null;
+                        unit.setMoveAction(null); // bugfix this
+                        repairAction = new RepairAction(canBuildId);
+                    } else {
+                        Integer canRepairId = repairMap.canRepairId(unit.getPosition());
+                        if (canRepairId != null) {
+                            repairAction = new RepairAction(canRepairId);
+                        } else if (resource != null) {
+                            attackAction = new AttackAction(resource.getId(), null);
+                            resource.increaseDamage(unit.getProperties().getAttack().getDamage());
+                        }
                     }
-                }
-                Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
-                Coordinate rbBuildCoordinates = simCityMap.getRangedBaseBuildCoordinates(unit.getPosition());
-                if (simCityMap.isNeedBarracks() // hack
-                        && me.getResource() >= playerView.getEntityProperties().get(EntityType.RANGED_BASE).getInitialCost()
-                        && rbBuildCoordinates != null) {
-                    attackAction = null;
-                    unit.setMoveAction(null); // bugfix this
-                    buildAction = new BuildAction(EntityType.RANGED_BASE, rbBuildCoordinates);
+                    Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
+                    Coordinate rbBuildCoordinates = simCityMap.getRangedBaseBuildCoordinates(unit.getPosition());
+                    if (simCityMap.isNeedBarracks() // hack
+                            && me.getResource() >= playerView.getEntityProperties().get(EntityType.RANGED_BASE).getInitialCost()
+                            && rbBuildCoordinates != null) {
+                        attackAction = null;
+                        unit.setMoveAction(null); // bugfix this
+                        buildAction = new BuildAction(EntityType.RANGED_BASE, rbBuildCoordinates);
 //                    maxUnits += playerView.getEntityProperties().get(EntityType.RANGED_BASE).getPopulationProvide();
 
 //                    simCityMap.setNeedBarracks(false);
+                    }
+                    if (needMoreHouses()
+                            && !(simCityMap.isNeedBarracks() && maxUnits >= 20)
+                            && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
+                            && buildCoordinates != null) {
+                        attackAction = null;
+                        unit.setMoveAction(null); // bugfix this
+                        buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
+                        maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
+                    }
+                } else if (unit.getTask() == Task.BUILD) {
+//                    DebugInterface.print("B", unit.getPosition());
+                    Entity order = buildOrders.getOrder(unit.getPosition());
+                    if (order != null) {
+                        Entity entity = entitiesMap.getEntity(order.getPosition());
+                        if (entity.getEntityType() == order.getEntityType()) {
+                            repairAction = new RepairAction(entity.getId());
+                        } else {
+                            buildAction = new BuildAction(order.getEntityType(), order.getPosition());
+                        }
+                    }
                 }
-                if (needMoreHouses()
-                        && !(simCityMap.isNeedBarracks() && maxUnits >= 20)
-                        && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
-                        && buildCoordinates != null) {
-                    attackAction = null;
-                    unit.setMoveAction(null); // bugfix this
-                    buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
-                    maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
-                }
+
+
                 unit.setAttackAction(attackAction);
                 unit.setBuildAction(buildAction);
                 unit.setRepairAction(repairAction);
@@ -248,10 +291,10 @@ public class DefaultStrategy implements StrategyDelegate {
 */
         int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
         if (playerView.isRound2())
-            buildersLimit = 65;
+            buildersLimit = 650;
 
         if (playerView.isFinials())
-            buildersLimit = 100;
+            buildersLimit = 1000;
 
         if (entityType == EntityType.BUILDER_UNIT
                 && allEntities.getMyBuilders().size() > buildersLimit) {
