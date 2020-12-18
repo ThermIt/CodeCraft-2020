@@ -95,7 +95,7 @@ public class DefaultStrategy implements StrategyDelegate {
         );
 
 //        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
-        harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me);
+        harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me, resources);
         simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, warMap);
         repairMap = new RepairMap(playerView, entitiesMap);
 
@@ -237,10 +237,11 @@ public class DefaultStrategy implements StrategyDelegate {
             } else if (unit.getRepairAction() != null) {
                 DebugInterface.print("RR", unit.getPosition());
             } else if (unit.getMoveAction() != null) {
-                if (unit.getTask() == Task.RUN_FOOLS)
-                DebugInterface.print("RN", unit.getPosition());
-                else
-                DebugInterface.print("MV", unit.getPosition());
+                if (unit.getTask() == Task.RUN_FOOLS) {
+                    DebugInterface.print("RN", unit.getPosition());
+                } else {
+                    DebugInterface.print("MV", unit.getPosition());
+                }
                 DebugInterface.line(unit.getPosition(), unit.getMoveAction().getTarget());
 
             }
@@ -295,11 +296,13 @@ public class DefaultStrategy implements StrategyDelegate {
 */
         int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
         if (playerView.isRound2()) {
-            buildersLimit = 650;
+            if (maxUnits > 30*0.7) {
+                buildersLimit = Math.max((int) (maxUnits * 0.7), buildersLimit);
+            }
         }
 
         if (playerView.isFinials()) {
-            buildersLimit = 1000;
+            buildersLimit = 110;
         }
 
         if (entityType == EntityType.BUILDER_UNIT

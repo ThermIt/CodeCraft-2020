@@ -72,7 +72,8 @@ public class FirstStageStrategy implements StrategyDelegate {
                 entitiesMap,
                 allEntities,
                 enemiesMap,
-                me
+                me,
+                resources
         );
         repairMap = new RepairMap(playerView, entitiesMap);
 

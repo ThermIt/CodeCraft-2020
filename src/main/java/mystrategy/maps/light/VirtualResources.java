@@ -8,6 +8,7 @@ import mystrategy.collections.AllEntities;
 import mystrategy.maps.EntitiesMap;
 
 public class VirtualResources {
+    public static final int VIRTUAL_PATCH_SIZE = 10;
     private int mapSize;
     private VisibilityMap visibility;
     private int playersCount;
@@ -90,7 +91,12 @@ public class VirtualResources {
     public int getResourceCount(int x, int y) {
         if (clearedFromResource[x][y]) {
             return 0;
+        } else if (x >= 40 - VIRTUAL_PATCH_SIZE && x < 40 + VIRTUAL_PATCH_SIZE &&
+                y >= 40 - VIRTUAL_PATCH_SIZE && y < 40 + VIRTUAL_PATCH_SIZE
+        ) {
+            return 5;
         }
+
         return resourceCount[x][y];
     }
 

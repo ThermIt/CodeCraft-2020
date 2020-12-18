@@ -27,8 +27,10 @@ public class HarvestJobsMap {
             EntitiesMap entitiesMap,
             AllEntities allEntities,
             EnemiesMap enemiesMap,
-            Player me
+            Player me,
+            VirtualResources resources
     ) {
+        resources.checkTick(playerView);
         this.entitiesMap = entitiesMap;
         this.mapSize = playerView.getMapSize();
         this.enemiesMap = enemiesMap;
@@ -42,35 +44,50 @@ public class HarvestJobsMap {
 
         Set<Coordinate> restrictedResourceCoordinates = new HashSet<>(128);
         Set<Coordinate> allResourceCoordinates = new HashSet<>(128);
-        for (Entity resource : allEntities.getResources()) {
-            Coordinate location = new Coordinate(resource.getPosition().getX(), resource.getPosition().getY());
-            List<Coordinate> adjacentList = location.getAdjacentList();
 
-            adjacentList.stream().filter(entitiesMap::isPassable)
-                    .forEach(loc -> {
-                        harvest[loc.getX()][loc.getY()] += resource.getHealth();
-                        Entity entity = entitiesMap.getEntity(loc);
-                        if (!entity.isMy(EntityType.BUILDER_UNIT)) {
-                            allResourceCoordinates.add(loc); // without workers on the spot
-                        }
-                    });
+        for (int i = 0; i < mapSize; i++) {
+            for (int j = 0; j < mapSize; j++) {
+                int resourceCount = resources.getResourceCount(i, j);
+                if (resourceCount == 0) {
+                    continue;
+                }
+//                DebugInterface.print(resourceCount, i, j);
 
-            // next section only for non-mined patches
-            int nearWorkersCount = (int) adjacentList.stream().filter(pos -> entitiesMap.getEntity(pos).isMy(EntityType.BUILDER_UNIT)).count();
-            if (nearWorkersCount > 0) { // remove patches with workers nearby
-                workers[location.getX()][location.getY()] = nearWorkersCount;
-                continue;
+                Coordinate location = new Coordinate(i, j);
+                List<Coordinate> adjacentList = location.getAdjacentList();
+
+                adjacentList.stream().filter(entitiesMap::isPassable)
+                        .forEach(loc -> {
+                            harvest[loc.getX()][loc.getY()] += resourceCount;
+                            Entity entity = entitiesMap.getEntity(loc);
+                            if (!entity.isMy(EntityType.BUILDER_UNIT)) {
+                                allResourceCoordinates.add(loc); // without workers on the spot
+//                                DebugInterface.print("-", loc);
+                            }
+                        });
+
+                // next section only for non-mined patches
+                int nearWorkersCount = (int) adjacentList.stream().filter(pos -> entitiesMap.getEntity(pos).isMy(EntityType.BUILDER_UNIT)).count();
+                if (nearWorkersCount > 0) { // remove patches with workers nearby
+                    workers[location.getX()][location.getY()] = nearWorkersCount;
+                    continue;
+                }
+
+                adjacentList.stream().filter(entitiesMap::isPassable)
+                        .forEach(loc -> {
+                            harvest[loc.getX()][loc.getY()] += resourceCount;
+                            Entity entity = entitiesMap.getEntity(loc);
+                            if (!entity.isMy(EntityType.BUILDER_UNIT)) {
+                                restrictedResourceCoordinates.add(loc);
+//                                DebugInterface.print("+", loc);
+                            }
+                        });
             }
-
-            adjacentList.stream().filter(entitiesMap::isPassable)
-                    .forEach(loc -> {
-                        harvest[loc.getX()][loc.getY()] += resource.getHealth();
-                        Entity entity = entitiesMap.getEntity(loc);
-                        if (!entity.isMy(EntityType.BUILDER_UNIT)) {
-                            restrictedResourceCoordinates.add(loc);
-                        }
-                    });
         }
+/*
+        for (Entity resource : allEntities.getResources()) {
+        }
+*/
 
         fillDistances(resourceDistanceByFoot, restrictedResourceCoordinates, false);
         fillDistances(resourceDistanceByFootWithObstacles, restrictedResourceCoordinates, true);
