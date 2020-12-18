@@ -43,12 +43,12 @@ public class WorkerJobsMap {
         this.repair = new int[mapSize][mapSize];
         this.workers = new int[mapSize][mapSize];
 
-        Set<Coordinate> repairEntitiesCoordinates = new HashSet<>();
+        Set<Coordinate> repairEntitiesCoordinates = new HashSet<>(128);
         for (Entity resource : allEntities.getMyUnits()) {
 //            repairEntitiesCoordinates.add(new Coordinate(resource.getPosition().getX(), resource.getPosition().getY()));
         }
 
-        Set<Coordinate> buildCoordinates = new HashSet<>();
+        Set<Coordinate> buildCoordinates = new HashSet<>(128);
         for (Entity order : buildOrders.updateAndGetActiveOrders(entitiesMap, me)) {
             List<Coordinate> adjacentCoordinates = order.getAdjacentCoordinates();
             buildCoordinates.addAll(adjacentCoordinates);
@@ -76,7 +76,7 @@ public class WorkerJobsMap {
     private void fillBuildOrderDistance(int[][] distanceMap, Set<Coordinate> coordinateList) {
         int workerCount = 0;
         for (int i = 1; !coordinateList.isEmpty(); i++) {
-            Set<Coordinate> coordinateListNext = new HashSet<>();
+            Set<Coordinate> coordinateListNext = new HashSet<>(128);
             for (Coordinate coordinate : coordinateList) {
                 if (coordinate.isInBounds()
                         && getDistanceUnsafe(distanceMap, coordinate) == 0

@@ -36,7 +36,7 @@ public class VisibilityMap {
             lastSeen = new int[mapSize][mapSize];
         }
 
-        Set<Coordinate> adjacentPositions = new HashSet<>();
+        Set<Coordinate> adjacentPositions = new HashSet<>(128);
         for (Entity unit : allEntities.getMyEntities()) {
             for (Coordinate position : unit.getAdjacentCoordinates()) {
                 adjacentPositions.add(position);
@@ -52,7 +52,7 @@ public class VisibilityMap {
 
         Set<Coordinate> coordinateList = adjacentPositions;
         for (int i = 1; !coordinateList.isEmpty(); i++) {
-            Set<Coordinate> coordinateListNext = new HashSet<>();
+            Set<Coordinate> coordinateListNext = new HashSet<>(128);
             for (Coordinate coordinate : coordinateList) {
                 int previouslyRemainingRange = remainingRange[coordinate.getX()][coordinate.getY()];
                 if (coordinate.isInBounds() && previouslyRemainingRange > 0) {

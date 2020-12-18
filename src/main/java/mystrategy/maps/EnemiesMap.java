@@ -6,8 +6,9 @@ import model.PlayerView;
 import mystrategy.Constants;
 import util.DebugInterface;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class EnemiesMap {
     private int[][] distanceByFoot;
@@ -21,9 +22,9 @@ public class EnemiesMap {
         distanceByFoot = new int[mapSize][mapSize];
         shootDanger = new int[mapSize][mapSize];
 
-        List<Coordinate> enemyCoordinates = new ArrayList<>();
-        List<Coordinate> shoot5Coordinates = new ArrayList<>();
-        List<Coordinate> shoot1Coordinates = new ArrayList<>();
+        Set<Coordinate> enemyCoordinates = new HashSet<>(128);
+        Set<Coordinate> shoot5Coordinates = new HashSet<>(128);
+        Set<Coordinate> shoot1Coordinates = new HashSet<>(128);
         for (int i = 0; i < mapSize; i++) {
             for (int j = 0; j < mapSize; j++) {
                 if (entitiesMap.getIsEnemy(i, j)) {
@@ -76,10 +77,10 @@ public class EnemiesMap {
         return distanceByFoot[x][y];
     }
 
-    private void fillShootDanger(int[][] dangerMap, List<Coordinate> coordinateList5, List<Coordinate> coordinateList1) {
-        List<Coordinate> coordinateList = coordinateList5;
+    private void fillShootDanger(int[][] dangerMap, Set<Coordinate> coordinateList5, Set<Coordinate> coordinateList1) {
+        Set<Coordinate> coordinateList = coordinateList5;
         for (int i = 7; i > 0; i--) {
-            List<Coordinate> coordinateListNext = new ArrayList<>();
+            Set<Coordinate> coordinateListNext = new HashSet<>(128);
             if (i == 4) {
                 coordinateListNext.addAll(coordinateList1);
             }
@@ -108,9 +109,9 @@ public class EnemiesMap {
 //        }
     }
 
-    private void fillDistances(int[][] distanceMap, List<Coordinate> coordinateList) {
+    private void fillDistances(int[][] distanceMap, Set<Coordinate> coordinateList) {
         for (int i = 1; !coordinateList.isEmpty(); i++) {
-            List<Coordinate> coordinateListNext = new ArrayList<>();
+            Set<Coordinate> coordinateListNext = new HashSet<>(128);
             for (Coordinate coordinate : coordinateList) {
                 if (coordinate.getX() >= 0 && coordinate.getX() < mapSize
                         && coordinate.getY() >= 0 && coordinate.getY() < mapSize

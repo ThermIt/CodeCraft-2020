@@ -125,4 +125,20 @@ public class PlayerView {
             entitiesElement.writeTo(stream);
         }
     }
+
+    public boolean isRound1() {
+        return !isFogOfWar();
+    }
+
+    public boolean isRound2() {
+        return isFogOfWar() && players.length == 4;
+    }
+
+    public boolean isFinials() {
+        return isFogOfWar() && isOneOnOne();
+    }
+
+    public boolean isOneOnOne() {
+        return players.length == 2;
+    }
 }

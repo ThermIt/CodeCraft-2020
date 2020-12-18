@@ -40,8 +40,8 @@ public class HarvestJobsMap {
         this.harvest = new int[mapSize][mapSize];
         this.workers = new int[mapSize][mapSize];
 
-        Set<Coordinate> restrictedResourceCoordinates = new HashSet<>();
-        Set<Coordinate> allResourceCoordinates = new HashSet<>();
+        Set<Coordinate> restrictedResourceCoordinates = new HashSet<>(128);
+        Set<Coordinate> allResourceCoordinates = new HashSet<>(128);
         for (Entity resource : allEntities.getResources()) {
             Coordinate location = new Coordinate(resource.getPosition().getX(), resource.getPosition().getY());
             List<Coordinate> adjacentList = location.getAdjacentList();
@@ -114,7 +114,7 @@ public class HarvestJobsMap {
 
     private void fillDistances(int[][] distanceMap, Set<Coordinate> coordinateList, boolean withObstacles) {
         for (int i = 1; !coordinateList.isEmpty(); i++) {
-            Set<Coordinate> coordinateListNext = new HashSet<>();
+            Set<Coordinate> coordinateListNext = new HashSet<>(128);
             for (Coordinate coordinate : coordinateList) {
                 if (coordinate.isInBounds()
                         && getDistance(coordinate, distanceMap) == 0

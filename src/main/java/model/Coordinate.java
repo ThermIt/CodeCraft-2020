@@ -5,7 +5,6 @@ import util.StreamUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class Coordinate {
     private int x;
@@ -105,7 +104,7 @@ public class Coordinate {
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        return x*80+y;
     }
 
     @Override

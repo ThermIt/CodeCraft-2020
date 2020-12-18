@@ -33,7 +33,7 @@ public class SimCityMap {
 
         int houseSize = playerView.getEntityProperties().get(EntityType.HOUSE).getSize();
         int houseSizeWithMargin = houseSize + 2;
-        Set<Coordinate> coordinates = new HashSet<>();
+        Set<Coordinate> coordinates = new HashSet<>(128);
 
         for (int i = 0; i < mapSize - houseSizeWithMargin + 1; i++) {
             for (int j = 0; j < mapSize - houseSizeWithMargin + 1; j++) {
@@ -159,7 +159,7 @@ public class SimCityMap {
 
     private void fillDistances(int[][] distanceMap, Set<Coordinate> coordinateList) {
         for (int i = 1; !coordinateList.isEmpty(); i++) {
-            Set<Coordinate> coordinateListNext = new HashSet<>();
+            Set<Coordinate> coordinateListNext = new HashSet<>(128);
             for (Coordinate coordinate : coordinateList) {
                 if (coordinate.getX() >= 0 && coordinate.getX() < mapSize
                         && coordinate.getY() >= 0 && coordinate.getY() < mapSize

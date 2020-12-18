@@ -115,10 +115,10 @@ public class DefaultStrategy implements StrategyDelegate {
             } else {
                 Coordinate moveTo = enemiesMap.getPositionClosestToEnemy(unit.getPosition());
                 if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
-                    if (playerView.getPlayers().length > 2) {
-                        moveTo = new Coordinate(7, 72);
-                    } else {
+                    if (playerView.isOneOnOne()) {
                         moveTo = new Coordinate(72, 72);
+                    } else {
+                        moveTo = new Coordinate(7, 72);
                     }
                 }
                 moveAction = new MoveAction(moveTo, true, true);
