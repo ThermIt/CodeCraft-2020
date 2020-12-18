@@ -18,13 +18,25 @@ public class WarMap {
 
     private Set<Coordinate> enemyBuildingLocations = new HashSet<>(128);
     private Set<Coordinate> enemyUnitLocations = new HashSet<>(128);
+    private Set<Coordinate> myAttackersLocations = new HashSet<>(128);
+    private int[][] enemyDistanceMap;
     private int[][] dominanceMap;
-    private int[][] delayFuseForCalculation;
     private int mapSize;
     private EntitiesMap entitiesMap;
     private AllEntities allEntities;
     private VisibilityMap visibility;
     private VirtualResources resources;
+    private int tick;
+
+    public int getTick() {
+        return tick;
+    }
+
+    public void checkTick(PlayerView playerView) {
+        if (getTick() != playerView.getCurrentTick()) {
+            throw new RuntimeException("visibility is not initialized");
+        }
+    }
 
     public WarMap(VisibilityMap visibility, VirtualResources resources) {
         this.visibility = visibility;
@@ -36,6 +48,7 @@ public class WarMap {
             EntitiesMap entitiesMap,
             AllEntities allEntities
     ) {
+        tick = playerView.getCurrentTick();
         this.entitiesMap = entitiesMap;
         this.allEntities = allEntities;
 
@@ -51,8 +64,13 @@ public class WarMap {
                 enemyBuildingLocations.add(new Coordinate(72, 7));
             }
             mapSize = playerView.getMapSize();
-
         }
+
+        myAttackersLocations = new HashSet<>(128);
+        for (Entity attacker:allEntities.getMyAttackers()) {
+            myAttackersLocations.add(attacker.getPosition());
+        }
+
 
         Iterator<Coordinate> buildingsIterator = enemyBuildingLocations.iterator();
         while (buildingsIterator.hasNext()) {
@@ -83,26 +101,78 @@ public class WarMap {
             enemyBuildingLocations.add(unit.getPosition());
         }
 
-        dominanceMap = new int[mapSize][mapSize];
-        delayFuseForCalculation = new int[mapSize][mapSize];
-
         Set<Coordinate> enemyDominance = new HashSet<>();
         enemyDominance.addAll(enemyUnitLocations);
         enemyDominance.addAll(enemyBuildingLocations);
 
 //        Set<Coordinate> myDominance = allEntities.getMyEntities().stream().map(Entity::getPosition).collect(Collectors.toSet());
 
-        fillDistances(enemyDominance);
+        fillEnemyDistances(enemyDominance);
+        fillMyAttackersDistances(myAttackersLocations);
     }
 
     private boolean isPassable(Coordinate coordinate) {
         Entity entity = this.entitiesMap.getEntity(coordinate);
-        return !(entity.isBuilding() && entity.isMy()) && !entity.isMy(EntityType.BUILDER_UNIT);
+        return !(entity.isBuilding() && entity.isMy())/* && !entity.isMy(EntityType.BUILDER_UNIT)*/;
     }
 
-    private void fillDistances(Set<Coordinate> coordinateList) {
-//        private int[][] dominanceMap;
-//        private int[][] delayFuseForCalculation;
+    private boolean isBuilder(Coordinate coordinate) {
+        return this.entitiesMap.getEntity(coordinate).isMy(EntityType.BUILDER_UNIT);
+    }
+
+    private void fillEnemyDistances(Set<Coordinate> coordinateList) {
+        enemyDistanceMap = new int[mapSize][mapSize];
+        int[][] delayFuseForCalculation = new int[mapSize][mapSize];
+        for (int i = 1; !coordinateList.isEmpty(); i++) {
+            Set<Coordinate> coordinateListNext = new HashSet<>(128);
+            for (Coordinate coordinate : coordinateList) {
+                if (coordinate.getX() >= 0 && coordinate.getX() < mapSize
+                        && coordinate.getY() >= 0 && coordinate.getY() < mapSize
+                        && enemyDistanceMap[coordinate.getX()][coordinate.getY()] == 0
+                        && isPassable(coordinate)) {
+                    int resourceCount = resources.getResourceCount(coordinate);
+                    if (resourceCount > 0 && delayFuseForCalculation[coordinate.getX()][coordinate.getY()] == 0) {
+                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()] = resourceCount / 5 + 1; // magic
+                    }
+                    if (delayFuseForCalculation[coordinate.getX()][coordinate.getY()] > 1) {
+                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()]--;
+                        coordinateListNext.add(coordinate);
+                    } else {
+                        enemyDistanceMap[coordinate.getX()][coordinate.getY()] = i;
+                        if (!isBuilder(coordinate)) {
+                            coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
+                            coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
+                            coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
+                            coordinateListNext.add(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
+                        }
+                    }
+                }
+            }
+            coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
+        }
+
+/*
+        for (int i = 0; i < mapSize; i++) {
+            for (int j = 0; j < mapSize; j++) {
+                if (DebugInterface.isDebugEnabled()) {
+                    DebugInterface.print(dominanceMap[i][j], i, j);
+                }
+            }
+        }
+*/
+    }
+
+    private void fillMyAttackersDistances(Set<Coordinate> coordinateList) {
+        dominanceMap = new int[mapSize][mapSize];
+        int[][] delayFuseForCalculation = new int[mapSize][mapSize];
         for (int i = 1; !coordinateList.isEmpty(); i++) {
             Set<Coordinate> coordinateListNext = new HashSet<>(128);
             for (Coordinate coordinate : coordinateList) {
@@ -112,17 +182,19 @@ public class WarMap {
                         && isPassable(coordinate)) {
                     int resourceCount = resources.getResourceCount(coordinate);
                     if (resourceCount > 0 && delayFuseForCalculation[coordinate.getX()][coordinate.getY()] == 0) {
-                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()] = resourceCount / 5 + 2; // magic
+                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()] = resourceCount / 5 + 1; // magic
                     }
                     if (delayFuseForCalculation[coordinate.getX()][coordinate.getY()] > 1) {
                         delayFuseForCalculation[coordinate.getX()][coordinate.getY()]--;
                         coordinateListNext.add(coordinate);
                     } else {
                         dominanceMap[coordinate.getX()][coordinate.getY()] = i;
-                        coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
-                        coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
-                        coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
-                        coordinateListNext.add(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
+                        if (!isBuilder(coordinate)) {
+                            coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
+                            coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
+                            coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
+                            coordinateListNext.add(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
+                        }
                     }
                 }
             }
@@ -152,11 +224,11 @@ public class WarMap {
         if (newPosition.isOutOfBounds()) {
             return old;
         }
-        int newDistance = getDistance(newPosition);
+        int newDistance = getDistanceToEnemy(newPosition);
         if (newDistance == 0) {
             return old;
         }
-        int oldDistance = getDistance(old);
+        int oldDistance = getDistanceToEnemy(old);
         if (newDistance < oldDistance) {
             return newPosition;
         }
@@ -169,11 +241,22 @@ public class WarMap {
         return old;
     }
 
-    public int getDistance(Coordinate position) {
-        return getDistance(position.getX(), position.getY());
+    public int getDistanceToEnemy(Coordinate position) {
+        return getDistanceToEnemy(position.getX(), position.getY());
     }
 
-    public int getDistance(int x, int y) {
+    public int getDistanceToEnemy(int x, int y) {
+        if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
+            return 0;
+        }
+        return enemyDistanceMap[x][y];
+    }
+
+    public int getDistanceToGoodGuys(Coordinate position) {
+        return getDistanceToGoodGuys(position.getX(), position.getY());
+    }
+
+    public int getDistanceToGoodGuys(int x, int y) {
         if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
             return 0;
         }

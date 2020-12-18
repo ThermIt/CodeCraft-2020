@@ -65,10 +65,11 @@ public class EnemiesMap {
     }
 
     private void fillShootDanger(int[][] dangerMap, Set<Coordinate> coordinateList5, Set<Coordinate> coordinateList1) {
+        int delta = 2;
         Set<Coordinate> coordinateList = coordinateList5;
-        for (int i = 7; i > 0; i--) {
+        for (int i = 6+delta; i > 0; i--) {
             Set<Coordinate> coordinateListNext = new HashSet<>(128);
-            if (i == 4) {
+            if (i == 3+delta) {
                 coordinateListNext.addAll(coordinateList1);
             }
             for (Coordinate coordinate : coordinateList) {

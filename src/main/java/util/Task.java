@@ -8,6 +8,7 @@ public enum Task {
     MOVE_TO_BUILD,
     MOVE,
     RECKON,
-    REPAIR
+    REPAIR,
+    RUN_FOOLS
 
 }

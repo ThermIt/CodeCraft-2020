@@ -90,12 +90,13 @@ public class DefaultStrategy implements StrategyDelegate {
                 allEntities,
                 enemiesMap,
                 me,
-                buildOrders
+                buildOrders,
+                warMap
         );
 
 //        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
         harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me);
-        simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, debugInterface);
+        simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, warMap);
         repairMap = new RepairMap(playerView, entitiesMap);
 
         if (!second && allEntities.getMyBuildings().stream()
@@ -126,12 +127,12 @@ public class DefaultStrategy implements StrategyDelegate {
         for (Entity unit : allEntities.getMyUnits()) {
             MoveAction moveAction;
             if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Coordinate moveTo;
+                Coordinate moveTo = null;
                 if (unit.getTask() == Task.BUILD) {
                     moveTo = null;
                 } else if (unit.getTask() == Task.MOVE_TO_BUILD) {
                     moveTo = jobs.getPositionClosestToBuild(unit.getPosition());
-                } else { // idle workers
+                } else if (unit.getTask() != Task.RUN_FOOLS) { // idle workers
                     moveTo = harvestJobs.getPositionClosestToResource(unit.getPosition());
                     if (moveTo == null) {
                         moveTo = new Coordinate(35, 35);
@@ -236,6 +237,9 @@ public class DefaultStrategy implements StrategyDelegate {
             } else if (unit.getRepairAction() != null) {
                 DebugInterface.print("RR", unit.getPosition());
             } else if (unit.getMoveAction() != null) {
+                if (unit.getTask() == Task.RUN_FOOLS)
+                DebugInterface.print("RN", unit.getPosition());
+                else
                 DebugInterface.print("MV", unit.getPosition());
                 DebugInterface.line(unit.getPosition(), unit.getMoveAction().getTarget());
 
@@ -290,14 +294,16 @@ public class DefaultStrategy implements StrategyDelegate {
 
 */
         int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
-        if (playerView.isRound2())
+        if (playerView.isRound2()) {
             buildersLimit = 650;
+        }
 
-        if (playerView.isFinials())
+        if (playerView.isFinials()) {
             buildersLimit = 1000;
+        }
 
         if (entityType == EntityType.BUILDER_UNIT
-                && allEntities.getMyBuilders().size() > buildersLimit) {
+                && allEntities.getMyWorkers().size() > buildersLimit) {
             return buildAction;
         }
 

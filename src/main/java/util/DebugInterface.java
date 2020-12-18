@@ -53,7 +53,7 @@ public class DebugInterface {
         }
         DebugCommand.Add command = new DebugCommand.Add();
         ColoredVertex coloredVertex1 = new ColoredVertex(new Vec2Float(pos.getX()+0.5f, pos.getY()+0.5f), new Vec2Float(0, 0), new Color(1, 1, 1, 0.7f));
-        ColoredVertex coloredVertex2 = new ColoredVertex(new Vec2Float(tgt.getX()+0.5f, tgt.getY()+0.5f), new Vec2Float(0, 0), new Color(0, 0, 0, 0.7f));
+        ColoredVertex coloredVertex2 = new ColoredVertex(new Vec2Float((pos.getX()+tgt.getX())/2.0f+0.5f, (pos.getY()+tgt.getY())/2.0f+0.5f), new Vec2Float(0, 0), new Color(0, 0, 0, 0.7f));
         ColoredVertex[] vertices = {coloredVertex1,coloredVertex2};
         DebugData data = new DebugData.Primitives(vertices, PrimitiveType.LINES);
         command.setData(data);

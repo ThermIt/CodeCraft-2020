@@ -5,6 +5,7 @@ import model.EntityType;
 import model.PlayerView;
 import mystrategy.Constants;
 import mystrategy.collections.AllEntities;
+import mystrategy.maps.light.WarMap;
 import util.DebugInterface;
 
 import java.util.HashSet;
@@ -12,18 +13,25 @@ import java.util.Set;
 
 public class SimCityMap {
 
+    public static final int MIN_DISTANCE_TO_ENEMY = 15;
     private int[][] distanceByFoot;
     private Coordinate[][] houseBuildCoordinates;
     private Coordinate[][] rangedBaseBuildCoordinates;
     private EntitiesMap entitiesMap;
     private int mapSize;
-    private DebugInterface debugInterface;
     private boolean needBarracks;
+    private WarMap warMap;
 
-    public SimCityMap(PlayerView playerView, EntitiesMap entitiesMap, AllEntities allEntities, DebugInterface debugInterface) {
+    public SimCityMap(
+            PlayerView playerView,
+            EntitiesMap entitiesMap,
+            AllEntities allEntities,
+            WarMap warMap
+    ) {
+        warMap.checkTick(playerView);
+        this.warMap = warMap;
         this.entitiesMap = entitiesMap;
         mapSize = playerView.getMapSize();
-        this.debugInterface = debugInterface;
         distanceByFoot = new int[mapSize][mapSize];
         houseBuildCoordinates = new Coordinate[mapSize][mapSize];
         rangedBaseBuildCoordinates = new Coordinate[mapSize][mapSize];
@@ -44,6 +52,10 @@ public class SimCityMap {
                     }
                     for (int l = 0; l < houseSize; l++) {
                         if (!isEmpty(i + 1 + k, j + 1 + l)) {
+                            canBuild = false;
+                            break;
+                        }
+                        if (warMap.getDistanceToEnemy(i + 1 + k, j + 1 + l) < MIN_DISTANCE_TO_ENEMY) {
                             canBuild = false;
                             break;
                         }
@@ -88,6 +100,10 @@ public class SimCityMap {
                         }
                         for (int l = 0; l < houseSizeWithMargin; l++) {
                             if (!isEmpty(i + k, j + l)) {
+                                canBuildRangedBase = false;
+                                break;
+                            }
+                            if (warMap.getDistanceToEnemy(i + 1 + k, j + 1 + l) < MIN_DISTANCE_TO_ENEMY) {
                                 canBuildRangedBase = false;
                                 break;
                             }

@@ -92,7 +92,7 @@ public class AllEntities {
         return enemyBuilders;
     }
 
-    public List<Entity> getMyBuilders() {
+    public List<Entity> getMyWorkers() {
         return myBuilders;
     }
 

@@ -8,10 +8,8 @@ import mystrategy.maps.EntitiesMap;
 import util.DebugInterface;
 import util.Task;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class WorkerJobsMap {
     private int mapSize;
@@ -24,6 +22,7 @@ public class WorkerJobsMap {
     private AllEntities allEntities;
     private EnemiesMap enemiesMap;
     private Player me;
+    private WarMap warMap;
 
     public WorkerJobsMap(
             PlayerView playerView,
@@ -31,8 +30,11 @@ public class WorkerJobsMap {
             AllEntities allEntities,
             EnemiesMap enemiesMap,
             Player me,
-            BuildOrders buildOrders
+            BuildOrders buildOrders,
+            WarMap warMap
     ) {
+        warMap.checkTick(playerView);
+        this.warMap = warMap;
         this.entitiesMap = entitiesMap;
         this.mapSize = playerView.getMapSize();
         this.allEntities = allEntities;
@@ -43,9 +45,17 @@ public class WorkerJobsMap {
         this.repair = new int[mapSize][mapSize];
         this.workers = new int[mapSize][mapSize];
 
+/*
         Set<Coordinate> repairEntitiesCoordinates = new HashSet<>(128);
         for (Entity resource : allEntities.getMyUnits()) {
 //            repairEntitiesCoordinates.add(new Coordinate(resource.getPosition().getX(), resource.getPosition().getY()));
+        }
+*/
+
+        for (Entity worker : allEntities.getMyWorkers()) {
+            if (enemiesMap.getDangerLevel(worker.getPosition()) > 0) {
+                markRun(worker);
+            }
         }
 
         int minWorkers = 3;
@@ -71,6 +81,76 @@ public class WorkerJobsMap {
 //            }
         }
 */
+    }
+
+    public void markRun(Entity worker) {
+        if (worker.getTask() == Task.RUN_FOOLS || !worker.isMy(EntityType.BUILDER_UNIT)) {
+            return;
+        }
+        worker.setTask(Task.RUN_FOOLS);
+        Coordinate runTo = getRunDirections(worker.getPosition());
+        worker.setMoveAction(new MoveAction(runTo, false, true));
+        Entity blockingEntity = entitiesMap.getEntity(runTo);
+        if (blockingEntity.isMy(EntityType.BUILDER_UNIT)) {
+            markRun(blockingEntity);
+        }
+    }
+
+    private Coordinate getRunDirections(Coordinate from) {
+        Coordinate result = from;
+
+        List<Coordinate> possibleRunLocations = from.getAdjacentList().stream()
+                .filter(pos -> entitiesMap.isPassable(pos))
+                .filter(pos -> {
+                    MoveAction otherMoveAction = entitiesMap.getEntity(pos).getMoveAction();
+                    return otherMoveAction == null || !Objects.equals(otherMoveAction.getTarget(), from);
+                })
+                .collect(Collectors.toList());
+        int minDanger = possibleRunLocations.stream()
+                .map(pos -> enemiesMap.getDangerLevel(pos))
+                .min(Integer::compareTo)
+                .orElse(enemiesMap.getDangerLevel(from));
+        List<Coordinate> lowestDangerPassablePoints = possibleRunLocations.stream()
+                .filter(pos -> enemiesMap.getDangerLevel(pos) == minDanger)
+                .collect(Collectors.toList());
+
+        if (lowestDangerPassablePoints.size() > 0 && !lowestDangerPassablePoints.contains(result)) {
+            result = lowestDangerPassablePoints.get(0);
+        }
+
+        int maxDominance = lowestDangerPassablePoints.stream()
+                .map(pos -> warMap.getDistanceToGoodGuys(pos))
+                .min(Integer::compareTo)
+                .orElse(warMap.getDistanceToGoodGuys(from));
+        List<Coordinate> lowestDangerMaxDominancePassablePoints = possibleRunLocations.stream()
+                .filter(pos -> warMap.getDistanceToGoodGuys(pos) == maxDominance)
+                .collect(Collectors.toList());
+
+        if (lowestDangerMaxDominancePassablePoints.size() > 0 && !lowestDangerMaxDominancePassablePoints.contains(result)) {
+            result = lowestDangerMaxDominancePassablePoints.get(0);
+        }
+
+        int maxDistance = lowestDangerMaxDominancePassablePoints.stream()
+                .map(pos -> warMap.getDistanceToEnemy(pos))
+                .max(Integer::compareTo)
+                .orElse(warMap.getDistanceToEnemy(from));
+        List<Coordinate> lowestDangerMaxDistancePassablePoints = possibleRunLocations.stream()
+                .filter(pos -> warMap.getDistanceToEnemy(pos) == maxDistance)
+                .collect(Collectors.toList());
+
+        if (lowestDangerMaxDistancePassablePoints.size() > 0 && !lowestDangerMaxDistancePassablePoints.contains(result)) {
+            result = lowestDangerMaxDistancePassablePoints.get(0);
+        }
+
+        List<Coordinate> lowestDangerMaxDistanceEmptyPoints = lowestDangerMaxDistancePassablePoints.stream()
+                .filter(entitiesMap::isEmpty)
+                .collect(Collectors.toList());
+
+        if (lowestDangerMaxDistanceEmptyPoints.size() > 0 && !lowestDangerMaxDistanceEmptyPoints.contains(result)) {
+            result = lowestDangerMaxDistanceEmptyPoints.get(0);
+        }
+
+        return result;
     }
 
     public int getDistanceUnsafe(int[][] distanceMap, Coordinate position) {
