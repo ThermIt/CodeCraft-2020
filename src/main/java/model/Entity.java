@@ -1,9 +1,9 @@
 package model;
 
-import mystrategy.Task;
 import mystrategy.maps.EntitiesMap;
 import util.Initializer;
 import util.StreamUtil;
+import util.Task;
 
 import java.util.ArrayList;
 import java.util.List;

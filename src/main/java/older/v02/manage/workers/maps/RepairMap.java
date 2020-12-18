@@ -22,26 +22,6 @@ public class RepairMap {
         mapSize = playerView.getMapSize();
         distanceByFoot = new int[mapSize][mapSize];
 
-/*
-        List<Coordinate> coordinates = new ArrayList<>();
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                Entity entity = entitiesMap.getEntity(i, j);
-                if (entity != null
-                        && entity.isPlayer(playerView.getMyId())
-                        && entity.isBuilding()
-                        && !entity.isActive()) {
-                    coordinates.add(new Coordinate(i, j));
-                }
-            }
-        }
-*/
-
-//        fillDistances(distanceByFoot, coordinates);
-/*
-        List<Coordinate> coordinates = Arrays.stream(playerView.getEntities()).filter(ent -> ent.getPlayerId() != playerView.getMyId())
-                .map(box -> new Coordinate(box.getPosition())).collect(Collectors.toList());
-*/
     }
 
 
@@ -103,15 +83,15 @@ public class RepairMap {
     public Integer canBuildId(Coordinate position) {
         int x = position.getX();
         int y = position.getY();
-        Integer entity = buildingRequired(x-1, y);
+        Integer entity = buildingRequired(x - 1, y);
         if (entity == null) {
-            entity = buildingRequired(x, y-1);
+            entity = buildingRequired(x, y - 1);
         }
         if (entity == null) {
-            entity = buildingRequired(x, y+1);
+            entity = buildingRequired(x, y + 1);
         }
         if (entity == null) {
-            entity = buildingRequired(x+1, y);
+            entity = buildingRequired(x + 1, y);
         }
         return entity;
     }

@@ -1,57 +1,30 @@
-package older.v01.greedy.rusher;
+package older.v04.smart.rusher.maps;
 
 import model.Coordinate;
+import model.Entity;
 import model.PlayerView;
-import mystrategy.Constants;
+import older.v04.smart.rusher.Constants;
 import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class EnemiesMap {
+public class RepairMap {
     private int[][] distanceByFoot;
     private EntitiesMap entitiesMap;
     private int mapSize;
+    private int myId;
 
-    public EnemiesMap(PlayerView playerView, EntitiesMap entitiesMap) {
+    public RepairMap(PlayerView playerView, EntitiesMap entitiesMap) {
         this.entitiesMap = entitiesMap;
+        myId = playerView.getMyId();
         mapSize = playerView.getMapSize();
         distanceByFoot = new int[mapSize][mapSize];
-
-        List<Coordinate> enemyCoordinates = new ArrayList<>();
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                if (entitiesMap.getIsEnemy(i, j)) {
-                    enemyCoordinates.add(new Coordinate(i, j));
-                }
-            }
-        }
-
-        fillDistances(distanceByFoot, enemyCoordinates);
     }
 
-
-    public Coordinate getMinOfTwoPositions(Coordinate old, Coordinate newPosition) {
-        if (newPosition.getX() < 0 || newPosition.getY() < 0 || newPosition.getX() >= mapSize || newPosition.getY() >= mapSize) {
-            return old;
-        }
-        if (getDistance(newPosition) == 0) {
-            return old;
-        }
-        if (getDistance(newPosition) < getDistance(old)) {
-            return newPosition;
-        }
-        return old;
-    }
-
-    public int getDistance(Coordinate position) {
-        return getDistance(position.getX(), position.getY());
-    }
 
     public int getDistance(int x, int y) {
-        if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
-            return 0;
-        }
         return distanceByFoot[x][y];
     }
 
@@ -61,7 +34,7 @@ public class EnemiesMap {
             for (Coordinate coordinate : coordinateList) {
                 if (coordinate.getX() >= 0 && coordinate.getX() < mapSize
                         && coordinate.getY() >= 0 && coordinate.getY() < mapSize
-                        && getDistance(coordinate) == 0
+                        && distanceMap[coordinate.getX()][coordinate.getY()] == 0
                         && isPassable(coordinate)) {
                     distanceMap[coordinate.getX()][coordinate.getY()] = i;
                     coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
@@ -83,20 +56,44 @@ public class EnemiesMap {
     }
 
     private boolean isPassable(Coordinate coordinate) {
-        return this.entitiesMap.isPassable(coordinate) || this.entitiesMap.getIsEnemy(coordinate);
+        return this.entitiesMap.isPassable(coordinate.getX(), coordinate.getY());
     }
 
-    public Coordinate getPositionClosestToEnemy(Coordinate from) {
-        Coordinate position = from;
+    public Integer canRepairId(Coordinate from) {
+        return from.getAdjacentList().stream().map(this::repairRequired)
+                .filter(Objects::nonNull).findFirst().orElse(null);
+    }
 
-        int radius = 5;
-        for (int i = -radius; i <= radius; i++) {
-            for (int j = -radius; j <= radius; j++) {
-                position = getMinOfTwoPositions(position, new Coordinate(from.getX() + i, from.getY() + j));
-            }
+    private Integer repairRequired(Coordinate position) {
+        Entity entity = entitiesMap.getEntity(position);
+        if (entity.isPlayer(myId)
+                && entity.getHealth() < entity.getProperties().getMaxHealth()) {
+            return entity.getId();
         }
-        return position;
+        return null;
     }
 
+    public Integer canBuildId(Coordinate position) {
+        int x = position.getX();
+        int y = position.getY();
+        Integer entity = buildingRequired(x-1, y);
+        if (entity == null) {
+            entity = buildingRequired(x, y-1);
+        }
+        if (entity == null) {
+            entity = buildingRequired(x, y+1);
+        }
+        if (entity == null) {
+            entity = buildingRequired(x+1, y);
+        }
+        return entity;
+    }
 
+    private Integer buildingRequired(int x, int y) {
+        Entity entity = entitiesMap.getEntity(x, y);
+        if (entity.isMy() && entity.isBuilding() && !entity.isActive()) {
+            return entity.getId();
+        }
+        return null;
+    }
 }

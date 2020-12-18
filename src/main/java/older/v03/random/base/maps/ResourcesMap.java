@@ -90,20 +90,6 @@ public class ResourcesMap {
             }
         }
 
-/*
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled()) {
-                    DebugCommand.Add command = new DebugCommand.Add();
-
-                    ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(i, j), new Vec2Float(0, withObstacles ? 14 : 0), new Color(0, 0, 0, 0.5f));
-                    DebugData data = new DebugData.PlacedText(coloredVertex, Integer.toString(getDistance(i, j, withObstacles)), -1, 12);
-                    command.setData(data);
-                    debugInterface.send(command);
-                }
-            }
-        }
-*/
 
     }
 

@@ -45,10 +45,6 @@ public class EnemiesMap {
 
         fillDistances(distanceByFoot, enemyCoordinates);
         fillShootDanger(shootDanger, shoot5Coordinates, shoot1Coordinates);
-/*
-        List<Coordinate> coordinates = Arrays.stream(playerView.getEntities()).filter(ent -> ent.getPlayerId() != playerView.getMyId())
-                .map(box -> new Coordinate(box.getPosition())).collect(Collectors.toList());
-*/
     }
 
 
@@ -123,21 +119,6 @@ public class EnemiesMap {
                 }
             }
         }
-
-/*
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled()) {
-                    DebugCommand.Add command = new DebugCommand.Add();
-                    ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(i, j), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
-                    DebugData data = new DebugData.PlacedText(coloredVertex, Integer.toString(distanceByFoot[i][j]), -1, 12);
-                    command.setData(data);
-                    debugInterface.send(command);
-                }
-            }
-        }
-*/
-
     }
 
     private boolean isPassable(Coordinate coordinate) {
@@ -145,7 +126,6 @@ public class EnemiesMap {
     }
 
     public Coordinate getPositionClosestToEnemy(Coordinate from) {
-//        return getPositionClosestToEnemy(from, from.getAdjacentList());
         int radius = 5;
         for (int i = -radius; i <= radius; i++) {
             for (int j = -radius; j <= radius; j++) {

@@ -1,11 +1,11 @@
-package mystrategy.strategies;
+package older.v04.smart.rusher.strategies;
 
 import model.*;
-import mystrategy.collections.AllEntities;
-import mystrategy.maps.EnemiesMap;
-import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.RepairMap;
-import mystrategy.maps.light.*;
+import older.v04.smart.rusher.collections.AllEntities;
+import older.v04.smart.rusher.maps.EnemiesMap;
+import older.v04.smart.rusher.maps.EntitiesMap;
+import older.v04.smart.rusher.maps.RepairMap;
+import older.v04.smart.rusher.maps.light.*;
 import util.StrategyDelegate;
 import util.Task;
 
@@ -113,7 +113,6 @@ public class FirstStageStrategy implements StrategyDelegate {
                         }
                     }
                 } else if (unit.getTask() == Task.BUILD) {
-//                    DebugInterface.print("B", unit.getPosition());
                     Entity order = buildOrders.getOrder(unit.getPosition());
                     if (order != null) {
                         Entity entity = entitiesMap.getEntity(order.getPosition());
@@ -125,42 +124,6 @@ public class FirstStageStrategy implements StrategyDelegate {
                     }
                 }
 
-/*
-                Integer canBuildId = repairMap.canBuildId(unit.getPosition());
-                if (canBuildId != null) {
-                    attackAction = null;
-                    unit.setMoveAction(null); // bugfix this
-                    repairAction = new RepairAction(canBuildId);
-                } else {
-                    Integer canRepairId = repairMap.canRepairId(unit.getPosition());
-                    if (canRepairId != null) {
-                        repairAction = new RepairAction(canRepairId);
-                    }
-                }
-*/
-/*
-                Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
-                Coordinate rbBuildCoordinates = simCityMap.getRangedBaseBuildCoordinates(unit.getPosition());
-                if (simCityMap.isNeedBarracks() // hack
-                        && me.getResource() >= playerView.getEntityProperties().get(EntityType.RANGED_BASE).getInitialCost()
-                        && rbBuildCoordinates != null) {
-                    attackAction = null;
-                    unit.setMoveAction(null); // bugfix this
-                    buildAction = new BuildAction(EntityType.RANGED_BASE, rbBuildCoordinates);
-//                    maxUnits += playerView.getEntityProperties().get(EntityType.RANGED_BASE).getPopulationProvide();
-
-//                    simCityMap.setNeedBarracks(false);
-                }
-                if (needMoreHouses()
-                        && !(simCityMap.isNeedBarracks() && maxUnits >= 20)
-                        && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
-                        && buildCoordinates != null) {
-                    attackAction = null;
-                    unit.setMoveAction(null); // bugfix this
-                    buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
-                    maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
-                }
-*/
                 unit.setAttackAction(attackAction);
                 unit.setBuildAction(buildAction);
                 unit.setRepairAction(repairAction);
@@ -170,12 +133,6 @@ public class FirstStageStrategy implements StrategyDelegate {
         allEntities.getMyBuildings().stream()
                 .filter(ent -> ent.getEntityType() == EntityType.BUILDER_BASE && ent.isActive())
                 .forEach(ent -> ent.setBuildAction(getBuilderBaseBuildingAction(ent)));
-
-/*
-        if (DebugInterface.isDebugEnabled()) {
-            System.out.println(allEntities.getMyBuilders().size());
-        }
-*/
 
         Action result = new Action(new java.util.HashMap<>());
         for (Entity actor : allEntities.getMyActors()) {

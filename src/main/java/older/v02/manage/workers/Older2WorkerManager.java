@@ -42,16 +42,9 @@ public class Older2WorkerManager implements Strategy {
 
         Action result = new Action(new java.util.HashMap<>());
 
-        // group units (attack/repair/build/harass/reconnaissance/harvest)
-        // strategic orders
-        // generate movements (attack/retreat/avoid active turrets/retreat to repair)
-        // test movements
-
-        // generate attacks+repairs
-
         // units
         for (Entity unit : allEntities.getMyUnits()) {
-            if (/*allEntities.getResources().size() > 0 && */unit.getEntityType() == EntityType.BUILDER_UNIT) {
+            if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
                 MoveAction moveAction = null;
                 BuildAction buildAction = null;
                 RepairAction repairAction = null;
@@ -60,12 +53,6 @@ public class Older2WorkerManager implements Strategy {
                 Entity resource = entitiesMap.getResource(unit.getPosition());
                 if (resource != null) {
                     attackAction = new AttackAction(resource.getId(), null);
-/* stops the unit
-                    attackAction = new AttackAction(
-                            null, new AutoAttack(1, validAutoAttackTargets)
-                    );
-*/
-
                 }
 
                 Coordinate moveTo = resourceMap.getPositionClosestToResource(unit.getPosition());
@@ -89,17 +76,9 @@ public class Older2WorkerManager implements Strategy {
                 }
                 Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
                 if ((maxUnits == 0 || (maxUnits - currentUnits) * 100 / maxUnits < 33)
-                        /*&& me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost() does not matter*/
                         && buildCoordinates != null && simCityMap.getDistance(unit.getPosition()) == 2) {
                     buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
                     maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
-                    validAutoAttackTargets = new EntityType[0];
-                } else {
-//                    if (resourceMap.getDistance(unit.getPosition(), false) == 2) {
-                    validAutoAttackTargets = new EntityType[]{EntityType.RESOURCE};
-//                    } else {
-//                        validAutoAttackTargets = new EntityType[0]; // only after removing autoattack
-//                    }
                 }
                 result.getEntityActions().put(unit.getId(), new EntityAction(
                         moveAction,

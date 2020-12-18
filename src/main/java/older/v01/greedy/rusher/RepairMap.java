@@ -20,27 +20,6 @@ public class RepairMap {
         myId = playerView.getMyId();
         mapSize = playerView.getMapSize();
         distanceByFoot = new int[mapSize][mapSize];
-
-/*
-        List<Coordinate> coordinates = new ArrayList<>();
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                Entity entity = entitiesMap.getEntity(i, j);
-                if (entity != null
-                        && entity.isPlayer(playerView.getMyId())
-                        && entity.isBuilding()
-                        && !entity.isActive()) {
-                    coordinates.add(new Coordinate(i, j));
-                }
-            }
-        }
-*/
-
-//        fillDistances(distanceByFoot, coordinates);
-/*
-        List<Coordinate> coordinates = Arrays.stream(playerView.getEntities()).filter(ent -> ent.getPlayerId() != playerView.getMyId())
-                .map(box -> new Coordinate(box.getPosition())).collect(Collectors.toList());
-*/
     }
 
 

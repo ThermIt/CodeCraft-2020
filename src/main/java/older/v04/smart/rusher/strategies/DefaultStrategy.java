@@ -1,14 +1,19 @@
-package older.v03.random.base;
+package older.v04.smart.rusher.strategies;
 
 import model.*;
-import older.v03.random.base.maps.*;
-import util.DebugInterface;
-import util.Strategy;
+import older.v04.smart.rusher.collections.AllEntities;
+import older.v04.smart.rusher.maps.EnemiesMap;
+import older.v04.smart.rusher.maps.EntitiesMap;
+import older.v04.smart.rusher.maps.RepairMap;
+import older.v04.smart.rusher.maps.SimCityMap;
+import older.v04.smart.rusher.maps.light.*;
+import util.StrategyDelegate;
+import util.Task;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Older3RandomBaseBuilder implements Strategy {
+public class DefaultStrategy implements StrategyDelegate {
 
     private EntitiesMap entitiesMap;
     private SimCityMap simCityMap;
@@ -19,43 +24,94 @@ public class Older3RandomBaseBuilder implements Strategy {
     private AllEntities allEntities;
     private Player me;
     private PlayerView playerView;
-    private ResourcesMap resourceMap;
+    private HarvestJobsMap harvestJobs;
+    private boolean done;
+    private boolean first;
+    private boolean second;
+    private boolean third;
+    private BuildOrders buildOrders;
+    private VisibilityMap visibility;
+    private VirtualResources resources;
+    private WarMap warMap;
+    private WorkerJobsMap jobs;
+
+    public DefaultStrategy(BuildOrders buildOrders, VisibilityMap visibility, VirtualResources resources, WarMap warMap) {
+        this.buildOrders = buildOrders;
+        this.visibility = visibility;
+        this.resources = resources;
+        this.warMap = warMap;
+    }
 
     /**
      * attack -> build -> repair -> move
      */
     @Override
-    public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
+    public Action getAction(PlayerView playerView) {
+        if (!first) {
+            first = true;
+        }
+
         this.playerView = playerView;
-        new Initializer(playerView).initStatic();
         allEntities = new AllEntities(playerView);
         entitiesMap = new EntitiesMap(playerView);
         me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
-
+        this.visibility.init(playerView, allEntities);
+        this.resources.init(playerView, allEntities, entitiesMap);
+        this.warMap.init(playerView, entitiesMap, allEntities);
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();
-
         enemiesMap = new EnemiesMap(playerView, entitiesMap);
-        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap);
+
+        this.jobs = new WorkerJobsMap(
+                playerView,
+                entitiesMap,
+                allEntities,
+                enemiesMap,
+                me,
+                buildOrders
+        );
+
+        harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me);
         simCityMap = new SimCityMap(playerView, entitiesMap, allEntities);
         repairMap = new RepairMap(playerView, entitiesMap);
 
+        if (!second && allEntities.getMyBuildings().stream()
+                .anyMatch(ent1 -> ent1.isMy(EntityType.RANGED_BASE) && !ent1.isActive())) {
+            second = true;
+        }
+        if (!third && allEntities.getMyBuildings().stream()
+                .anyMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive())) {
+            third = true;
+        }
+
         Action result = new Action(new HashMap<>());
 
-        // units
         for (Entity unit : allEntities.getMyUnits()) {
             MoveAction moveAction;
             if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Coordinate moveTo = resourceMap.getPositionClosestToResource(unit.getPosition());
-                if (moveTo == null) {
-                    moveTo = new Coordinate(35, 35);
+                Coordinate moveTo;
+                if (unit.getTask() == Task.BUILD) {
+                    moveTo = null;
+                } else if (unit.getTask() == Task.MOVE_TO_BUILD) {
+                    moveTo = jobs.getPositionClosestToBuild(unit.getPosition());
+                } else { // idle workers
+                    moveTo = harvestJobs.getPositionClosestToResource(unit.getPosition());
+                    if (moveTo == null) {
+                        moveTo = new Coordinate(35, 35);
+                    }
                 }
-                moveAction = new MoveAction(moveTo, true, true);
-                unit.setMoveAction(moveAction);
+                if (moveTo != null) {
+                    moveAction = new MoveAction(moveTo, true, true);
+                    unit.setMoveAction(moveAction);
+                }
             } else {
-                Coordinate moveTo = enemiesMap.getPositionClosestToEnemy(unit.getPosition());
+                Coordinate moveTo = warMap.getPositionClosestToEnemy(unit.getPosition());
                 if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
-                    moveTo = new Coordinate(35, 35);
+                    if (playerView.isOneOnOne()) {
+                        moveTo = new Coordinate(72, 72);
+                    } else {
+                        moveTo = new Coordinate(7, 72);
+                    }
                 }
                 moveAction = new MoveAction(moveTo, true, true);
                 unit.setMoveAction(moveAction);
@@ -66,41 +122,57 @@ public class Older3RandomBaseBuilder implements Strategy {
             BuildAction buildAction = null;
             RepairAction repairAction = null;
             AttackAction attackAction = null;
-            if (/*allEntities.getResources().size() > 0 && */unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Entity resource = entitiesMap.getResource(unit.getPosition());
-                if (resource != null) {
-                    attackAction = new AttackAction(resource.getId(), null);
-                }
+            if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
 
-                Integer canBuildId = repairMap.canBuildId(unit.getPosition());
-                if (canBuildId != null) {
-                    attackAction = null;
-                    unit.setMoveAction(null); // bugfix this
-                    repairAction = new RepairAction(canBuildId);
-                } else {
-                    Integer canRepairId = repairMap.canRepairId(unit.getPosition());
-                    if (canRepairId != null) {
-                        repairAction = new RepairAction(canRepairId);
+                if (unit.getTask() == Task.IDLE) {
+
+                    // assign idle workers to harvest
+                    Entity resource = harvestJobs.getResource(unit.getPosition());
+                    Integer canBuildId = repairMap.canBuildId(unit.getPosition());
+                    if (canBuildId != null) {
+                        attackAction = null;
+                        unit.setMoveAction(null); // bugfix this
+                        repairAction = new RepairAction(canBuildId);
+                    } else {
+                        Integer canRepairId = repairMap.canRepairId(unit.getPosition());
+                        if (canRepairId != null) {
+                            repairAction = new RepairAction(canRepairId);
+                        } else if (resource != null) {
+                            attackAction = new AttackAction(resource.getId(), null);
+                            resource.increaseDamage(unit.getProperties().getAttack().getDamage());
+                        }
+                    }
+                    Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
+                    Coordinate rbBuildCoordinates = simCityMap.getRangedBaseBuildCoordinates(unit.getPosition());
+                    if (simCityMap.isNeedBarracks() // hack
+                            && me.getResource() >= playerView.getEntityProperties().get(EntityType.RANGED_BASE).getInitialCost()
+                            && rbBuildCoordinates != null) {
+                        attackAction = null;
+                        unit.setMoveAction(null); // bugfix this
+                        buildAction = new BuildAction(EntityType.RANGED_BASE, rbBuildCoordinates);
+                    }
+                    if (needMoreHouses()
+                            && !(simCityMap.isNeedBarracks() && maxUnits >= 20)
+                            && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
+                            && buildCoordinates != null) {
+                        attackAction = null;
+                        unit.setMoveAction(null); // bugfix this
+                        buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
+                        maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
+                    }
+                } else if (unit.getTask() == Task.BUILD) {
+                    Entity order = buildOrders.getOrder(unit.getPosition());
+                    if (order != null) {
+                        Entity entity = entitiesMap.getEntity(order.getPosition());
+                        if (entity.getEntityType() == order.getEntityType()) {
+                            repairAction = new RepairAction(entity.getId());
+                        } else {
+                            buildAction = new BuildAction(order.getEntityType(), order.getPosition());
+                        }
                     }
                 }
-                Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
-                Coordinate rbBuildCoordinates = simCityMap.getRangedBaseBuildCoordinates(unit.getPosition());
-                if (simCityMap.isNeedBarracks() // hack
-                        && me.getResource() >= playerView.getEntityProperties().get(EntityType.RANGED_BASE).getInitialCost()
-                        && rbBuildCoordinates != null) {
-                    attackAction = null;
-                    unit.setMoveAction(null); // bugfix this
-                    buildAction = new BuildAction(EntityType.RANGED_BASE, rbBuildCoordinates);
-                }
-                if (needMoreHouses()
-                        && !(simCityMap.isNeedBarracks() && maxUnits >= 20)
-                        && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
-                        && buildCoordinates != null) {
-                    attackAction = null;
-                    unit.setMoveAction(null); // bugfix this
-                    buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
-                    maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
-                }
+
+
                 unit.setAttackAction(attackAction);
                 unit.setBuildAction(buildAction);
                 unit.setRepairAction(repairAction);
@@ -157,8 +229,15 @@ public class Older3RandomBaseBuilder implements Strategy {
             return buildAction;
         }
 
+        int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
+        if (playerView.isRound2())
+            buildersLimit = 650;
+
+        if (playerView.isFinials())
+            buildersLimit = 1000;
+
         if (entityType == EntityType.BUILDER_UNIT
-                && allEntities.getMyBuilders().size() > (playerView.isFogOfWar() ? 500 : allEntities.getEnemyBuilders().size() + 20)) {
+                && allEntities.getMyBuilders().size() > buildersLimit) {
             return buildAction;
         }
 
@@ -187,7 +266,7 @@ public class Older3RandomBaseBuilder implements Strategy {
                 buildPosition = any.get();
             }
 
-            buildPosition = resourceMap.getPositionClosestToResource(buildPosition, adjacentFreePoints);
+            buildPosition = harvestJobs.getPositionClosestToResource(buildPosition, adjacentFreePoints);
             buildAction = new BuildAction(
                     EntityType.BUILDER_UNIT,
                     buildPosition
@@ -212,7 +291,7 @@ public class Older3RandomBaseBuilder implements Strategy {
             if (any.isPresent()) {
                 buildPosition = any.get();
             }
-            buildPosition = enemiesMap.getPositionClosestToEnemy(buildPosition, adjacentFreePoints);
+            buildPosition = warMap.getPositionClosestToEnemy(buildPosition, adjacentFreePoints);
             buildAction = new BuildAction(
                     entityType,
                     buildPosition
@@ -222,8 +301,12 @@ public class Older3RandomBaseBuilder implements Strategy {
     }
 
     @Override
-    public void debugUpdate(PlayerView playerView, DebugInterface debugInterface) {
-        debugInterface.send(new DebugCommand.Clear());
-        debugInterface.getState();
+    public boolean isDone() {
+        return done;
+    }
+
+    @Override
+    public StrategyDelegate getNextStage() {
+        return null;
     }
 }

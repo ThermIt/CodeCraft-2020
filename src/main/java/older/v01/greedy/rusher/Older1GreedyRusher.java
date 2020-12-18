@@ -92,16 +92,6 @@ public class Older1GreedyRusher implements Strategy {
         if (entityType != EntityType.BUILDER_UNIT && playerView.getCurrentTick() < 20) {
             return buildAction;
         }
-/*
-        int currentUnits = 0;
-        for (Entity otherEntity : playerView.getEntities()) {
-            if (otherEntity.getPlayerId() != null && otherEntity.getPlayerId() == myId
-                    && otherEntity.getEntityType() == entityType) {
-                currentUnits++;
-            }
-        }
-*/
-//        if ((currentUnits + 1) * playerView.getEntityProperties().get(entityType).getPopulationUse() <= properties.getPopulationProvide()) {
         buildAction = new BuildAction(
                 entityType,
                 new Coordinate(
@@ -109,7 +99,6 @@ public class Older1GreedyRusher implements Strategy {
                         entity.getPosition().getY() + properties.getSize() - 1
                 )
         );
-//        }
         return buildAction;
     }
 

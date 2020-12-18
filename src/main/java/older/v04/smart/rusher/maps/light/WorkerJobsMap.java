@@ -1,10 +1,10 @@
-package mystrategy.maps.light;
+package older.v04.smart.rusher.maps.light;
 
 import model.*;
-import mystrategy.Constants;
-import mystrategy.collections.AllEntities;
-import mystrategy.maps.EnemiesMap;
-import mystrategy.maps.EntitiesMap;
+import older.v04.smart.rusher.Constants;
+import older.v04.smart.rusher.collections.AllEntities;
+import older.v04.smart.rusher.maps.EnemiesMap;
+import older.v04.smart.rusher.maps.EntitiesMap;
 import util.DebugInterface;
 import util.Task;
 
@@ -43,11 +43,6 @@ public class WorkerJobsMap {
         this.repair = new int[mapSize][mapSize];
         this.workers = new int[mapSize][mapSize];
 
-        Set<Coordinate> repairEntitiesCoordinates = new HashSet<>(128);
-        for (Entity resource : allEntities.getMyUnits()) {
-//            repairEntitiesCoordinates.add(new Coordinate(resource.getPosition().getX(), resource.getPosition().getY()));
-        }
-
         int minWorkers = 3;
         Set<Coordinate> buildCoordinates = new HashSet<>(128);
         for (Entity order : buildOrders.updateAndGetActiveOrders(allEntities, entitiesMap, me)) {
@@ -59,18 +54,6 @@ public class WorkerJobsMap {
         }
 
         fillBuildOrderDistance(buildDistanceByFoot, buildCoordinates, minWorkers);
-/*
-        if (DebugInterface.isDebugEnabled()) {
-            for (Coordinate pos:buildCoordinates) {
-                    DebugInterface.print("X", pos.getX(), pos.getY());
-            }
-//            for (int i = 0; i < mapSize; i++) {
-//                for (int j = 0; j < mapSize; j++) {
-//                    DebugInterface.print(Integer.toString(distanceByFoot[i][j]), i, j);
-//                }
-//            }
-        }
-*/
     }
 
     public int getDistanceUnsafe(int[][] distanceMap, Coordinate position) {
@@ -86,7 +69,6 @@ public class WorkerJobsMap {
                         && getDistanceUnsafe(distanceMap, coordinate) == 0
                         && isPassable(coordinate)) {
                     Entity entity = entitiesMap.getEntity(coordinate);
-//                    DebugInterface.print(Integer.toString(i), coordinate); // build distance
                     if (entity.isMy(EntityType.BUILDER_UNIT)) {
                         if (entity.getTask() == Task.IDLE) {
                             entity.setTask(i == 1 ? Task.BUILD : Task.MOVE_TO_BUILD);

@@ -2,7 +2,6 @@ package older.v03.random.base;
 
 import model.EntityType;
 import model.PlayerView;
-import util.DebugInterface;
 
 public class Initializer {
     private PlayerView playerView;

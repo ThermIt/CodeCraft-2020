@@ -1,7 +1,6 @@
 package mystrategy.strategies;
 
 import model.*;
-import mystrategy.Task;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
@@ -10,6 +9,7 @@ import mystrategy.maps.SimCityMap;
 import mystrategy.maps.light.*;
 import util.DebugInterface;
 import util.StrategyDelegate;
+import util.Task;
 
 import java.util.*;
 import java.util.stream.Collectors;
