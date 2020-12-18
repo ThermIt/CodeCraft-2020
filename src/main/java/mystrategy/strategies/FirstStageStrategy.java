@@ -5,6 +5,7 @@ import mystrategy.Task;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
+import mystrategy.maps.RepairMap;
 import mystrategy.maps.light.*;
 import util.StrategyDelegate;
 
@@ -27,6 +28,7 @@ public class FirstStageStrategy implements StrategyDelegate {
     private VisibilityMap visibility;
     private VirtualResources resources;
     private WarMap warMap; // only to pass wo war state
+    private RepairMap repairMap;
 
     public FirstStageStrategy(BuildOrders buildOrders, VisibilityMap visibility, VirtualResources resources, WarMap warMap) {
         this.buildOrders = buildOrders;
@@ -70,6 +72,7 @@ public class FirstStageStrategy implements StrategyDelegate {
                 enemiesMap,
                 me
         );
+        repairMap = new RepairMap(playerView, entitiesMap);
 
         for (Entity unit : allEntities.getMyUnits()) {
             MoveAction moveAction;
@@ -99,10 +102,15 @@ public class FirstStageStrategy implements StrategyDelegate {
             if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
                 if (unit.getTask() == Task.IDLE) {
                     // assign idle workers to harvest
-                    Entity resource = harvestJobs.getResource(unit.getPosition());
-                    if (resource != null) {
-                        attackAction = new AttackAction(resource.getId(), null);
-                        resource.increaseDamage(unit.getProperties().getAttack().getDamage());
+                    Integer canRepairId = repairMap.canRepairId(unit.getPosition()); // костыль
+                    if (canRepairId != null) {
+                        repairAction = new RepairAction(canRepairId);
+                    } else {
+                        Entity resource = harvestJobs.getResource(unit.getPosition());
+                        if (resource != null) {
+                            attackAction = new AttackAction(resource.getId(), null);
+                            resource.increaseDamage(unit.getProperties().getAttack().getDamage());
+                        }
                     }
                 } else if (unit.getTask() == Task.BUILD) {
 //                    DebugInterface.print("B", unit.getPosition());

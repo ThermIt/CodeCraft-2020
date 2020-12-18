@@ -16,7 +16,7 @@ public class RepairMap {
     private int mapSize;
     private int myId;
 
-    public RepairMap(PlayerView playerView, EntitiesMap entitiesMap, DebugInterface debugInterface) {
+    public RepairMap(PlayerView playerView, EntitiesMap entitiesMap) {
         this.entitiesMap = entitiesMap;
         myId = playerView.getMyId();
         mapSize = playerView.getMapSize();
@@ -81,14 +81,8 @@ public class RepairMap {
     }
 
     public Integer canRepairId(Coordinate from) {
-        List<Coordinate> coordinateList = new ArrayList<>();
-        coordinateList.add(new Coordinate(from.getX() - 1, from.getY() + 0));
-        coordinateList.add(new Coordinate(from.getX() + 0, from.getY() + 1));
-        coordinateList.add(new Coordinate(from.getX() + 0, from.getY() - 1));
-        coordinateList.add(new Coordinate(from.getX() + 1, from.getY() + 0));
-        coordinateList.add(new Coordinate(from.getX(), from.getY()));
-
-        return coordinateList.stream().map(this::repairRequired).filter(Objects::nonNull).findFirst().orElse(null);
+        return from.getAdjacentList().stream().map(this::repairRequired)
+                .filter(Objects::nonNull).findFirst().orElse(null);
     }
 
     private Integer repairRequired(Coordinate position) {

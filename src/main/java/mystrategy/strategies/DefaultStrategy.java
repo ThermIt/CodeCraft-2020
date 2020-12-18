@@ -96,7 +96,7 @@ public class DefaultStrategy implements StrategyDelegate {
 //        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
         harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me);
         simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, debugInterface);
-        repairMap = new RepairMap(playerView, entitiesMap, debugInterface);
+        repairMap = new RepairMap(playerView, entitiesMap);
 
         if (!second && allEntities.getMyBuildings().stream()
                 .anyMatch(ent1 -> ent1.isMy(EntityType.RANGED_BASE) && !ent1.isActive())) {
