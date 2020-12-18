@@ -294,6 +294,9 @@ public class DefaultStrategy implements StrategyDelegate {
         }
 
 */
+
+/*
+failedLimits
         int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
         if (playerView.isRound2()) {
             if (maxUnits > 30*0.7) {
@@ -304,6 +307,14 @@ public class DefaultStrategy implements StrategyDelegate {
         if (playerView.isFinials()) {
             buildersLimit = 110;
         }
+*/
+        int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
+        if (playerView.isRound2())
+            buildersLimit = 650;
+
+        if (playerView.isFinials())
+            buildersLimit = 1000;
+
 
         if (entityType == EntityType.BUILDER_UNIT
                 && allEntities.getMyWorkers().size() > buildersLimit) {
