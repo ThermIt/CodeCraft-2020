@@ -249,4 +249,8 @@ public class Entity {
     public void setTask(Task task) {
         this.task = task;
     }
+
+    public boolean isUnit() {
+        return getEntityType().isUnit();
+    }
 }

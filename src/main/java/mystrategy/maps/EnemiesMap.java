@@ -53,19 +53,6 @@ public class EnemiesMap {
     }
 
 
-    public Coordinate getMinOfTwoPositions(Coordinate old, Coordinate newPosition) {
-        if (newPosition.getX() < 0 || newPosition.getY() < 0 || newPosition.getX() >= mapSize || newPosition.getY() >= mapSize) {
-            return old;
-        }
-        if (getDistance(newPosition) == 0) {
-            return old;
-        }
-        if (getDistance(newPosition) < getDistance(old)) {
-            return newPosition;
-        }
-        return old;
-    }
-
     public int getDistance(Coordinate position) {
         return getDistance(position.getX(), position.getY());
     }
@@ -153,6 +140,19 @@ public class EnemiesMap {
 
     private boolean isPassable(Coordinate coordinate) {
         return this.entitiesMap.isPassable(coordinate) || this.entitiesMap.getIsEnemy(coordinate);
+    }
+
+    public Coordinate getMinOfTwoPositions(Coordinate old, Coordinate newPosition) {
+        if (newPosition.getX() < 0 || newPosition.getY() < 0 || newPosition.getX() >= mapSize || newPosition.getY() >= mapSize) {
+            return old;
+        }
+        if (getDistance(newPosition) == 0) {
+            return old;
+        }
+        if (getDistance(newPosition) < getDistance(old)) {
+            return newPosition;
+        }
+        return old;
     }
 
     public Coordinate getPositionClosestToEnemy(Coordinate from) {

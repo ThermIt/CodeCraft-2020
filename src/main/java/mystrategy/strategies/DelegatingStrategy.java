@@ -6,6 +6,7 @@ import model.PlayerView;
 import mystrategy.maps.light.BuildOrders;
 import mystrategy.maps.light.VirtualResources;
 import mystrategy.maps.light.VisibilityMap;
+import mystrategy.maps.light.WarMap;
 import util.*;
 
 public class DelegatingStrategy implements Strategy {
@@ -15,6 +16,7 @@ public class DelegatingStrategy implements Strategy {
     private BuildOrders buildOrders = new BuildOrders();
     private VisibilityMap visibility = new VisibilityMap();
     private VirtualResources resources = new VirtualResources(visibility);
+    private WarMap warMap = new WarMap(visibility, resources);
 
     @Override
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
@@ -38,13 +40,13 @@ public class DelegatingStrategy implements Strategy {
     }
 
     private void initDefaultStrategy() {
-        DefaultStrategy currentStrategy = new DefaultStrategy(visibility, resources);
+        DefaultStrategy currentStrategy = new DefaultStrategy(visibility, resources, warMap);
         this.currentStrategy = currentStrategy;
         this.trigger = currentStrategy;
     }
 
     private void initFogStrategy() {
-        FirstStageStrategy currentStrategy = new FirstStageStrategy(buildOrders, visibility, resources);
+        FirstStageStrategy currentStrategy = new FirstStageStrategy(buildOrders, visibility, resources, warMap);
         this.currentStrategy = currentStrategy;
         this.trigger = currentStrategy;
     }

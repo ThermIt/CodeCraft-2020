@@ -26,11 +26,13 @@ public class FirstStageStrategy implements StrategyDelegate {
     private BuildOrders buildOrders;
     private VisibilityMap visibility;
     private VirtualResources resources;
+    private WarMap warMap; // only to pass wo war state
 
-    public FirstStageStrategy(BuildOrders buildOrders, VisibilityMap visibility, VirtualResources resources) {
+    public FirstStageStrategy(BuildOrders buildOrders, VisibilityMap visibility, VirtualResources resources, WarMap warMap) {
         this.buildOrders = buildOrders;
         this.visibility = visibility;
         this.resources = resources;
+        this.warMap = warMap;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class FirstStageStrategy implements StrategyDelegate {
 
     @Override
     public StrategyDelegate getNextStage() {
-        return new DefaultStrategy(visibility, resources);
+        return new DefaultStrategy(visibility, resources, warMap);
     }
 
     @Override

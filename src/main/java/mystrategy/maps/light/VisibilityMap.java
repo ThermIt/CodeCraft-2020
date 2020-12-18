@@ -20,12 +20,12 @@ public class VisibilityMap {
     private int tick;
 
     public int getTick() {
-        return tick - 1; // 0-based
+        return tick;
     }
 
     public void init(PlayerView playerView, AllEntities allEntities) {
         isFogOfWar = playerView.isFogOfWar();
-        tick = playerView.getCurrentTick() + 1; // 0-based -> 1-based
+        tick = playerView.getCurrentTick();
 
         // calculate anyway to filter enemies by range
 
@@ -46,7 +46,7 @@ public class VisibilityMap {
                                 unit.getProperties().getSightRange()
                         );
                 visibilityRange[position.getX()][position.getY()] = 1;
-                lastSeen[position.getX()][position.getY()] = tick;
+                lastSeen[position.getX()][position.getY()] = tick + 1; // more than 0
             }
         }
 
@@ -102,7 +102,7 @@ public class VisibilityMap {
         ) {
             if (visibilityRange[pos.getX()][pos.getY()] == 0) {
                 visibilityRange[pos.getX()][pos.getY()] = i + 1;
-                lastSeen[pos.getX()][pos.getY()] = tick;
+                lastSeen[pos.getX()][pos.getY()] = tick + 1; // more than 0
             }
             remainingRange[pos.getX()][pos.getY()] = previouslyRemainingRange - 1;
             coordinateListNext.add(pos);
@@ -110,6 +110,19 @@ public class VisibilityMap {
     }
 
     public boolean isVisible(int x, int y) {
+        if (!isFogOfWar) {
+            return true;
+        }
         return visibilityRange[x][y] > 0;
+    }
+
+    public boolean isVisible(Coordinate location) {
+        return isVisible(location.getX(), location.getY());
+    }
+
+    public void checkTick(PlayerView playerView) {
+        if (getTick() != playerView.getCurrentTick()) {
+            throw new RuntimeException("visibility is not initialized");
+        }
     }
 }

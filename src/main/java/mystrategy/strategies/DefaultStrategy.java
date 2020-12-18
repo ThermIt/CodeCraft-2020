@@ -9,6 +9,7 @@ import mystrategy.maps.SimCityMap;
 import mystrategy.maps.light.HarvestJobsMap;
 import mystrategy.maps.light.VirtualResources;
 import mystrategy.maps.light.VisibilityMap;
+import mystrategy.maps.light.WarMap;
 import util.DebugInterface;
 import util.StrategyDelegate;
 
@@ -34,10 +35,12 @@ public class DefaultStrategy implements StrategyDelegate {
     private boolean second;
     private VisibilityMap visibility;
     private VirtualResources resources;
+    private WarMap warMap;
 
-    public DefaultStrategy(VisibilityMap visibility, VirtualResources resources) {
+    public DefaultStrategy(VisibilityMap visibility, VirtualResources resources, WarMap warMap) {
         this.visibility = visibility;
         this.resources = resources;
+        this.warMap = warMap;
     }
 
     /**
@@ -74,6 +77,7 @@ public class DefaultStrategy implements StrategyDelegate {
         me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
         this.visibility.init(playerView, allEntities);
         this.resources.init(playerView, allEntities, entitiesMap);
+        this.warMap.init(playerView, entitiesMap, allEntities);
 
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();
@@ -113,7 +117,7 @@ public class DefaultStrategy implements StrategyDelegate {
                 moveAction = new MoveAction(moveTo, true, true);
                 unit.setMoveAction(moveAction);
             } else {
-                Coordinate moveTo = enemiesMap.getPositionClosestToEnemy(unit.getPosition());
+                Coordinate moveTo = warMap.getPositionClosestToEnemy(unit.getPosition());
                 if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
                     if (playerView.isOneOnOne()) {
                         moveTo = new Coordinate(72, 72);
@@ -242,8 +246,15 @@ public class DefaultStrategy implements StrategyDelegate {
         }
 
 */
+        int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
+        if (playerView.isRound2())
+            buildersLimit = 65;
+
+        if (playerView.isFinials())
+            buildersLimit = 100;
+
         if (entityType == EntityType.BUILDER_UNIT
-                && allEntities.getMyBuilders().size() > (playerView.isFogOfWar() ? 60 : allEntities.getEnemyBuilders().size() + 20)) {
+                && allEntities.getMyBuilders().size() > buildersLimit) {
             return buildAction;
         }
 

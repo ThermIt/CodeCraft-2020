@@ -17,15 +17,15 @@ public class VirtualResources {
     private boolean[][] clearedFromResource;
     private boolean[][] possibleResource;
     private int[][] resourceCount;
+    private int tick;
 
     public VirtualResources(VisibilityMap visibility) {
         this.visibility = visibility;
     }
 
     public void init(PlayerView playerView, AllEntities allEntities, EntitiesMap entitiesMap) {
-        if (visibility.getTick() != playerView.getCurrentTick()) {
-            throw new RuntimeException("visibility is not initialized");
-        }
+        visibility.checkTick(playerView);
+        tick = playerView.getCurrentTick();
         this.playersCount = playerView.getPlayers().length;
         this.playerView = playerView;
         this.allEntities = allEntities;
@@ -80,6 +80,13 @@ public class VirtualResources {
 */
     }
 
+    public int getResourceCount(Coordinate location) {
+        if (location.isOutOfBounds()) {
+            return 0;
+        }
+        return getResourceCount(location.getX(), location.getY());
+    }
+
     public int getResourceCount(int x, int y) {
         if (clearedFromResource[x][y]) {
             return 0;
@@ -93,6 +100,16 @@ public class VirtualResources {
         possibleResource[pos.getX()][pos.getY()] = resourcePossible;
         if (resourceCount[pos.getX()][pos.getY()] == 0 && resourcePossible) {
             resourceCount[pos.getX()][pos.getY()] = playerView.getEntityProperties().get(EntityType.RESOURCE).getMaxHealth();
+        }
+    }
+
+    public int getTick() {
+        return tick;
+    }
+
+    public void checkTick(PlayerView playerView) {
+        if (getTick() != playerView.getCurrentTick()) {
+            throw new RuntimeException("visibility is not initialized");
         }
     }
 }
