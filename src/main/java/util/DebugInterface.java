@@ -32,6 +32,10 @@ public class DebugInterface {
         print(test, pos.getX(), pos.getY());
     }
 
+    public static void print(Integer test, int x, int y) {
+        print(test.toString(), x, y);
+    }
+
     public static void print(String test, int x, int y) {
         if (!isDebugEnabled()) {
             return;

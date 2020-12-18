@@ -2,9 +2,11 @@ package mystrategy.maps.light;
 
 import model.Coordinate;
 import model.Entity;
+import model.EntityType;
 import model.PlayerView;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EntitiesMap;
+import util.DebugInterface;
 
 public class VirtualResources {
     private int mapSize;
@@ -15,6 +17,7 @@ public class VirtualResources {
     private boolean[][] processedAlready;
     private boolean[][] clearedFromResource;
     private boolean[][] possibleResource;
+    private int[][] resourceCount;
 
     public VirtualResources(VisibilityMap visibility) {
         this.visibility = visibility;
@@ -32,10 +35,12 @@ public class VirtualResources {
             this.processedAlready = new boolean[mapSize][mapSize];
             this.possibleResource = new boolean[mapSize][mapSize];
             this.clearedFromResource = new boolean[mapSize][mapSize];
+            this.resourceCount = new int[mapSize][mapSize];
         }
 
         for (Entity resource : allEntities.getResources()) {
             Coordinate pos = resource.getPosition();
+            resourceCount[pos.getX()][pos.getY()] = resource.getHealth();
             if (!processedAlready[pos.getX()][pos.getY()]) {
                 markProcessed(pos);
                 if (playersCount > 2) {
@@ -62,21 +67,23 @@ public class VirtualResources {
             }
         }
 
-/*
         if (DebugInterface.isDebugEnabled()) {
             for (int i = 0; i < mapSize; i++) {
                 for (int j = 0; j < mapSize; j++) {
-                    if (possibleResource[i][j]) {
-                        DebugInterface.print("X", i, j);
+                    if (resourceCount[i][j] > 0) {
+                        DebugInterface.print(resourceCount[i][j], i, j);
                     }
                 }
             }
         }
-*/
     }
 
     public void markProcessed(Coordinate pos) {
         processedAlready[pos.getX()][pos.getY()] = true;
-        possibleResource[pos.getX()][pos.getY()] = !clearedFromResource[pos.getX()][pos.getY()];
+        boolean resourcePossible = !clearedFromResource[pos.getX()][pos.getY()];
+        possibleResource[pos.getX()][pos.getY()] = resourcePossible;
+        if (resourceCount[pos.getX()][pos.getY()] == 0 && resourcePossible) {
+            resourceCount[pos.getX()][pos.getY()] = playerView.getEntityProperties().get(EntityType.RESOURCE).getMaxHealth();
+        }
     }
 }
