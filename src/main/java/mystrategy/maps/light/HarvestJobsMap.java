@@ -73,11 +73,12 @@ public class HarvestJobsMap {
                     continue;
                 }
 
+                // only safe untaken spots
                 adjacentList.stream().filter(entitiesMap::isPassable)
                         .forEach(loc -> {
                             harvest[loc.getX()][loc.getY()] += resourceCount;
                             Entity entity = entitiesMap.getEntity(loc);
-                            if (!entity.isMy(EntityType.BUILDER_UNIT)) {
+                            if (!entity.isMy(EntityType.BUILDER_UNIT) && enemiesMap.getDangerLevel(loc) == 0) {
                                 restrictedResourceCoordinates.add(loc);
 //                                DebugInterface.print("+", loc);
                             }

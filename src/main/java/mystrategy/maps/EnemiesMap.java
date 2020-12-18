@@ -65,7 +65,7 @@ public class EnemiesMap {
     }
 
     private void fillShootDanger(int[][] dangerMap, Set<Coordinate> coordinateList5, Set<Coordinate> coordinateList1) {
-        int delta = 2;
+        int delta = 1;
         Set<Coordinate> coordinateList = coordinateList5;
         for (int i = 6+delta; i > 0; i--) {
             Set<Coordinate> coordinateListNext = new HashSet<>(128);

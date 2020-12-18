@@ -73,15 +73,19 @@ public class BuildOrders {
         boolean single = true;
         for (Iterator<Entity> iterator = orderList.iterator(); iterator.hasNext(); ) {
             Entity order = iterator.next();
+
+            Entity entity = entitiesMap.getEntity(order.getPosition());
+            if (entity.isMy(order.getEntityType()) && entity.isActive()) {
+                iterator.remove();
+                continue;
+            }
+
             if (!single) {
                 order.setActive(false);
                 continue;
             }
 
-            Entity entity = entitiesMap.getEntity(order.getPosition());
-            if (entity.isMy(order.getEntityType()) && entity.isActive()) {
-                iterator.remove();
-            } else if (entity.isMy(order.getEntityType()) && !entity.isActive()) {
+             if (entity.isMy(order.getEntityType()) && entity.getHealth() != entity.getProperties().getMaxHealth()) {
                 order.setActive(true);
                 DebugInterface.print("A+", order.getPosition());
                 single = false;

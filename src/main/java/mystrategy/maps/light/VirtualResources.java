@@ -91,8 +91,10 @@ public class VirtualResources {
     public int getResourceCount(int x, int y) {
         if (clearedFromResource[x][y]) {
             return 0;
-        } else if (x >= 40 - VIRTUAL_PATCH_SIZE && x < 40 + VIRTUAL_PATCH_SIZE &&
-                y >= 40 - VIRTUAL_PATCH_SIZE && y < 40 + VIRTUAL_PATCH_SIZE
+        } else if (resourceCount[x][y] == 0 &&
+                ((x >= 40 - VIRTUAL_PATCH_SIZE && x < 40 + VIRTUAL_PATCH_SIZE &&
+                        y >= 40 - VIRTUAL_PATCH_SIZE && y < 40 + VIRTUAL_PATCH_SIZE)
+                        || (playerView.isFinials() && (x == 0 || y == 0)))
         ) {
             return 5;
         }

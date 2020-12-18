@@ -142,8 +142,11 @@ public class DefaultStrategy implements StrategyDelegate {
                     moveAction = new MoveAction(moveTo, true, true);
                     unit.setMoveAction(moveAction);
                 }
-            } else {
-                Coordinate moveTo = warMap.getPositionClosestToEnemy(unit.getPosition());
+            } else { // all
+                Coordinate moveTo =
+                        unit.getEntityType() == EntityType.RANGED_UNIT ?
+                                warMap.getPositionClosestToForRangedUnit(unit.getPosition())
+                                : warMap.getPositionClosestToEnemy(unit.getPosition());
                 if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
                     if (playerView.isOneOnOne()) {
                         moveTo = new Coordinate(72, 72);
@@ -223,7 +226,7 @@ public class DefaultStrategy implements StrategyDelegate {
                 EntityType[] validAutoAttackTargets;
                 validAutoAttackTargets = new EntityType[0];
                 attackAction = new AttackAction(
-                        null, new AutoAttack(properties.getSightRange(), validAutoAttackTargets)
+                        null, new AutoAttack(5, validAutoAttackTargets)
                 );
                 unit.setAttackAction(attackAction);
                 unit.setBuildAction(buildAction);
@@ -309,11 +312,13 @@ failedLimits
         }
 */
         int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
-        if (playerView.isRound2())
+        if (playerView.isRound2()) {
             buildersLimit = 650;
+        }
 
-        if (playerView.isFinials())
+        if (playerView.isFinials()) {
             buildersLimit = 1000;
+        }
 
 
         if (entityType == EntityType.BUILDER_UNIT

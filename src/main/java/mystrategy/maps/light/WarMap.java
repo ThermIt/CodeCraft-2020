@@ -16,10 +16,13 @@ import java.util.Set;
 
 public class WarMap {
 
+    public static final int RANGER_RANGE = 5;
     private Set<Coordinate> enemyBuildingLocations = new HashSet<>(128);
     private Set<Coordinate> enemyUnitLocations = new HashSet<>(128);
+    private Set<Coordinate> enemyWorkerLocations = new HashSet<>(128);
     private Set<Coordinate> myAttackersLocations = new HashSet<>(128);
     private int[][] enemyDistanceMap;
+    private int[][] enemyWorkerDistanceMap;
     private int[][] dominanceMap;
     private int mapSize;
     private EntitiesMap entitiesMap;
@@ -27,6 +30,11 @@ public class WarMap {
     private VisibilityMap visibility;
     private VirtualResources resources;
     private int tick;
+
+    public WarMap(VisibilityMap visibility, VirtualResources resources) {
+        this.visibility = visibility;
+        this.resources = resources;
+    }
 
     public int getTick() {
         return tick;
@@ -36,11 +44,6 @@ public class WarMap {
         if (getTick() != playerView.getCurrentTick()) {
             throw new RuntimeException("visibility is not initialized");
         }
-    }
-
-    public WarMap(VisibilityMap visibility, VirtualResources resources) {
-        this.visibility = visibility;
-        this.resources = resources;
     }
 
     public void init(
@@ -67,7 +70,7 @@ public class WarMap {
         }
 
         myAttackersLocations = new HashSet<>(128);
-        for (Entity attacker:allEntities.getMyAttackers()) {
+        for (Entity attacker : allEntities.getMyAttackers()) {
             myAttackersLocations.add(attacker.getPosition());
         }
 
@@ -78,7 +81,7 @@ public class WarMap {
             if (visibility.isVisible(next)) {
                 Entity entity = entitiesMap.getEntity(next);
                 if (!entity.isBuilding() || entity.isMy()) {
-                    buildingsIterator.remove();
+                    buildingsIterator.remove(); // clean old instances
                 }
             }
         }
@@ -87,8 +90,18 @@ public class WarMap {
             Coordinate next = unitsIterator.next();
             if (visibility.isVisible(next)) {
                 Entity entity = entitiesMap.getEntity(next);
-                if (!entity.isUnit() || entity.isMy()) {
+                if (!entity.isUnit() || entity.isMy()) { // clean old instances
                     unitsIterator.remove();
+                }
+            }
+        }
+        Iterator<Coordinate> workersIterator = enemyWorkerLocations.iterator();
+        while (workersIterator.hasNext()) {
+            Coordinate next = workersIterator.next();
+            if (visibility.isVisible(next)) {
+                Entity entity = entitiesMap.getEntity(next);
+                if (entity.getEntityType() != EntityType.BUILDER_UNIT || entity.isMy()) { // clean old instances
+                    workersIterator.remove();
                 }
             }
         }
@@ -98,10 +111,13 @@ public class WarMap {
         }
 
         for (Entity unit : allEntities.getEnemyUnits()) {
-            enemyBuildingLocations.add(unit.getPosition());
+            enemyUnitLocations.add(unit.getPosition());
+            if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
+                enemyWorkerLocations.add(unit.getPosition());
+            }
         }
 
-        Set<Coordinate> enemyDominance = new HashSet<>();
+        Set<Coordinate> enemyDominance = new HashSet<>(128);
         enemyDominance.addAll(enemyUnitLocations);
         enemyDominance.addAll(enemyBuildingLocations);
 
@@ -109,6 +125,7 @@ public class WarMap {
 
         fillEnemyDistances(enemyDominance);
         fillMyAttackersDistances(myAttackersLocations);
+        fillEnemyWorkerDistances(enemyWorkerLocations);
     }
 
     private boolean isPassable(Coordinate coordinate) {
@@ -120,14 +137,75 @@ public class WarMap {
         return this.entitiesMap.getEntity(coordinate).isMy(EntityType.BUILDER_UNIT);
     }
 
+    private void fillEnemyWorkerDistances(Set<Coordinate> coordinateList) {
+        enemyWorkerDistanceMap = new int[mapSize][mapSize];
+        int[][] delayFuseForCalculation = new int[mapSize][mapSize];
+        for (int i = 1; !coordinateList.isEmpty(); i++) {
+            Set<Coordinate> coordinateListNext = new HashSet<>(128);
+            for (Coordinate coordinate : coordinateList) {
+                if (coordinate.isInBounds()
+                        && enemyWorkerDistanceMap[coordinate.getX()][coordinate.getY()] == 0
+                        && (isPassable(coordinate) || i <= RANGER_RANGE + 1)) {
+                    if (i <= RANGER_RANGE + 1) {
+                        // skip attack range
+                        enemyWorkerDistanceMap[coordinate.getX()][coordinate.getY()] = i;
+                        coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
+                        coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
+                        coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
+                        coordinateListNext.add(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
+                        continue;
+                    }
+                    int resourceCount = resources.getResourceCount(coordinate);
+                    if (resourceCount > 0 && delayFuseForCalculation[coordinate.getX()][coordinate.getY()] == 0) {
+                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()] = resourceCount / 5 + 1; // magic
+                    }
+                    if (delayFuseForCalculation[coordinate.getX()][coordinate.getY()] > 1) {
+                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()]--;
+                        coordinateListNext.add(coordinate);
+                    } else {
+                        enemyWorkerDistanceMap[coordinate.getX()][coordinate.getY()] = i;
+                        if (!isBuilder(coordinate)) {
+                            coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
+                            coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
+                            coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
+                            coordinateListNext.add(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
+                        }
+                    }
+                }
+            }
+            coordinateList = coordinateListNext;
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
+        }
+
+/*
+        for (int i = 0; i < mapSize; i++) {
+            for (int j = 0; j < mapSize; j++) {
+                if (DebugInterface.isDebugEnabled()) {
+                    if (enemyWorkerDistanceMap[i][j] == 0) {
+                        DebugInterface.print(enemyDistanceMap[i][j], i, j);
+                    } else {
+                        DebugInterface.print(Math.min(enemyWorkerDistanceMap[i][j], enemyDistanceMap[i][j]), i, j);
+                    }
+                }
+            }
+        }
+*/
+    }
+
     private void fillEnemyDistances(Set<Coordinate> coordinateList) {
         enemyDistanceMap = new int[mapSize][mapSize];
         int[][] delayFuseForCalculation = new int[mapSize][mapSize];
         for (int i = 1; !coordinateList.isEmpty(); i++) {
             Set<Coordinate> coordinateListNext = new HashSet<>(128);
             for (Coordinate coordinate : coordinateList) {
-                if (coordinate.getX() >= 0 && coordinate.getX() < mapSize
-                        && coordinate.getY() >= 0 && coordinate.getY() < mapSize
+                if (coordinate.isInBounds()
                         && enemyDistanceMap[coordinate.getX()][coordinate.getY()] == 0
                         && isPassable(coordinate)) {
                     int resourceCount = resources.getResourceCount(coordinate);
@@ -176,8 +254,7 @@ public class WarMap {
         for (int i = 1; !coordinateList.isEmpty(); i++) {
             Set<Coordinate> coordinateListNext = new HashSet<>(128);
             for (Coordinate coordinate : coordinateList) {
-                if (coordinate.getX() >= 0 && coordinate.getX() < mapSize
-                        && coordinate.getY() >= 0 && coordinate.getY() < mapSize
+                if (coordinate.isInBounds()
                         && dominanceMap[coordinate.getX()][coordinate.getY()] == 0
                         && isPassable(coordinate)) {
                     int resourceCount = resources.getResourceCount(coordinate);
@@ -241,6 +318,36 @@ public class WarMap {
         return old;
     }
 
+    public Coordinate getMinOfTwoPositionsForRangedUnit(Coordinate old, Coordinate newPosition) {
+        if (newPosition.isOutOfBounds()) {
+            return old;
+        }
+        int newDistance = getDistanceToEnemy(newPosition);
+        int distanceToEnemyWorker = getDistanceToEnemyWorker(newPosition);
+        if (distanceToEnemyWorker > 0 && distanceToEnemyWorker < newDistance) {
+            newDistance = distanceToEnemyWorker;
+        }
+        if (newDistance == 0) {
+            return old;
+        }
+
+        int oldDistance = getDistanceToEnemy(old);
+        int oldDistanceToEnemyWorker = getDistanceToEnemyWorker(old);
+        if (oldDistanceToEnemyWorker > 0 && oldDistanceToEnemyWorker < oldDistance) {
+            oldDistance = oldDistanceToEnemyWorker;
+        }
+        if (newDistance < oldDistance) {
+            return newPosition;
+        }
+
+/*
+        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) { // scatter
+            return newPosition;
+        }
+*/
+        return old;
+    }
+
     public int getDistanceToEnemy(Coordinate position) {
         return getDistanceToEnemy(position.getX(), position.getY());
     }
@@ -250,6 +357,17 @@ public class WarMap {
             return 0;
         }
         return enemyDistanceMap[x][y];
+    }
+
+    public int getDistanceToEnemyWorker(Coordinate position) {
+        return getDistanceToEnemyWorker(position.getX(), position.getY());
+    }
+
+    public int getDistanceToEnemyWorker(int x, int y) {
+        if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
+            return 0;
+        }
+        return enemyWorkerDistanceMap[x][y];
     }
 
     public int getDistanceToGoodGuys(Coordinate position) {
@@ -268,6 +386,16 @@ public class WarMap {
         for (int i = -radius; i <= radius; i++) {
             for (int j = -radius; j <= radius; j++) {
                 from = getMinOfTwoPositions(from, new Coordinate(from.getX() + i, from.getY() + j));
+            }
+        }
+        return from;
+    }
+
+    public Coordinate getPositionClosestToForRangedUnit(Coordinate from) {
+        int radius = 1;
+        for (int i = -radius; i <= radius; i++) {
+            for (int j = -radius; j <= radius; j++) {
+                from = getMinOfTwoPositionsForRangedUnit(from, new Coordinate(from.getX() + i, from.getY() + j));
             }
         }
         return from;
