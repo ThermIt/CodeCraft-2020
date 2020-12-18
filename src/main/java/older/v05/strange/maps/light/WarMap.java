@@ -183,20 +183,6 @@ public class WarMap {
                 }
             }
         }
-
-/*
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled()) {
-                    if (enemyWorkerDistanceMap[i][j] == 0) {
-                        DebugInterface.print(enemyDistanceMap[i][j], i, j);
-                    } else {
-                        DebugInterface.print(Math.min(enemyWorkerDistanceMap[i][j], enemyDistanceMap[i][j]), i, j);
-                    }
-                }
-            }
-        }
-*/
     }
 
     private void fillEnemyDistances(Set<Coordinate> coordinateList) {
@@ -236,16 +222,6 @@ public class WarMap {
                 }
             }
         }
-
-/*
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled()) {
-                    DebugInterface.print(dominanceMap[i][j], i, j);
-                }
-            }
-        }
-*/
     }
 
     private void fillMyAttackersDistances(Set<Coordinate> coordinateList) {
@@ -285,16 +261,6 @@ public class WarMap {
                 }
             }
         }
-
-/*
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled()) {
-                    DebugInterface.print(dominanceMap[i][j], i, j);
-                }
-            }
-        }
-*/
     }
 
     public Coordinate getMinOfTwoPositions(Coordinate old, Coordinate newPosition) {

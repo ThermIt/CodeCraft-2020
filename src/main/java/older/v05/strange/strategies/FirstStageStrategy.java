@@ -116,7 +116,6 @@ public class FirstStageStrategy implements StrategyDelegate {
                         }
                     }
                 } else if (unit.getTask() == Task.BUILD) {
-//                    DebugInterface.print("B", unit.getPosition());
                     Entity order = buildOrders.getOrder(unit.getPosition());
                     if (order != null) {
                         Entity entity = entitiesMap.getEntity(order.getPosition());
@@ -173,12 +172,6 @@ public class FirstStageStrategy implements StrategyDelegate {
         allEntities.getMyBuildings().stream()
                 .filter(ent -> ent.getEntityType() == EntityType.BUILDER_BASE && ent.isActive())
                 .forEach(ent -> ent.setBuildAction(getBuilderBaseBuildingAction(ent)));
-
-/*
-        if (DebugInterface.isDebugEnabled()) {
-            System.out.println(allEntities.getMyBuilders().size());
-        }
-*/
 
         Action result = new Action(new java.util.HashMap<>());
         for (Entity actor : allEntities.getMyActors()) {

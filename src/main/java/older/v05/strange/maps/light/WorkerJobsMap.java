@@ -69,18 +69,6 @@ public class WorkerJobsMap {
         }
 
         fillBuildOrderDistance(buildDistanceByFoot, buildCoordinates, minWorkers);
-/*
-        if (DebugInterface.isDebugEnabled()) {
-            for (Coordinate pos:buildCoordinates) {
-                    DebugInterface.print("X", pos.getX(), pos.getY());
-            }
-//            for (int i = 0; i < mapSize; i++) {
-//                for (int j = 0; j < mapSize; j++) {
-//                    DebugInterface.print(Integer.toString(distanceByFoot[i][j]), i, j);
-//                }
-//            }
-        }
-*/
     }
 
     public void markRun(Entity worker) {
@@ -166,7 +154,6 @@ public class WorkerJobsMap {
                         && getDistanceUnsafe(distanceMap, coordinate) == 0
                         && isPassable(coordinate)) {
                     Entity entity = entitiesMap.getEntity(coordinate);
-//                    DebugInterface.print(Integer.toString(i), coordinate); // build distance
                     if (entity.isMy(EntityType.BUILDER_UNIT)) {
                         if (entity.getTask() == Task.IDLE) {
                             entity.setTask(i == 1 ? Task.BUILD : Task.MOVE_TO_BUILD);

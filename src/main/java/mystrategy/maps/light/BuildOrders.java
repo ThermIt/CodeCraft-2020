@@ -89,7 +89,7 @@ public class BuildOrders {
                 order.setActive(true);
                 DebugInterface.print("A+", order.getPosition());
                 single = false;
-            } else if (!order.isFree(entitiesMap)) {
+            } else if (!entitiesMap.isOrderFree(order)) {
                 order.setActive(false);
             } else if (me.getResource() >= order.getProperties().getInitialCost() - 2
                     && !entity.isMy(order.getEntityType())) {

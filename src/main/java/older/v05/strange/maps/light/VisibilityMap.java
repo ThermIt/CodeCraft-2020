@@ -76,18 +76,6 @@ public class VisibilityMap {
                 }
             }
         }
-
-/*
-        if (DebugInterface.isDebugEnabled()) {
-            for (int i = 0; i < mapSize; i++) {
-                for (int j = 0; j < mapSize; j++) {
-                    if (visibilityRange[i][j] > 0) {
-                        DebugInterface.print(Integer.toString(visibilityRange[i][j]), i, j);
-                    }
-                }
-            }
-        }
-*/
     }
 
     private void addNextCoordinate(

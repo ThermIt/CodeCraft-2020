@@ -51,7 +51,6 @@ public class HarvestJobsMap {
                 if (resourceCount == 0) {
                     continue;
                 }
-//                DebugInterface.print(resourceCount, i, j);
 
                 Coordinate location = new Coordinate(i, j);
                 List<Coordinate> adjacentList = location.getAdjacentList();
@@ -62,7 +61,6 @@ public class HarvestJobsMap {
                             Entity entity = entitiesMap.getEntity(loc);
                             if (!entity.isMy(EntityType.BUILDER_UNIT)) {
                                 allResourceCoordinates.add(loc); // without workers on the spot
-//                                DebugInterface.print("-", loc);
                             }
                         });
 
@@ -80,7 +78,6 @@ public class HarvestJobsMap {
                             Entity entity = entitiesMap.getEntity(loc);
                             if (!entity.isMy(EntityType.BUILDER_UNIT) && enemiesMap.getDangerLevel(loc) == 0) {
                                 restrictedResourceCoordinates.add(loc);
-//                                DebugInterface.print("+", loc);
                             }
                         });
             }

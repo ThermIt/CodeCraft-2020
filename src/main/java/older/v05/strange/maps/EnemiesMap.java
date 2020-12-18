@@ -85,16 +85,6 @@ public class EnemiesMap {
             }
             coordinateList = coordinateListNext;
         }
-
-//        if (DebugInterface.isDebugEnabled()) {
-//            for (int i = 0; i < mapSize; i++) {
-//                for (int j = 0; j < mapSize; j++) {
-//                    if (shootDanger[i][j] > 0) {
-//                        DebugInterface.print(Integer.toString(shootDanger[i][j]), i, j);
-//                    }
-//                }
-//            }
-//        }
     }
 
     private void fillDistances(int[][] distanceMap, Set<Coordinate> coordinateList) {
@@ -122,21 +112,6 @@ public class EnemiesMap {
                 }
             }
         }
-
-/*
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled()) {
-                    DebugCommand.Add command = new DebugCommand.Add();
-                    ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(i, j), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
-                    DebugData data = new DebugData.PlacedText(coloredVertex, Integer.toString(distanceByFoot[i][j]), -1, 12);
-                    command.setData(data);
-                    debugInterface.send(command);
-                }
-            }
-        }
-*/
-
     }
 
     private boolean isPassable(Coordinate coordinate) {

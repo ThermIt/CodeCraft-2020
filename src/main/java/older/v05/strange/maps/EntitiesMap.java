@@ -97,4 +97,16 @@ public class EntitiesMap {
     public boolean isEmpty(int x, int y) {
         return entityAtPosition[x][y] == null;
     }
+
+    public boolean isOrderFree(Entity order) {
+        int size = order.getProperties().getSize();
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (!isEmpty(i + order.getPosition().getX(), j + order.getPosition().getY())) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

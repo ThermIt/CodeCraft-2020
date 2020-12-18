@@ -66,19 +66,6 @@ public class VirtualResources {
                 }
             }
         }
-
-/*
-        if (DebugInterface.isDebugEnabled()) {
-            for (int i = 0; i < mapSize; i++) {
-                for (int j = 0; j < mapSize; j++) {
-                    int resourceCount = getResourceCount(i, j);
-                    if (resourceCount > 0) {
-                        DebugInterface.print(resourceCount, i, j);
-                    }
-                }
-            }
-        }
-*/
     }
 
     public int getResourceCount(Coordinate location) {

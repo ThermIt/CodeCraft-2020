@@ -94,7 +94,6 @@ public class DefaultStrategy implements StrategyDelegate {
                 warMap
         );
 
-//        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
         harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me, resources);
         simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, warMap);
         repairMap = new RepairMap(playerView, entitiesMap);
@@ -205,7 +204,6 @@ public class DefaultStrategy implements StrategyDelegate {
                         maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
                     }
                 } else if (unit.getTask() == Task.BUILD) {
-//                    DebugInterface.print("B", unit.getPosition());
                     Entity order = buildOrders.getOrder(unit.getPosition());
                     if (order != null) {
                         Entity entity = entitiesMap.getEntity(order.getPosition());
@@ -232,23 +230,6 @@ public class DefaultStrategy implements StrategyDelegate {
                 unit.setBuildAction(buildAction);
                 unit.setRepairAction(repairAction);
             }
-
-            if (unit.getAttackAction() != null) {
-                DebugInterface.print("AK", unit.getPosition());
-            } else if (unit.getBuildAction() != null) {
-                DebugInterface.print("BD", unit.getPosition());
-            } else if (unit.getRepairAction() != null) {
-                DebugInterface.print("RR", unit.getPosition());
-            } else if (unit.getMoveAction() != null) {
-                if (unit.getTask() == Task.RUN_FOOLS) {
-                    DebugInterface.print("RN", unit.getPosition());
-                } else {
-                    DebugInterface.print("MV", unit.getPosition());
-                }
-                DebugInterface.line(unit.getPosition(), unit.getMoveAction().getTarget());
-
-            }
-
 
             result.getEntityActions().put(unit.getId(), new EntityAction(
                     unit.getMoveAction(),
@@ -290,27 +271,6 @@ public class DefaultStrategy implements StrategyDelegate {
         if (entityType != EntityType.BUILDER_UNIT && playerView.getCurrentTick() < 20) {
             return buildAction;
         }
-
-/*
-        if (DebugInterface.isDebugEnabled()) {
-            System.out.println(playerView.getCurrentTick() + ":" + allEntities.getMyBuilders().size());
-        }
-
-*/
-
-/*
-failedLimits
-        int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
-        if (playerView.isRound2()) {
-            if (maxUnits > 30*0.7) {
-                buildersLimit = Math.max((int) (maxUnits * 0.7), buildersLimit);
-            }
-        }
-
-        if (playerView.isFinials()) {
-            buildersLimit = 110;
-        }
-*/
         int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
         if (playerView.isRound2()) {
             buildersLimit = 650;

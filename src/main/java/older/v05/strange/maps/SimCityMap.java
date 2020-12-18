@@ -78,18 +78,6 @@ public class SimCityMap {
                             int canBuildX = i + 1 + k;
                             int canBuildY = j + 1 + l;
                             coordinates.add(new Coordinate(canBuildX, canBuildY));
-/*
-                            if (debugInterface.isDebugEnabled()) {
-                                DebugCommand.Add command = new DebugCommand.Add();
-                                ColoredVertex[] arra = new ColoredVertex[3];
-                                arra[0] = new ColoredVertex(new Vec2Float(canBuildX,canBuildY), new Vec2Float(0, 0), new Color(0, 1, 1, 0.5f));
-                                arra[1] = new ColoredVertex(new Vec2Float(canBuildX+1,canBuildY), new Vec2Float(0, 0), new Color(0, 1, 1, 0.5f));
-                                arra[2] = new ColoredVertex(new Vec2Float(canBuildX,canBuildY+1), new Vec2Float(0, 0), new Color(0, 1, 1, 0.5f));
-                                DebugData data = new DebugData.Primitives(arra, PrimitiveType.TRIANGLES);
-                                command.setData(data);
-                                debugInterface.send(command);
-                            }
-*/
                         }
                     }
 
@@ -143,22 +131,7 @@ public class SimCityMap {
             }
         }
 
-/*
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled() && rangedBaseBuildCoordinates[i][j] != null) {
-                    DebugInterface.print(rangedBaseBuildCoordinates[i][j].toString(), i, j);
-                }
-            }
-        }
-*/
-
         fillDistances(distanceByFoot, coordinates);
-
-/*
-        List<Coordinate> coordinates = Arrays.stream(playerView.getEntities()).filter(ent -> ent.getPlayerId() != playerView.getMyId())
-                .map(box -> new Coordinate(box.getPosition())).collect(Collectors.toList());
-*/
     }
 
     public boolean isNeedBarracks() {
@@ -218,13 +191,6 @@ public class SimCityMap {
     }
 
     public int getDistance(Coordinate position) {
-/*
-        DebugCommand.Add command = new DebugCommand.Add();
-        ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(position.getX(), position.getY()), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
-        DebugData data = new DebugData.PlacedText(coloredVertex, Integer.toString(getDistance(position.getX(), position.getY())), -1, 12);
-        command.setData(data);
-        debugInterface.send(command);
-*/
         return getDistance(position.getX(), position.getY());
     }
 

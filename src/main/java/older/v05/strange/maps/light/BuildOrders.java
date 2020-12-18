@@ -87,14 +87,12 @@ public class BuildOrders {
 
              if (entity.isMy(order.getEntityType()) && entity.getHealth() != entity.getProperties().getMaxHealth()) {
                 order.setActive(true);
-                DebugInterface.print("A+", order.getPosition());
                 single = false;
-            } else if (!order.isFree(entitiesMap)) {
+            } else if (!entitiesMap.isOrderFree(order)) {
                 order.setActive(false);
             } else if (me.getResource() >= order.getProperties().getInitialCost() - 2
                     && !entity.isMy(order.getEntityType())) {
                 order.setActive(true);
-                DebugInterface.print("A", order.getPosition());
                 single = false;
             } else {
                 order.setActive(false);
