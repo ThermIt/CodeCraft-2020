@@ -1,7 +1,5 @@
 import mystrategy.strategies.DefaultStrategy;
 import mystrategy.strategies.DelegatingStrategy;
-import older.v01.greedy.rusher.Older1GreedyRusher;
-import older.v02.manage.workers.Older2WorkerManager;
 import older.v03.random.base.Older3RandomBaseBuilder;
 import util.DebugInterface;
 import util.Strategy;
@@ -51,11 +49,11 @@ public class Runner {
         }
         if (args.length > 3 && "multiply2".equals(args[3])) {
             runOnceMultithreaded(host, port, token, new DelegatingStrategy());
-            runOnceMultithreaded(host, port + 1, token, new Older1GreedyRusher());
+            runOnceMultithreaded(host, port + 1, token, new Older3RandomBaseBuilder());
         } else if (args.length > 3 && "multiply3".equals(args[3])) {
             runOnceMultithreaded(host, port, token, new DelegatingStrategy());
-            runOnceMultithreaded(host, port + 1, token, new Older2WorkerManager());
-            runOnceMultithreaded(host, port + 2, token, new Older1GreedyRusher());
+            runOnceMultithreaded(host, port + 1, token, new Older3RandomBaseBuilder());
+            runOnceMultithreaded(host, port + 2, token, new Older3RandomBaseBuilder());
         } else if (args.length > 3 && "multiply4".equals(args[3])) {
             runOnceMultithreaded(host, port, token, new DelegatingStrategy());
             runOnceMultithreaded(host, port + 1, token, new Older3RandomBaseBuilder());

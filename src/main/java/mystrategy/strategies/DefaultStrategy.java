@@ -7,6 +7,7 @@ import mystrategy.maps.EntitiesMap;
 import mystrategy.maps.RepairMap;
 import mystrategy.maps.SimCityMap;
 import mystrategy.maps.light.HarvestJobsMap;
+import mystrategy.maps.light.VirtualResources;
 import mystrategy.maps.light.VisibilityMap;
 import util.DebugInterface;
 import util.StrategyDelegate;
@@ -32,9 +33,11 @@ public class DefaultStrategy implements StrategyDelegate {
     private boolean first;
     private boolean second;
     private VisibilityMap visibility;
+    private VirtualResources resources;
 
-    public DefaultStrategy(VisibilityMap visibility) {
+    public DefaultStrategy(VisibilityMap visibility, VirtualResources resources) {
         this.visibility = visibility;
+        this.resources = resources;
     }
 
     /**
@@ -70,6 +73,7 @@ public class DefaultStrategy implements StrategyDelegate {
         entitiesMap = new EntitiesMap(playerView);
         me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
         this.visibility.init(playerView, allEntities);
+        this.resources.init(playerView, allEntities, entitiesMap);
 
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();
@@ -111,7 +115,11 @@ public class DefaultStrategy implements StrategyDelegate {
             } else {
                 Coordinate moveTo = enemiesMap.getPositionClosestToEnemy(unit.getPosition());
                 if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
-                    moveTo = new Coordinate(7, 72);
+                    if (playerView.getPlayers().length > 2) {
+                        moveTo = new Coordinate(7, 72);
+                    } else {
+                        moveTo = new Coordinate(72, 72);
+                    }
                 }
                 moveAction = new MoveAction(moveTo, true, true);
                 unit.setMoveAction(moveAction);

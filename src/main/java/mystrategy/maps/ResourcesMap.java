@@ -109,11 +109,11 @@ public class ResourcesMap {
     }
 
     private boolean isPassable(Coordinate coordinate) {
-        return this.entitiesMap.isPassable(coordinate) || this.entitiesMap.getIsResource(coordinate);
+        return this.entitiesMap.isPassable(coordinate) || this.entitiesMap.isResource(coordinate);
     }
 
     private boolean isPassableWithObstacles(Coordinate coordinate) {
-        return this.entitiesMap.isEmpty(coordinate) || this.entitiesMap.getIsResource(coordinate);
+        return this.entitiesMap.isEmpty(coordinate) || this.entitiesMap.isResource(coordinate);
     }
 
     public Coordinate getPositionClosestToResource(Coordinate from) {

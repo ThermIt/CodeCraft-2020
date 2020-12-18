@@ -5,10 +5,7 @@ import mystrategy.Task;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.light.BuildOrders;
-import mystrategy.maps.light.HarvestJobsMap;
-import mystrategy.maps.light.VisibilityMap;
-import mystrategy.maps.light.WorkerJobsMap;
+import mystrategy.maps.light.*;
 import util.StrategyDelegate;
 
 import java.util.ArrayList;
@@ -28,10 +25,12 @@ public class FirstStageStrategy implements StrategyDelegate {
     private Player me;
     private BuildOrders buildOrders;
     private VisibilityMap visibility;
+    private VirtualResources resources;
 
-    public FirstStageStrategy(BuildOrders buildOrders, VisibilityMap visibility) {
+    public FirstStageStrategy(BuildOrders buildOrders, VisibilityMap visibility, VirtualResources resources) {
         this.buildOrders = buildOrders;
         this.visibility = visibility;
+        this.resources = resources;
     }
 
     @Override
@@ -41,7 +40,7 @@ public class FirstStageStrategy implements StrategyDelegate {
 
     @Override
     public StrategyDelegate getNextStage() {
-        return new DefaultStrategy(visibility);
+        return new DefaultStrategy(visibility, resources);
     }
 
     @Override
@@ -51,6 +50,7 @@ public class FirstStageStrategy implements StrategyDelegate {
         this.entitiesMap = new EntitiesMap(playerView);
         this.allEntities = new AllEntities(playerView);
         this.visibility.init(playerView, allEntities);
+        this.resources.init(playerView, allEntities, entitiesMap);
 
         EnemiesMap enemiesMap = new EnemiesMap(playerView, entitiesMap);
         this.jobs = new WorkerJobsMap(

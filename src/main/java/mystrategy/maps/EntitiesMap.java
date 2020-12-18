@@ -82,8 +82,12 @@ public class EntitiesMap {
         return entity;
     }
 
-    public boolean getIsResource(Coordinate coordinate) {
-        return entityAtPosition[coordinate.getX()][coordinate.getY()].getEntityType() == EntityType.RESOURCE;
+    public boolean isResource(Coordinate coordinate) {
+        return isResource(coordinate.getX(), coordinate.getY());
+    }
+
+    public boolean isResource(int x, int y) {
+        return getEntity(x, y).getEntityType() == EntityType.RESOURCE;
     }
 
     public boolean isEmpty(Coordinate coordinate) {

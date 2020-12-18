@@ -15,16 +15,26 @@ public class VisibilityMap {
     private boolean isFogOfWar;
 
     private int[][] visibilityRange;
+    private int[][] lastSeen;
     private int mapSize;
+    private int tick;
+
+    public int getTick() {
+        return tick - 1; // 0-based
+    }
 
     public void init(PlayerView playerView, AllEntities allEntities) {
         isFogOfWar = playerView.isFogOfWar();
+        tick = playerView.getCurrentTick() + 1; // 0-based -> 1-based
 
         // calculate anyway to filter enemies by range
 
         mapSize = playerView.getMapSize();
         int[][] remainingRange = new int[mapSize][mapSize];
         visibilityRange = new int[mapSize][mapSize];
+        if (lastSeen == null) {
+            lastSeen = new int[mapSize][mapSize];
+        }
 
         Set<Coordinate> adjacentPositions = new HashSet<>();
         for (Entity unit : allEntities.getMyEntities()) {
@@ -36,6 +46,7 @@ public class VisibilityMap {
                                 unit.getProperties().getSightRange()
                         );
                 visibilityRange[position.getX()][position.getY()] = 1;
+                lastSeen[position.getX()][position.getY()] = tick;
             }
         }
 
@@ -91,9 +102,14 @@ public class VisibilityMap {
         ) {
             if (visibilityRange[pos.getX()][pos.getY()] == 0) {
                 visibilityRange[pos.getX()][pos.getY()] = i + 1;
+                lastSeen[pos.getX()][pos.getY()] = tick;
             }
             remainingRange[pos.getX()][pos.getY()] = previouslyRemainingRange - 1;
             coordinateListNext.add(pos);
         }
+    }
+
+    public boolean isVisible(int x, int y) {
+        return visibilityRange[x][y] > 0;
     }
 }
