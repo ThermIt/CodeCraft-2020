@@ -52,17 +52,19 @@ public class WorkerJobsMap {
         }
 */
 
+/*
         for (Entity worker : allEntities.getMyWorkers()) {
             if (enemiesMap.getDangerLevel(worker.getPosition()) > 0) {
                 markRun(worker);
             }
         }
+*/
 
         int minWorkers = 3;
         Set<Coordinate> buildCoordinates = new HashSet<>(128);
         for (Entity order : buildOrders.updateAndGetActiveOrders(allEntities, entitiesMap, me)) {
-            if (order.getEntityType() == EntityType.RANGED_BASE) {
-                minWorkers = 5;
+            if (order.getEntityType() == EntityType.RANGED_BASE || order.getEntityType() == EntityType.MELEE_BASE) {
+                minWorkers = 10;
             }
             List<Coordinate> adjacentCoordinates = order.getAdjacentCoordinates();
             buildCoordinates.addAll(adjacentCoordinates);
@@ -168,12 +170,12 @@ public class WorkerJobsMap {
                     Entity entity = entitiesMap.getEntity(coordinate);
 //                    DebugInterface.print(Integer.toString(i), coordinate); // build distance
                     if (entity.isMy(EntityType.BUILDER_UNIT)) {
+                        if (i > 2 && workerCount >= minWorkers) {
+                            return;
+                        }
                         if (entity.getTask() == Task.IDLE) {
                             entity.setTask(i == 1 ? Task.BUILD : Task.MOVE_TO_BUILD);
                             workerCount++;
-                        }
-                        if (i > 2 && workerCount >= minWorkers) {
-                            return;
                         }
                         if (entity.getTask() == Task.BUILD) {
                             continue;

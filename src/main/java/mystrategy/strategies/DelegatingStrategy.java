@@ -3,10 +3,7 @@ package mystrategy.strategies;
 import model.Action;
 import model.DebugCommand;
 import model.PlayerView;
-import mystrategy.maps.light.BuildOrders;
-import mystrategy.maps.light.VirtualResources;
-import mystrategy.maps.light.VisibilityMap;
-import mystrategy.maps.light.WarMap;
+import mystrategy.maps.light.*;
 import util.*;
 
 public class DelegatingStrategy implements Strategy {
@@ -17,15 +14,17 @@ public class DelegatingStrategy implements Strategy {
     private VisibilityMap visibility = new VisibilityMap();
     private VirtualResources resources = new VirtualResources(visibility);
     private WarMap warMap = new WarMap(visibility, resources);
+    private SimCityPlan simCityPlan = new SimCityPlan();
 
     @Override
     public Action getAction(PlayerView playerView, DebugInterface debugInterface) {
+        // once on start because we don't have settings outside of a round
         new Initializer(playerView, debugInterface).run();
-        buildOrders.init(playerView); // once on start because we don't have settings outside of a round
 
         if (currentStrategy == null) {
             if (playerView.isFogOfWar()) {
-                initFogStrategy();
+//                initFogStrategy();
+                initDefaultStrategy();
             } else {
                 initDefaultStrategy();
             }
@@ -40,13 +39,13 @@ public class DelegatingStrategy implements Strategy {
     }
 
     private void initDefaultStrategy() {
-        DefaultStrategy currentStrategy = new DefaultStrategy(buildOrders, visibility, resources, warMap);
+        DefaultStrategy currentStrategy = new DefaultStrategy(buildOrders, visibility, resources, warMap, simCityPlan);
         this.currentStrategy = currentStrategy;
         this.trigger = currentStrategy;
     }
 
     private void initFogStrategy() {
-        FirstStageStrategy currentStrategy = new FirstStageStrategy(buildOrders, visibility, resources, warMap);
+        FirstStageStrategy currentStrategy = new FirstStageStrategy(buildOrders, visibility, resources, warMap, simCityPlan);
         this.currentStrategy = currentStrategy;
         this.trigger = currentStrategy;
     }

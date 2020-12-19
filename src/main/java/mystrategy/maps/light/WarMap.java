@@ -310,11 +310,9 @@ public class WarMap {
             return newPosition;
         }
 
-/*
         if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) { // scatter
             return newPosition;
         }
-*/
         return old;
     }
 

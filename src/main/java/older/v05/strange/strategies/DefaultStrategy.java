@@ -53,7 +53,7 @@ public class DefaultStrategy implements StrategyDelegate {
         if (!first) {
             first = true;
             if (DebugInterface.isDebugEnabled()) {
-                System.out.println(playerView.getCurrentTick() + "SW");
+                System.out.println(playerView.getCurrentTick() + "oldSW");
             }
         }
         // определить фронт работ (добыча/постройка/починка/атака/расчистка/разведка/защита)
@@ -102,14 +102,14 @@ public class DefaultStrategy implements StrategyDelegate {
                 .anyMatch(ent1 -> ent1.isMy(EntityType.RANGED_BASE) && !ent1.isActive())) {
             second = true;
             if (DebugInterface.isDebugEnabled()) {
-                System.out.println(playerView.getCurrentTick() + "BR");
+                System.out.println(playerView.getCurrentTick() + "oldBR");
             }
         }
         if (!third && allEntities.getMyBuildings().stream()
                 .anyMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive())) {
             third = true;
             if (DebugInterface.isDebugEnabled()) {
-                System.out.println(playerView.getCurrentTick() + "BR+");
+                System.out.println(playerView.getCurrentTick() + "oldBR+");
             }
         }
 
@@ -245,7 +245,10 @@ public class DefaultStrategy implements StrategyDelegate {
     }
 
     private boolean needMoreHouses() {
-        return maxUnits == 0 || (maxUnits - (currentUnits + me.getResource() / (maxUnits <= 150 ? 10 : 50))) * 100 / maxUnits < 20;
+        if (maxUnits == 0)
+            return true;
+
+        return (maxUnits - currentUnits - me.getResource() / (maxUnits <= 150 ? 10 : 50)) < 30;
     }
 
     private void handleBuildings(Action result) {

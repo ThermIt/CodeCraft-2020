@@ -32,6 +32,10 @@ public class DebugInterface {
         print(test, pos.getX(), pos.getY());
     }
 
+    public static void print(Integer test, Coordinate pos) {
+        print(test, pos.getX(), pos.getY());
+    }
+
     public static void print(Integer test, int x, int y) {
         print(test.toString(), x, y);
     }
@@ -58,6 +62,19 @@ public class DebugInterface {
         DebugData data = new DebugData.Primitives(vertices, PrimitiveType.LINES);
         command.setData(data);
         getDebugInterface().send(command);
+
+/*
+                            if (debugInterface.isDebugEnabled()) {
+                                DebugCommand.Add command = new DebugCommand.Add();
+                                ColoredVertex[] arra = new ColoredVertex[3];
+                                arra[0] = new ColoredVertex(new Vec2Float(canBuildX,canBuildY), new Vec2Float(0, 0), new Color(0, 1, 1, 0.5f));
+                                arra[1] = new ColoredVertex(new Vec2Float(canBuildX+1,canBuildY), new Vec2Float(0, 0), new Color(0, 1, 1, 0.5f));
+                                arra[2] = new ColoredVertex(new Vec2Float(canBuildX,canBuildY+1), new Vec2Float(0, 0), new Color(0, 1, 1, 0.5f));
+                                DebugData data = new DebugData.Primitives(arra, PrimitiveType.TRIANGLES);
+                                command.setData(data);
+                                debugInterface.send(command);
+                            }
+*/
     }
 
     public void send(model.DebugCommand command) {

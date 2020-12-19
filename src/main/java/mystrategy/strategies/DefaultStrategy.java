@@ -11,7 +11,10 @@ import util.DebugInterface;
 import util.StrategyDelegate;
 import util.Task;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultStrategy implements StrategyDelegate {
@@ -37,12 +40,20 @@ public class DefaultStrategy implements StrategyDelegate {
     private VirtualResources resources;
     private WarMap warMap;
     private WorkerJobsMap jobs;
+    private SimCityPlan simCityPlan;
 
-    public DefaultStrategy(BuildOrders buildOrders, VisibilityMap visibility, VirtualResources resources, WarMap warMap) {
+    public DefaultStrategy(
+            BuildOrders buildOrders,
+            VisibilityMap visibility,
+            VirtualResources resources,
+            WarMap warMap,
+            SimCityPlan simCityPlan
+    ) {
         this.buildOrders = buildOrders;
         this.visibility = visibility;
         this.resources = resources;
         this.warMap = warMap;
+        this.simCityPlan = simCityPlan;
     }
 
     /**
@@ -71,9 +82,14 @@ public class DefaultStrategy implements StrategyDelegate {
         // делеать милишников пачками по 5 штук
         // разбавлять лучников рабочими
         // сохранять стоимость юнитов низкой?
+        // group units (attack/repair/build/harass/reconnaissance/harvest)
+        // strategic orders
+        // generate movements (attack/retreat/avoid active turrets/retreat to repair)
+        // test movements
+
+        // generate attacks+repairs
 
         this.playerView = playerView;
-        this.debugInterface = debugInterface;
         allEntities = new AllEntities(playerView);
         entitiesMap = new EntitiesMap(playerView);
         me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
@@ -83,6 +99,7 @@ public class DefaultStrategy implements StrategyDelegate {
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();
         enemiesMap = new EnemiesMap(playerView, entitiesMap);
+        buildOrders.init(playerView, allEntities);
 
         this.jobs = new WorkerJobsMap(
                 playerView,
@@ -96,8 +113,9 @@ public class DefaultStrategy implements StrategyDelegate {
 
 //        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
         harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me, resources);
-        simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, warMap);
         repairMap = new RepairMap(playerView, entitiesMap);
+        simCityPlan.init(playerView, entitiesMap, allEntities, warMap, resources);
+        simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, warMap, simCityPlan);
 
         if (!second && allEntities.getMyBuildings().stream()
                 .anyMatch(ent1 -> ent1.isMy(EntityType.RANGED_BASE) && !ent1.isActive())) {
@@ -115,13 +133,6 @@ public class DefaultStrategy implements StrategyDelegate {
         }
 
         Action result = new Action(new java.util.HashMap<>());
-
-        // group units (attack/repair/build/harass/reconnaissance/harvest)
-        // strategic orders
-        // generate movements (attack/retreat/avoid active turrets/retreat to repair)
-        // test movements
-
-        // generate attacks+repairs
 
         // units
         for (Entity unit : allEntities.getMyUnits()) {
@@ -187,18 +198,21 @@ public class DefaultStrategy implements StrategyDelegate {
                     Coordinate rbBuildCoordinates = simCityMap.getRangedBaseBuildCoordinates(unit.getPosition());
                     if (simCityMap.isNeedBarracks() // hack
                             && me.getResource() >= playerView.getEntityProperties().get(EntityType.RANGED_BASE).getInitialCost()
-                            && rbBuildCoordinates != null) {
+                            && rbBuildCoordinates != null
+                    ) {
                         attackAction = null;
                         unit.setMoveAction(null); // bugfix this
                         buildAction = new BuildAction(EntityType.RANGED_BASE, rbBuildCoordinates);
+//                        buildOrders.placeBarracks(rbBuildCoordinates);
 //                    maxUnits += playerView.getEntityProperties().get(EntityType.RANGED_BASE).getPopulationProvide();
 
-//                    simCityMap.setNeedBarracks(false);
+//                        simCityMap.setNeedBarracks(false);
                     }
                     if (needMoreHouses()
-                            && !(simCityMap.isNeedBarracks() && maxUnits >= 20)
+                            && buildOrders.isFreeToAdd()
                             && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
-                            && buildCoordinates != null) {
+                            && buildCoordinates != null
+                    ) {
                         attackAction = null;
                         unit.setMoveAction(null); // bugfix this
                         buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
@@ -226,7 +240,7 @@ public class DefaultStrategy implements StrategyDelegate {
                 EntityType[] validAutoAttackTargets;
                 validAutoAttackTargets = new EntityType[0];
                 attackAction = new AttackAction(
-                        null, new AutoAttack(5, validAutoAttackTargets)
+                        null, new AutoAttack(6, validAutoAttackTargets)
                 );
                 unit.setAttackAction(attackAction);
                 unit.setBuildAction(buildAction);
@@ -332,14 +346,7 @@ failedLimits
         );
         if (entityType == EntityType.BUILDER_UNIT) {
             Coordinate buildPosition = defaultBuildPosition;
-            List<Coordinate> adjacentFreePoints = new ArrayList<>();
-            int size = entity.getProperties().getSize();
-            for (int i = 0; i < size; i++) {
-                adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() - 1, entity.getPosition().getY() + i));
-                adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() - 1));
-                adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + size, entity.getPosition().getY() + i));
-                adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() + size));
-            }
+            List<Coordinate> adjacentFreePoints = entity.getAdjacentCoordinates();
             adjacentFreePoints = adjacentFreePoints.stream()
                     .filter(point -> !point.isOutOfBounds())
                     .filter(point -> entitiesMap.isEmpty(point))
@@ -358,14 +365,7 @@ failedLimits
             );
         } else {
             Coordinate buildPosition = defaultBuildPosition;
-            List<Coordinate> adjacentFreePoints = new ArrayList<>();
-            int size = entity.getProperties().getSize();
-            for (int i = 0; i < size; i++) {
-                adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() - 1, entity.getPosition().getY() + i));
-                adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() - 1));
-                adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + size, entity.getPosition().getY() + i));
-                adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() + size));
-            }
+            List<Coordinate> adjacentFreePoints = entity.getAdjacentCoordinates();
             adjacentFreePoints = adjacentFreePoints.stream()
                     .filter(point -> !point.isOutOfBounds())
                     .filter(point -> entitiesMap.isEmpty(point))

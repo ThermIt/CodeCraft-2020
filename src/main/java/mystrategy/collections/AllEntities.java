@@ -23,6 +23,7 @@ public class AllEntities {
     private List<Entity> enemyBuildings = new ArrayList<>();
     private List<Entity> enemyBuilders = new ArrayList<>();
     private List<Entity> myBuilders = new ArrayList<>();
+    private List<Entity> myRangedBases = new ArrayList<>();
 
     private int currentUnits;
     private int maxUnits;
@@ -50,6 +51,9 @@ public class AllEntities {
                     myBuildings.add(entity);
                     if (entity.getEntityType() != EntityType.HOUSE) {
                         myActors.add(entity);
+                        if (entity.getEntityType() == EntityType.RANGED_BASE) {
+                            myRangedBases.add(entity);
+                        }
                     }
                 } else if (entity.getEntityType().isUnit()) {
                     if (entity.getEntityType() == EntityType.BUILDER_UNIT) {
@@ -126,5 +130,9 @@ public class AllEntities {
 
     public List<Entity> getMyEntities() {
         return myEntities;
+    }
+
+    public List<Entity> getMyRangedBases() {
+        return myRangedBases;
     }
 }

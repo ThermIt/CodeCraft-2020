@@ -9,7 +9,6 @@ import mystrategy.maps.light.*;
 import util.StrategyDelegate;
 import util.Task;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -28,13 +27,21 @@ public class FirstStageStrategy implements StrategyDelegate {
     private VisibilityMap visibility;
     private VirtualResources resources;
     private WarMap warMap; // only to pass wo war state
+    private SimCityPlan simCityPlan;
     private RepairMap repairMap;
 
-    public FirstStageStrategy(BuildOrders buildOrders, VisibilityMap visibility, VirtualResources resources, WarMap warMap) {
+    public FirstStageStrategy(
+            BuildOrders buildOrders,
+            VisibilityMap visibility,
+            VirtualResources resources,
+            WarMap warMap,
+            SimCityPlan simCityPlan
+    ) {
         this.buildOrders = buildOrders;
         this.visibility = visibility;
         this.resources = resources;
         this.warMap = warMap;
+        this.simCityPlan = simCityPlan;
     }
 
     @Override
@@ -44,7 +51,7 @@ public class FirstStageStrategy implements StrategyDelegate {
 
     @Override
     public StrategyDelegate getNextStage() {
-        return new DefaultStrategy(buildOrders, visibility, resources, warMap);
+        return new DefaultStrategy(buildOrders, visibility, resources, warMap, simCityPlan);
     }
 
     @Override
@@ -56,6 +63,7 @@ public class FirstStageStrategy implements StrategyDelegate {
         this.visibility.init(playerView, allEntities);
         this.resources.init(playerView, allEntities, entitiesMap);
         this.warMap.init(playerView, entitiesMap, allEntities);
+        buildOrders.init(playerView, allEntities);
 
         EnemiesMap enemiesMap = new EnemiesMap(playerView, entitiesMap);
         this.jobs = new WorkerJobsMap(
@@ -204,14 +212,7 @@ public class FirstStageStrategy implements StrategyDelegate {
                 entity.getPosition().getY() + entity.getProperties().getSize() - 1
         );
         Coordinate buildPosition = defaultBuildPosition;
-        List<Coordinate> adjacentFreePoints = new ArrayList<>();
-        int size = entity.getProperties().getSize();
-        for (int i = 0; i < size; i++) {
-            adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() - 1, entity.getPosition().getY() + i));
-            adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() - 1));
-            adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + size, entity.getPosition().getY() + i));
-            adjacentFreePoints.add(new Coordinate(entity.getPosition().getX() + i, entity.getPosition().getY() + size));
-        }
+        List<Coordinate> adjacentFreePoints = entity.getAdjacentCoordinates();
         adjacentFreePoints = adjacentFreePoints.stream()
                 .filter(point -> !point.isOutOfBounds())
                 .filter(point -> entitiesMap.isEmpty(point))
