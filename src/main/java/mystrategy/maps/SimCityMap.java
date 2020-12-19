@@ -38,34 +38,32 @@ public class SimCityMap {
 
         for (int i = 0; i < mapSize - houseSizeWithMargin + 1; i++) {
             for (int j = 0; j < mapSize - houseSizeWithMargin + 1; j++) {
-                boolean canBuild = true;
-                canBuild = simCityPlan.getPassableSize(i, j) >= houseSizeWithMargin
+                boolean canBuild = simCityPlan.getPassableSize(i, j) >= houseSizeWithMargin
                         && simCityPlan.getEmptySize(i + 1, j + 1) >= houseSize
                         && warMap.getDistanceToEnemy(i + 2, j + 2) >= MIN_DISTANCE_TO_ENEMY;
                 if (canBuild) {
                     for (int k = 0; k < houseSize; k++) {
                         for (int l = 0; l < houseSize; l++) {
-                            int canBuildX = i + 1 + k;
-                            int canBuildY = j + 1 + l;
-                            coordinates.add(new Coordinate(canBuildX, canBuildY));
+                            coordinates.add(new Coordinate(i + 1 + k, j + 1 + l));
                         }
                     }
 
                     boolean canBuildRangedBase = simCityPlan.getEmptySize(i, j) >= 5
                             && warMap.getDistanceToEnemy(i + 2, j + 2) >= MIN_DISTANCE_TO_ENEMY; // big building
                     if (canBuildRangedBase) {
-                        for (int k = 0; k <= houseSize + 1; k++) { // hack
+                        int rangedBaseSize = 5;
+                        for (int k = 0; k < rangedBaseSize; k++) { // hack
                             if (i - 1 >= 0) {
                                 rangedBaseBuildCoordinates[i - 1][j + k] = new Coordinate(i, j);
                             }
                             if (j - 1 >= 0) {
                                 rangedBaseBuildCoordinates[i + k][j - 1] = new Coordinate(i, j);
                             }
-                            if (j + houseSize + 2 < mapSize) {
-                                rangedBaseBuildCoordinates[i + k][j + houseSize + 2] = new Coordinate(i, j);
+                            if (j + rangedBaseSize < mapSize) {
+                                rangedBaseBuildCoordinates[i + k][j + rangedBaseSize] = new Coordinate(i, j);
                             }
-                            if (i + houseSize + 2 < mapSize) {
-                                rangedBaseBuildCoordinates[i + houseSize + 2][j + k] = new Coordinate(i, j);
+                            if (i + rangedBaseSize < mapSize) {
+                                rangedBaseBuildCoordinates[i + rangedBaseSize][j + k] = new Coordinate(i, j);
                             }
                         }
                     }

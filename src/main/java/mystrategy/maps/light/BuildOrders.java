@@ -99,6 +99,7 @@ public class BuildOrders {
                     && !entity.isMy(order.getEntityType())) {
                 order.setActive(true);
                 DebugInterface.print("A", order.getPosition());
+                single = false;
                 if (order.getEntityType() == EntityType.RANGED_BASE) {
                     single = false;
                 }
