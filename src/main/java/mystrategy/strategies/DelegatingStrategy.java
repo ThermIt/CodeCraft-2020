@@ -44,12 +44,6 @@ public class DelegatingStrategy implements Strategy {
         this.trigger = currentStrategy;
     }
 
-    private void initFogStrategy() {
-        FirstStageStrategy currentStrategy = new FirstStageStrategy(buildOrders, visibility, resources, warMap, simCityPlan);
-        this.currentStrategy = currentStrategy;
-        this.trigger = currentStrategy;
-    }
-
     @Override
     public void debugUpdate(PlayerView playerView, DebugInterface debugInterface) {
         debugInterface.send(new DebugCommand.Clear());

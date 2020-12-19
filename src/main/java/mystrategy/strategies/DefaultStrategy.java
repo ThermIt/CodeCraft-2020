@@ -61,12 +61,6 @@ public class DefaultStrategy implements StrategyDelegate {
      */
     @Override
     public Action getAction(PlayerView playerView) {
-        if (!first) {
-            first = true;
-            if (DebugInterface.isDebugEnabled()) {
-                System.out.println(playerView.getCurrentTick() + "SW");
-            }
-        }
         // определить фронт работ (добыча/постройка/починка/атака/расчистка/разведка/защита)
         // резервирование ресурсов
         // определить кто что делает сейчас // забрать работы
@@ -331,7 +325,6 @@ failedLimits
         if (playerView.isFinials()) {
             buildersLimit = 1000;
         }
-
 
         if (entityType == EntityType.BUILDER_UNIT
                 && allEntities.getMyWorkers().size() > buildersLimit) {
