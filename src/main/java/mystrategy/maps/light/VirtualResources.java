@@ -18,6 +18,7 @@ public class VirtualResources {
     private boolean[][] clearedFromResource;
     private boolean[][] possibleResource;
     private int[][] resourceCount;
+    private int totalResourceCount;
     private int tick;
 
     public VirtualResources(VisibilityMap visibility) {
@@ -54,6 +55,7 @@ public class VirtualResources {
             }
         }
 
+        totalResourceCount = 0;
         for (int i = 0; i < mapSize; i++) {
             for (int j = 0; j < mapSize; j++) {
                 if (!clearedFromResource[i][j]) {
@@ -64,6 +66,7 @@ public class VirtualResources {
                         }
                     }
                 }
+                totalResourceCount += getResourceCount(i, j);
             }
         }
 
@@ -119,5 +122,9 @@ public class VirtualResources {
         if (getTick() != playerView.getCurrentTick()) {
             throw new RuntimeException("visibility is not initialized");
         }
+    }
+
+    public int getTotalResourceCount() {
+        return totalResourceCount;
     }
 }

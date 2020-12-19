@@ -132,12 +132,10 @@ public class DefaultStrategy implements StrategyDelegate {
             }
         }
 
-        Action result = new Action(new java.util.HashMap<>());
-
         // units
         for (Entity unit : allEntities.getMyUnits()) {
             MoveAction moveAction;
-            if (unit.getEntityType() == EntityType.BUILDER_UNIT) {
+            if (resources.getTotalResourceCount() > 0 && unit.getEntityType() == EntityType.BUILDER_UNIT) {
                 Coordinate moveTo = null;
                 if (unit.getTask() == Task.BUILD) {
                     moveTo = null;
@@ -174,11 +172,8 @@ public class DefaultStrategy implements StrategyDelegate {
             BuildAction buildAction = null;
             RepairAction repairAction = null;
             AttackAction attackAction = null;
-            if (/*allEntities.getResources().size() > 0 && */unit.getEntityType() == EntityType.BUILDER_UNIT) {
-
-                if (unit.getTask() == Task.IDLE) {
-
-                    // assign idle workers to harvest
+            if (resources.getTotalResourceCount() > 0 && unit.getEntityType() == EntityType.BUILDER_UNIT) {
+                if (unit.getTask() == Task.IDLE) { // assign idle workers to harvest or repair
                     Entity resource = harvestJobs.getResource(unit.getPosition());
                     Integer canBuildId = repairMap.canBuildId(unit.getPosition());
                     if (canBuildId != null) {
@@ -262,18 +257,24 @@ public class DefaultStrategy implements StrategyDelegate {
                 DebugInterface.line(unit.getPosition(), unit.getMoveAction().getTarget());
 
             }
-
-
-            result.getEntityActions().put(unit.getId(), new EntityAction(
-                    unit.getMoveAction(),
-                    unit.getBuildAction(),
-                    unit.getAttackAction(),
-                    unit.getRepairAction()
-            ));
         }
 
         // buildings
-        handleBuildings(result);
+        handleBuildings();
+
+
+        Action result = new Action(new java.util.HashMap<>());
+        for (Entity actor : allEntities.getMyActors()) {
+            if (actor.hasAction()) {
+                result.getEntityActions().put(actor.getId(), new EntityAction(
+                        actor.getMoveAction(),
+                        actor.getBuildAction(),
+                        actor.getAttackAction(),
+                        actor.getRepairAction()
+                ));
+            }
+        }
+
         return result;
     }
 
@@ -281,21 +282,18 @@ public class DefaultStrategy implements StrategyDelegate {
         return maxUnits == 0 || (maxUnits - (currentUnits + me.getResource() / (maxUnits <= 150 ? 10 : 50))) * 100 / maxUnits < 20;
     }
 
-    private void handleBuildings(Action result) {
+    private void handleBuildings() {
         for (Entity building : allEntities.getMyBuildings()) {
             BuildAction buildAction = null;
             if (building.getProperties().getBuild() != null) {
                 buildAction = getBuildingAction(playerView, building, building.getProperties(), null);
             }
-            result.getEntityActions().put(building.getId(), new EntityAction(
-                    null,
-                    buildAction,
-                    new AttackAction(
-                            null, new AutoAttack(building.getProperties().getSightRange(), new EntityType[0])
-                    ),
-                    null
+            building.setMoveAction(null);
+            building.setAttackAction(new AttackAction(
+                    null, new AutoAttack(building.getProperties().getSightRange(), new EntityType[0])
             ));
-
+            building.setRepairAction(null);
+            building.setBuildAction(buildAction);
         }
     }
 
