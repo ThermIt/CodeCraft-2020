@@ -2,12 +2,15 @@ package mystrategy.maps.light;
 
 import model.*;
 import mystrategy.Constants;
+import mystrategy.SingleVisitCoordinateSet;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import util.DebugInterface;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HarvestJobsMap {
@@ -42,8 +45,9 @@ public class HarvestJobsMap {
         this.harvest = new int[mapSize][mapSize];
         this.workers = new int[mapSize][mapSize];
 
-        Set<Coordinate> restrictedResourceCoordinates = new HashSet<>(128);
-        Set<Coordinate> allResourceCoordinates = new HashSet<>(128);
+        SingleVisitCoordinateSet restrictedResourceCoordinates = new SingleVisitCoordinateSet();
+        SingleVisitCoordinateSet restrictedResourceCoordinatesWithObstacles = new SingleVisitCoordinateSet();
+        SingleVisitCoordinateSet allResourceCoordinates = new SingleVisitCoordinateSet();
 
         for (int i = 0; i < mapSize; i++) {
             for (int j = 0; j < mapSize; j++) {
@@ -80,6 +84,7 @@ public class HarvestJobsMap {
                             Entity entity = entitiesMap.getEntity(loc);
                             if (!entity.isMy(EntityType.BUILDER_UNIT) && enemiesMap.getDangerLevel(loc) == 0) {
                                 restrictedResourceCoordinates.add(loc);
+                                restrictedResourceCoordinatesWithObstacles.add(loc);
 //                                DebugInterface.print("+", loc);
                             }
                         });
@@ -91,8 +96,8 @@ public class HarvestJobsMap {
 */
 
         fillDistances(resourceDistanceByFoot, restrictedResourceCoordinates, false);
-        fillDistances(resourceDistanceByFootWithObstacles, restrictedResourceCoordinates, true);
-        fillDistances(resourceDistanceByFootAllResources, restrictedResourceCoordinates, false);
+        fillDistances(resourceDistanceByFootWithObstacles, restrictedResourceCoordinatesWithObstacles, true);
+        fillDistances(resourceDistanceByFootAllResources, allResourceCoordinates, false);
     }
 
     public Entity getResource(Coordinate position) {
@@ -130,21 +135,20 @@ public class HarvestJobsMap {
         return distanceMap[position.getX()][position.getY()];
     }
 
-    private void fillDistances(int[][] distanceMap, Set<Coordinate> coordinateList, boolean withObstacles) {
+    private void fillDistances(int[][] distanceMap, SingleVisitCoordinateSet coordinateList, boolean withObstacles) {
         for (int i = 1; !coordinateList.isEmpty(); i++) {
-            Set<Coordinate> coordinateListNext = new HashSet<>(128);
             for (Coordinate coordinate : coordinateList) {
                 if (coordinate.isInBounds()
                         && getDistance(coordinate, distanceMap) == 0
                         && (withObstacles ? isPassableWithObstacles(coordinate) : isPassable(coordinate))) {
                     distanceMap[coordinate.getX()][coordinate.getY()] = i;
-                    coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
-                    coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
-                    coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
-                    coordinateListNext.add(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
+                    coordinateList.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
+                    coordinateList.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
+                    coordinateList.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
+                    coordinateList.addOnNextStep(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
                 }
             }
-            coordinateList = coordinateListNext;
+            coordinateList.nextStep();
 
             if (i > Constants.MAX_CYCLES) {
                 if (DebugInterface.isDebugEnabled()) {

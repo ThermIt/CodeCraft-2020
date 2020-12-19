@@ -1,0 +1,64 @@
+package mystrategy;
+
+import model.Coordinate;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+
+public class SingleVisitCoordinateSet implements Iterable<Coordinate> {
+    private final int MAP_SIZE = 80;
+    boolean[][] beenThere = new boolean[MAP_SIZE][MAP_SIZE];
+    Set<Coordinate> coordinateList = new HashSet<>(256);
+    Set<Coordinate> coordinateListNextStep = new HashSet<>(256);
+
+    @Override
+    public Iterator<Coordinate> iterator() {
+        return coordinateList.iterator();
+    }
+
+    @Override
+    public Spliterator<Coordinate> spliterator() {
+        return coordinateList.spliterator();
+    }
+
+    @Override
+    public void forEach(Consumer<? super Coordinate> action) {
+        coordinateList.forEach(action);
+    }
+
+    public boolean isEmpty() {
+        return coordinateList.isEmpty();
+    }
+
+    public int size() {
+        return coordinateList.size();
+    }
+
+    public boolean add(Coordinate coordinate) {
+        if (coordinate.isOutOfBounds() || beenThere[coordinate.getX()][coordinate.getY()]) {
+            return false;
+        }
+        beenThere[coordinate.getX()][coordinate.getY()] = true;
+        return coordinateList.add(coordinate);
+    }
+
+    public boolean addOnNextStep(Coordinate coordinate) {
+        if (coordinate.isOutOfBounds() || beenThere[coordinate.getX()][coordinate.getY()]) {
+            return false;
+        }
+        beenThere[coordinate.getX()][coordinate.getY()] = true;
+        return coordinateListNextStep.add(coordinate);
+    }
+
+    public void nextStep() {
+        coordinateList = coordinateListNextStep;
+        coordinateListNextStep = new HashSet<>(256);
+    }
+
+    public Set<Coordinate> getSet() {
+        return new HashSet<>(coordinateList);
+    }
+}
