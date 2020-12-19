@@ -52,13 +52,11 @@ public class WorkerJobsMap {
         }
 */
 
-/*
         for (Entity worker : allEntities.getMyWorkers()) {
             if (enemiesMap.getDangerLevel(worker.getPosition()) > 0) {
                 markRun(worker);
             }
         }
-*/
 
         int minWorkers = 3;
         Set<Coordinate> buildCoordinates = new HashSet<>(128);
