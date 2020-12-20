@@ -430,18 +430,18 @@ public class WarMap {
                 continue;
             }
             if (entity.getEntityType() == EntityType.RESOURCE) {
-                DebugInterface.print("-", entity.getPosition().getX(), entity.getPosition().getY());
+//                DebugInterface.print("-", entity.getPosition().getX(), entity.getPosition().getY());
                 continue;
             }
             if (entity.getMoveAction() != null && entity.getAttackAction() == null && entity.getRepairAction() == null && entity.getBuildAction() == null) {
                 takenSpace[entity.getMoveAction().getTarget().getX()][entity.getMoveAction().getTarget().getY()] = true;
-                DebugInterface.print("X", entity.getMoveAction().getTarget().getX(), entity.getMoveAction().getTarget().getY());
+//                DebugInterface.print("X", entity.getMoveAction().getTarget().getX(), entity.getMoveAction().getTarget().getY());
             } else {
                 int size = entity.getProperties().getSize();
                 for (int i = 0; i < size; i++) {
                     for (int j = 0; j < size; j++) {
                         takenSpace[entity.getPosition().getX() + i][entity.getPosition().getY() + j] = true;
-                        DebugInterface.print("X", entity.getPosition().getX() + i, entity.getPosition().getY() + j);
+//                        DebugInterface.print("X", entity.getPosition().getX() + i, entity.getPosition().getY() + j);
                     }
                 }
                 if (entity.getBuildAction() != null) {
