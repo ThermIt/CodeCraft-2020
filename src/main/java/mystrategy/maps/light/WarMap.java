@@ -5,6 +5,7 @@ import model.Entity;
 import model.EntityType;
 import model.PlayerView;
 import mystrategy.Constants;
+import mystrategy.SingleVisitCoordinateSet;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
@@ -110,7 +111,9 @@ public class WarMap {
         }
 
         for (Entity building : allEntities.getEnemyBuildings()) {
-            enemyBuildingLocations.add(building.getPosition());
+            if (building.getEntityType() != EntityType.TURRET) { // little hack
+                enemyBuildingLocations.add(building.getPosition());
+            }
         }
 
         for (Entity unit : allEntities.getEnemyUnits()) {
@@ -120,7 +123,7 @@ public class WarMap {
             }
         }
 
-        Set<Coordinate> enemyDominance = new HashSet<>(128);
+        SingleVisitCoordinateSet enemyDominance = new SingleVisitCoordinateSet();
         enemyDominance.addAll(enemyUnitLocations);
         enemyDominance.addAll(enemyBuildingLocations);
 
@@ -202,11 +205,10 @@ public class WarMap {
 */
     }
 
-    private void fillEnemyDistances(Set<Coordinate> coordinateList) {
+    private void fillEnemyDistances(SingleVisitCoordinateSet coordinateList) {
         enemyDistanceMap = new int[mapSize][mapSize];
         int[][] delayFuseForCalculation = new int[mapSize][mapSize];
         for (int i = 1; !coordinateList.isEmpty(); i++) {
-            Set<Coordinate> coordinateListNext = new HashSet<>(128);
             for (Coordinate coordinate : coordinateList) {
                 if (coordinate.isInBounds()
                         && enemyDistanceMap[coordinate.getX()][coordinate.getY()] == 0
@@ -217,19 +219,19 @@ public class WarMap {
                     }
                     if (delayFuseForCalculation[coordinate.getX()][coordinate.getY()] > 1) {
                         delayFuseForCalculation[coordinate.getX()][coordinate.getY()]--;
-                        coordinateListNext.add(coordinate);
+                        coordinateList.addOnNextStepByForce(coordinate);
                     } else {
                         enemyDistanceMap[coordinate.getX()][coordinate.getY()] = i;
                         if (!isBuilder(coordinate)) {
-                            coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
-                            coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
-                            coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
-                            coordinateListNext.add(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
+                            coordinateList.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
+                            coordinateList.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
+                            coordinateList.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
+                            coordinateList.addOnNextStep(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
                         }
                     }
                 }
             }
-            coordinateList = coordinateListNext;
+            coordinateList.nextStep();
 
             if (i > Constants.MAX_CYCLES) {
                 if (DebugInterface.isDebugEnabled()) {
@@ -244,7 +246,7 @@ public class WarMap {
         for (int i = 0; i < mapSize; i++) {
             for (int j = 0; j < mapSize; j++) {
                 if (DebugInterface.isDebugEnabled()) {
-                    DebugInterface.print(dominanceMap[i][j], i, j);
+                    DebugInterface.print(enemyDistanceMap[i][j], i, j);
                 }
             }
         }

@@ -178,7 +178,7 @@ public class DefaultStrategy implements StrategyDelegate {
                             && buildCoordinates != null) {
                         attackAction = null;
                         unit.setMoveAction(null); // bugfix this
-                        buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
+                        buildAction = new BuildAction(EntityType.TURRET, buildCoordinates);
                         maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
                     }
                 } else if (unit.getTask() == Task.BUILD) {

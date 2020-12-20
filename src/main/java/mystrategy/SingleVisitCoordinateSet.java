@@ -50,6 +50,11 @@ public class SingleVisitCoordinateSet implements Iterable<Coordinate> {
         return coordinateListNextStep.add(coordinate);
     }
 
+    public boolean addOnNextStepByForce(Coordinate coordinate) {
+        beenThere[coordinate.getX()][coordinate.getY()] = true;
+        return coordinateListNextStep.add(coordinate);
+    }
+
     public void nextStep() {
         coordinateList = coordinateListNextStep;
         coordinateListNextStep = new ArrayList<>(256);
@@ -57,5 +62,11 @@ public class SingleVisitCoordinateSet implements Iterable<Coordinate> {
 
     public Set<Coordinate> getSet() {
         return new HashSet<>(coordinateList);
+    }
+
+    public void addAll(Set<Coordinate> coordinates) {
+        for (Coordinate pos : coordinates) {
+            add(pos);
+        }
     }
 }
