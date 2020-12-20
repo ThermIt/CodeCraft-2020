@@ -1,10 +1,13 @@
 package model;
 
-import mystrategy.maps.EntitiesMap;
+import mystrategy.Decision;
 import util.Initializer;
 import util.StreamUtil;
 import util.Task;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +16,7 @@ import static util.Initializer.getMyId;
 public class Entity {
     private int id;
     private Integer playerId;
-    private model.EntityType entityType;
+    private EntityType entityType;
     private Coordinate position;
     private int health;
     private int accumulatedDamage;
@@ -26,11 +29,12 @@ public class Entity {
     private MoveAction moveAction = null;
 
     private Task task = Task.IDLE;
+    private Decision moveDecision = Decision.NONE;
 
     public Entity() {
     }
 
-    public Entity(int id, Integer playerId, model.EntityType entityType, Coordinate position, int health, boolean active) {
+    public Entity(int id, Integer playerId, EntityType entityType, Coordinate position, int health, boolean active) {
         this.id = id;
         this.playerId = playerId;
         this.entityType = entityType;
@@ -39,7 +43,7 @@ public class Entity {
         this.active = active;
     }
 
-    public static Entity readFrom(java.io.InputStream stream) throws java.io.IOException {
+    public static Entity readFrom(InputStream stream) throws IOException {
         Entity result = new Entity();
         result.id = StreamUtil.readInt(stream);
         if (StreamUtil.readBoolean(stream)) {
@@ -49,37 +53,37 @@ public class Entity {
         }
         switch (StreamUtil.readInt(stream)) {
             case 0:
-                result.entityType = model.EntityType.WALL;
+                result.entityType = EntityType.WALL;
                 break;
             case 1:
-                result.entityType = model.EntityType.HOUSE;
+                result.entityType = EntityType.HOUSE;
                 break;
             case 2:
-                result.entityType = model.EntityType.BUILDER_BASE;
+                result.entityType = EntityType.BUILDER_BASE;
                 break;
             case 3:
-                result.entityType = model.EntityType.BUILDER_UNIT;
+                result.entityType = EntityType.BUILDER_UNIT;
                 break;
             case 4:
-                result.entityType = model.EntityType.MELEE_BASE;
+                result.entityType = EntityType.MELEE_BASE;
                 break;
             case 5:
-                result.entityType = model.EntityType.MELEE_UNIT;
+                result.entityType = EntityType.MELEE_UNIT;
                 break;
             case 6:
-                result.entityType = model.EntityType.RANGED_BASE;
+                result.entityType = EntityType.RANGED_BASE;
                 break;
             case 7:
-                result.entityType = model.EntityType.RANGED_UNIT;
+                result.entityType = EntityType.RANGED_UNIT;
                 break;
             case 8:
-                result.entityType = model.EntityType.RESOURCE;
+                result.entityType = EntityType.RESOURCE;
                 break;
             case 9:
-                result.entityType = model.EntityType.TURRET;
+                result.entityType = EntityType.TURRET;
                 break;
             default:
-                throw new java.io.IOException("Unexpected tag value");
+                throw new IOException("Unexpected tag value");
         }
         result.position = Coordinate.readFrom(stream);
         result.health = StreamUtil.readInt(stream);
@@ -103,11 +107,11 @@ public class Entity {
         this.playerId = playerId;
     }
 
-    public model.EntityType getEntityType() {
+    public EntityType getEntityType() {
         return entityType;
     }
 
-    public void setEntityType(model.EntityType entityType) {
+    public void setEntityType(EntityType entityType) {
         this.entityType = entityType;
     }
 
@@ -135,7 +139,7 @@ public class Entity {
         this.active = active;
     }
 
-    public void writeTo(java.io.OutputStream stream) throws java.io.IOException {
+    public void writeTo(OutputStream stream) throws IOException {
         StreamUtil.writeInt(stream, id);
         if (playerId == null) {
             StreamUtil.writeBoolean(stream, false);
@@ -255,14 +259,11 @@ public class Entity {
         return getEntityType().isUnit();
     }
 
-    public boolean isFree(EntitiesMap entitiesMap) {
-        int size = getProperties().getSize();
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (!entitiesMap.isEmpty(i + position.getX(), j+ position.getY()))
-                    return false;
-            }
-        }
-        return true;
+    public Decision getMoveDecision() {
+        return moveDecision;
+    }
+
+    public void setMoveDecision(Decision moveDecision) {
+        this.moveDecision = moveDecision;
     }
 }

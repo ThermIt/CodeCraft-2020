@@ -239,14 +239,10 @@ public class DefaultStrategy implements StrategyDelegate {
                 }
             } else { // all
                 if (unit.getEntityType() == EntityType.RANGED_UNIT) {
-                    // MOVE RANGER
-                    Coordinate moveTo = warMap.getPositionClosestToForRangedUnit(unit);
-                    if (!Objects.equals(moveTo, unit.getPosition())) {
-                        moveAction = new MoveAction(moveTo, true, true);
-                        unit.setMoveAction(moveAction);
-                    }
+                    continue;
+                    //skip
                 } else {
-                    Coordinate moveTo = warMap.getPositionClosestToEnemy(unit.getPosition());
+                    Coordinate moveTo = warMap.getPositionClosestToEnemy(unit);
                     if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
                         if (playerView.isOneOnOne()) {
                             moveTo = new Coordinate(72, 72);
@@ -258,7 +254,17 @@ public class DefaultStrategy implements StrategyDelegate {
                     unit.setMoveAction(moveAction);
                 }
             }
+        }
 
+        warMap.updateFreeSpaceMaskForRangedUnits();
+        for (Entity unit : allEntities.getMyUnits()) {
+            if (unit.getEntityType() == EntityType.RANGED_UNIT) {
+                // MOVE RANGER
+                warMap.decideMoveForRangedUnit(unit);
+            }
+        }
+
+        for (Entity unit : allEntities.getMyUnits()) {
             if (unit.getAttackAction() != null) {
                 if (unit.getAttackAction().getAutoAttack() != null) {
                     DebugInterface.print("U", unit.getPosition());

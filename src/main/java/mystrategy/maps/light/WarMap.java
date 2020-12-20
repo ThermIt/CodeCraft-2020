@@ -1,20 +1,15 @@
 package mystrategy.maps.light;
 
-import model.Coordinate;
-import model.Entity;
-import model.EntityType;
-import model.PlayerView;
+import model.*;
 import mystrategy.Constants;
+import mystrategy.Decision;
 import mystrategy.SingleVisitCoordinateSet;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import util.DebugInterface;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class WarMap {
 
@@ -26,7 +21,9 @@ public class WarMap {
     private int[][] enemyDistanceMap;
     private int[][] enemyWorkerDistanceMap;
     private int[][] dominanceMap;
+    private boolean[][] takenSpace;
     private int mapSize;
+    private PlayerView playerView;
     private EntitiesMap entitiesMap;
     private EnemiesMap enemiesMap;
     private AllEntities allEntities;
@@ -55,6 +52,7 @@ public class WarMap {
             AllEntities allEntities,
             EnemiesMap enemiesMap) {
         tick = playerView.getCurrentTick();
+        this.playerView = playerView;
         this.entitiesMap = entitiesMap;
         this.allEntities = allEntities;
         this.enemiesMap = enemiesMap;
@@ -325,6 +323,9 @@ public class WarMap {
         if (newPosition.isOutOfBounds()) {
             return old;
         }
+        if (old == null) {
+            return newPosition;
+        }
         int newDistance = getDistanceToEnemy(newPosition);
         int distanceToEnemyWorker = getDistanceToEnemyWorker(newPosition);
         if (distanceToEnemyWorker > 0 && distanceToEnemyWorker < newDistance) {
@@ -382,25 +383,36 @@ public class WarMap {
         return dominanceMap[x][y];
     }
 
-    public Coordinate getPositionClosestToEnemy(Coordinate from) {
+    public Coordinate getPositionClosestToEnemy(Entity fromUnit) {
+        Coordinate fromPosition = fromUnit.getPosition();
+        List<Coordinate> possibleMoves = fromPosition.getAdjacentListWithSelf();
+        for (Coordinate newPosition : possibleMoves) {
+            if (newPosition.isInBounds()) {
+                fromPosition = getMinOfTwoPositions(fromPosition, newPosition);
+            }
+        }
+/*
         int radius = 1;
         for (int i = -radius; i <= radius; i++) {
             for (int j = -radius; j <= radius; j++) {
                 from = getMinOfTwoPositions(from, new Coordinate(from.getX() + i, from.getY() + j));
             }
         }
-        return from;
+*/
+        return fromPosition;
     }
 
     public Coordinate getPositionClosestToForRangedUnit(Entity fromUnit) {
-        Coordinate fromPosition = fromUnit.getPosition();
-        List<Coordinate> possibleMoves = fromPosition.getAdjacentListWithSelf();
+        Coordinate closestCandidate = null;
+        List<Coordinate> possibleMoves = fromUnit.getPosition().getAdjacentListWithSelf();
         for (Coordinate newPosition : possibleMoves) {
-            if (newPosition.isInBounds() && enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth()) {
-                fromPosition = getMinOfTwoPositionsForRangedUnit(fromPosition, newPosition);
+            if (newPosition.isInBounds()
+                    && enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth()
+                    && !takenSpace[newPosition.getX()][newPosition.getY()]) {
+                closestCandidate = getMinOfTwoPositionsForRangedUnit(closestCandidate, newPosition);
             }
         }
-        return fromPosition;
+        return closestCandidate == null ? fromUnit.getPosition() : closestCandidate;
     }
 
     public Coordinate getPositionClosestToEnemy(Coordinate from, List<Coordinate> coordinateList) {
@@ -409,5 +421,81 @@ public class WarMap {
             position = getMinOfTwoPositions(position, newPosition);
         }
         return position;
+    }
+
+    public void updateFreeSpaceMaskForRangedUnits() {
+        takenSpace = new boolean[mapSize][mapSize];
+        for (Entity entity : playerView.getEntities()) {
+            if (entity.isMy(EntityType.RANGED_UNIT)) {
+                continue;
+            }
+            if (entity.getEntityType() == EntityType.RESOURCE) {
+                DebugInterface.print("-", entity.getPosition().getX(), entity.getPosition().getY());
+                continue;
+            }
+            if (entity.getMoveAction() != null && entity.getAttackAction() == null && entity.getRepairAction() == null && entity.getBuildAction() == null) {
+                takenSpace[entity.getMoveAction().getTarget().getX()][entity.getMoveAction().getTarget().getY()] = true;
+                DebugInterface.print("X", entity.getMoveAction().getTarget().getX(), entity.getMoveAction().getTarget().getY());
+            } else {
+                int size = entity.getProperties().getSize();
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < size; j++) {
+                        takenSpace[entity.getPosition().getX() + i][entity.getPosition().getY() + j] = true;
+                        DebugInterface.print("X", entity.getPosition().getX() + i, entity.getPosition().getY() + j);
+                    }
+                }
+                if (entity.getBuildAction() != null) {
+                    // ignore for now, does not matter on the field of battle
+                }
+            }
+        }
+    }
+
+    public void decideMoveForRangedUnit(Entity unit) {
+        if (unit.getAttackAction() != null) {
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
+            DebugInterface.print("0 - attacking", unit.getPosition().getX(), unit.getPosition().getY());
+            unit.setMoveAction(null);
+            unit.setMoveDecision(Decision.DECIDED);
+            return;
+        }
+        if (unit.getMoveDecision() == Decision.DECIDED) {
+            return;
+        }
+        unit.setMoveDecision(Decision.DECIDING);
+        Coordinate moveTo = getPositionClosestToForRangedUnit(unit);
+
+        Entity otherUnit = entitiesMap.getEntity(moveTo.getX(), moveTo.getY());
+        if (!Objects.equals(moveTo, unit.getPosition()) // not self
+                && otherUnit.isMy(EntityType.RANGED_UNIT)
+                && otherUnit.getMoveDecision() != Decision.DECIDED // DECIDING marks his place as taken
+        ) {
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
+            decideMoveForRangedUnit(otherUnit);
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = false;
+            if (takenSpace[moveTo.getX()][moveTo.getY()]) {
+                takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true; // so it tries to move anyway
+                decideMoveForRangedUnit(unit);
+                takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = false;
+                return;
+            }
+        }
+
+        if (!Objects.equals(moveTo, unit.getPosition()) && otherUnit.getEntityType() != EntityType.RESOURCE) {
+            takenSpace[moveTo.getX()][moveTo.getY()] = true;
+            DebugInterface.print("0 - move", moveTo.getX(), moveTo.getY());
+            MoveAction moveAction = new MoveAction(moveTo, true, true);
+            unit.setMoveAction(moveAction);
+        } else if (otherUnit.getEntityType() == EntityType.RESOURCE) {
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
+            DebugInterface.print("0 - cleaning", unit.getPosition().getX(), unit.getPosition().getY());
+            MoveAction moveAction = new MoveAction(moveTo, true, true);
+            unit.setMoveAction(moveAction);
+        } else {
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
+            DebugInterface.print("0 - not moving", unit.getPosition().getX(), unit.getPosition().getY());
+            unit.setMoveAction(null);
+        }
+        unit.setMoveDecision(Decision.DECIDED);
     }
 }
