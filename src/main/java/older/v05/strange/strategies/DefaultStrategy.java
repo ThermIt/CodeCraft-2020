@@ -80,14 +80,14 @@ public class DefaultStrategy implements StrategyDelegate {
                 .anyMatch(ent1 -> ent1.isMy(EntityType.RANGED_BASE) && !ent1.isActive())) {
             second = true;
             if (DebugInterface.isDebugEnabled()) {
-                System.out.println(playerView.getCurrentTick() + "oldBR");
+//                System.out.println(playerView.getCurrentTick() + "oldBR");
             }
         }
         if (!third && allEntities.getMyBuildings().stream()
                 .anyMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive())) {
             third = true;
             if (DebugInterface.isDebugEnabled()) {
-                System.out.println(playerView.getCurrentTick() + "oldBR+");
+                System.out.println(playerView.getCurrentTick() + "Old strat barracks done");
             }
         }
 
