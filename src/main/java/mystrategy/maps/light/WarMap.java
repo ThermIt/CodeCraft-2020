@@ -407,7 +407,7 @@ public class WarMap {
         List<Coordinate> possibleMoves = fromUnit.getPosition().getAdjacentListWithSelf();
         for (Coordinate newPosition : possibleMoves) {
             if (newPosition.isInBounds()
-                    && enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth()
+                    && (enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth() || fromUnit.getHealth() <= 5)
                     && !takenSpace[newPosition.getX()][newPosition.getY()]) {
                 closestCandidate = getMinOfTwoPositionsForRangedUnit(closestCandidate, newPosition);
             }
