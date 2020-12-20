@@ -18,6 +18,7 @@ public class AllEntities {
     private List<Entity> myAttackers = new ArrayList<>();
     private List<Entity> myBuildings = new ArrayList<>();
     private List<Entity> myActors = new ArrayList<>();
+    private List<Entity> enemyAttackers = new ArrayList<>();
 
     private List<Entity> enemyUnits = new ArrayList<>();
     private List<Entity> enemyBuildings = new ArrayList<>();
@@ -41,11 +42,11 @@ public class AllEntities {
         }
 
         for (Entity entity : playerView.getEntities()) {
-            if (entity.getEntityType() == EntityType.RESOURCE) {
+            if (entity.getEntityType() == EntityType.RESOURCE) { // neutral
                 resources.add(entity);
                 continue;
             }
-            if (entity.getPlayerId() == myId) {
+            if (entity.getPlayerId() == myId) { //my
                 myEntities.add(entity);
                 if (entity.getEntityType().isBuilding()) {
                     myBuildings.add(entity);
@@ -66,7 +67,10 @@ public class AllEntities {
                     myAttackers.add(entity);
                 }
 
-            } else {
+            } else if (entity.getPlayerId() != null) { // enemy
+                if (entity.getProperties().getAttack() != null) {
+                    enemyAttackers.add(entity);
+                }
                 if (entity.getEntityType().isBuilding()) {
                     enemyBuildings.add(entity);
                 }
@@ -90,6 +94,10 @@ public class AllEntities {
 
     public List<Entity> getEnemyUnits() {
         return enemyUnits;
+    }
+
+    public List<Entity> getEnemyAttackers() {
+        return enemyAttackers;
     }
 
     public List<Entity> getEnemyBuilders() {

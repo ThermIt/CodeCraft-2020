@@ -89,10 +89,10 @@ public class DefaultStrategy implements StrategyDelegate {
         me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
         this.visibility.init(playerView, allEntities);
         this.resources.init(playerView, allEntities, entitiesMap);
-        this.warMap.init(playerView, entitiesMap, allEntities);
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();
-        enemiesMap = new EnemiesMap(playerView, entitiesMap);
+        enemiesMap = new EnemiesMap(playerView, entitiesMap, allEntities);
+        this.warMap.init(playerView, entitiesMap, allEntities, enemiesMap);
         buildOrders.init(playerView, allEntities);
 
         this.jobs = new WorkerJobsMap(
@@ -127,41 +127,7 @@ public class DefaultStrategy implements StrategyDelegate {
         }
 
         // units
-        for (Entity unit : allEntities.getMyUnits()) {
-            MoveAction moveAction;
-            if (resources.getTotalResourceCount() > 0 && unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Coordinate moveTo = null;
-                if (unit.getTask() == Task.BUILD) {
-                    moveTo = null;
-                } else if (unit.getTask() == Task.MOVE_TO_BUILD) {
-                    moveTo = jobs.getPositionClosestToBuild(unit.getPosition());
-                } else if (unit.getTask() != Task.RUN_FOOLS) { // idle workers
-                    moveTo = harvestJobs.getPositionClosestToResource(unit.getPosition());
-                    if (moveTo == null) {
-                        moveTo = new Coordinate(35, 35);
-                    }
-                }
-                if (moveTo != null) {
-                    moveAction = new MoveAction(moveTo, true, true);
-                    unit.setMoveAction(moveAction);
-                }
-            } else { // all
-                Coordinate moveTo =
-                        unit.getEntityType() == EntityType.RANGED_UNIT ?
-                                warMap.getPositionClosestToForRangedUnit(unit.getPosition())
-                                : warMap.getPositionClosestToEnemy(unit.getPosition());
-                if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
-                    if (playerView.isOneOnOne()) {
-                        moveTo = new Coordinate(72, 72);
-                    } else {
-                        moveTo = new Coordinate(7, 72);
-                    }
-                }
-                moveAction = new MoveAction(moveTo, true, true);
-                unit.setMoveAction(moveAction);
-            }
-        }
-
+        // REAL WORK
         for (Entity unit : allEntities.getMyUnits()) {
             BuildAction buildAction = null;
             RepairAction repairAction = null;
@@ -225,31 +191,93 @@ public class DefaultStrategy implements StrategyDelegate {
                 unit.setBuildAction(buildAction);
                 unit.setRepairAction(repairAction);
             } else {
-                EntityProperties properties = unit.getProperties();
-                EntityType[] validAutoAttackTargets;
-                validAutoAttackTargets = new EntityType[0];
-                attackAction = new AttackAction(
-                        null, new AutoAttack(6, validAutoAttackTargets)
-                );
-                unit.setAttackAction(attackAction);
-                unit.setBuildAction(buildAction);
-                unit.setRepairAction(repairAction);
+
+                if (unit.getEntityType() == EntityType.RANGED_UNIT) {
+                    // RANGER ATTACK
+                    EntityType[] validAutoAttackTargets;
+                    validAutoAttackTargets = new EntityType[0];
+                    Entity enemy = entitiesMap.choosePossibleAttackTarget(unit);
+                    if (enemy != null) {
+                        attackAction = new AttackAction(enemy.getId(), null);
+                        enemy.increaseDamage(unit.getProperties().getAttack().getDamage());
+                    }
+                    unit.setAttackAction(attackAction);
+                    unit.setBuildAction(null);
+                    unit.setRepairAction(null);
+                } else {
+                    // MELEE+WORKERS
+                    EntityType[] validAutoAttackTargets;
+                    validAutoAttackTargets = new EntityType[0];
+                    attackAction = new AttackAction(
+                            null, new AutoAttack(5, validAutoAttackTargets)
+                    );
+                    unit.setAttackAction(attackAction);
+                    unit.setBuildAction(null);
+                    unit.setRepairAction(null);
+                }
+            }
+        }
+
+        // JUST MOVING
+        for (Entity unit : allEntities.getMyUnits()) {
+            MoveAction moveAction;
+            if (resources.getTotalResourceCount() > 0 && unit.getEntityType() == EntityType.BUILDER_UNIT) {
+                Coordinate moveTo = null;
+                if (unit.getTask() == Task.BUILD) {
+                    moveTo = null;
+                } else if (unit.getTask() == Task.MOVE_TO_BUILD) {
+                    moveTo = jobs.getPositionClosestToBuild(unit.getPosition());
+                } else if (unit.getTask() != Task.RUN_FOOLS) { // idle workers
+                    moveTo = harvestJobs.getPositionClosestToResource(unit.getPosition());
+                    if (moveTo == null) {
+                        moveTo = new Coordinate(35, 35);
+                    }
+                }
+                if (moveTo != null) {
+                    moveAction = new MoveAction(moveTo, true, true);
+                    unit.setMoveAction(moveAction);
+                }
+            } else { // all
+                if (unit.getEntityType() == EntityType.RANGED_UNIT) {
+                    // MOVE RANGER
+                    Coordinate moveTo = warMap.getPositionClosestToForRangedUnit(unit);
+                    if (!Objects.equals(moveTo, unit.getPosition())) {
+                        moveAction = new MoveAction(moveTo, true, true);
+                        unit.setMoveAction(moveAction);
+                    }
+                } else {
+                    Coordinate moveTo = warMap.getPositionClosestToEnemy(unit.getPosition());
+                    if (moveTo == null || Objects.equals(moveTo, unit.getPosition())) { // hack
+                        if (playerView.isOneOnOne()) {
+                            moveTo = new Coordinate(72, 72);
+                        } else {
+                            moveTo = new Coordinate(7, 72);
+                        }
+                    }
+                    moveAction = new MoveAction(moveTo, true, true);
+                    unit.setMoveAction(moveAction);
+                }
             }
 
             if (unit.getAttackAction() != null) {
-                DebugInterface.print("AK", unit.getPosition());
+                if (unit.getAttackAction().getAutoAttack() != null) {
+                    DebugInterface.print("U", unit.getPosition());
+                } else {
+                    DebugInterface.print("A", unit.getPosition());
+                }
             } else if (unit.getBuildAction() != null) {
-                DebugInterface.print("BD", unit.getPosition());
+                DebugInterface.print("B", unit.getPosition());
             } else if (unit.getRepairAction() != null) {
-                DebugInterface.print("RR", unit.getPosition());
+                DebugInterface.print("T", unit.getPosition());
             } else if (unit.getMoveAction() != null) {
                 if (unit.getTask() == Task.RUN_FOOLS) {
-                    DebugInterface.print("RN", unit.getPosition());
+                    DebugInterface.print("R", unit.getPosition());
                 } else {
-                    DebugInterface.print("MV", unit.getPosition());
+                    DebugInterface.print("M", unit.getPosition());
                 }
+            }
+            if (unit.getMoveAction() != null) {
                 DebugInterface.line(unit.getPosition(), unit.getMoveAction().getTarget());
-
             }
         }
 
@@ -355,6 +383,11 @@ failedLimits
                     buildPosition
             );
         } else {
+/*
+            if (entityType == EntityType.MELEE_UNIT) {
+                return buildAction;
+            }
+*/
             Coordinate buildPosition = defaultBuildPosition;
             List<Coordinate> adjacentFreePoints = entity.getAdjacentCoordinates();
             adjacentFreePoints = adjacentFreePoints.stream()

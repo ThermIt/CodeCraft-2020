@@ -6,6 +6,7 @@ import model.EntityType;
 import model.PlayerView;
 import mystrategy.Constants;
 import mystrategy.collections.AllEntities;
+import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import util.DebugInterface;
 
@@ -26,6 +27,7 @@ public class WarMap {
     private int[][] dominanceMap;
     private int mapSize;
     private EntitiesMap entitiesMap;
+    private EnemiesMap enemiesMap;
     private AllEntities allEntities;
     private VisibilityMap visibility;
     private VirtualResources resources;
@@ -49,11 +51,12 @@ public class WarMap {
     public void init(
             PlayerView playerView,
             EntitiesMap entitiesMap,
-            AllEntities allEntities
-    ) {
+            AllEntities allEntities,
+            EnemiesMap enemiesMap) {
         tick = playerView.getCurrentTick();
         this.entitiesMap = entitiesMap;
         this.allEntities = allEntities;
+        this.enemiesMap = enemiesMap;
 
         visibility.checkTick(playerView);
         resources.checkTick(playerView);
@@ -310,7 +313,7 @@ public class WarMap {
             return newPosition;
         }
 
-        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) { // scatter
+        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) { // scatters a bit
             return newPosition;
         }
         return old;
@@ -338,11 +341,9 @@ public class WarMap {
             return newPosition;
         }
 
-/*
-        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) { // scatter
+        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) { // scatters a bit
             return newPosition;
         }
-*/
         return old;
     }
 
@@ -389,14 +390,15 @@ public class WarMap {
         return from;
     }
 
-    public Coordinate getPositionClosestToForRangedUnit(Coordinate from) {
-        int radius = 1;
-        for (int i = -radius; i <= radius; i++) {
-            for (int j = -radius; j <= radius; j++) {
-                from = getMinOfTwoPositionsForRangedUnit(from, new Coordinate(from.getX() + i, from.getY() + j));
+    public Coordinate getPositionClosestToForRangedUnit(Entity fromUnit) {
+        Coordinate fromPosition = fromUnit.getPosition();
+        List<Coordinate> possibleMoves = fromPosition.getAdjacentListWithSelf();
+        for (Coordinate newPosition : possibleMoves) {
+            if (newPosition.isInBounds() && enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth()) {
+                fromPosition = getMinOfTwoPositionsForRangedUnit(fromPosition, newPosition);
             }
         }
-        return from;
+        return fromPosition;
     }
 
     public Coordinate getPositionClosestToEnemy(Coordinate from, List<Coordinate> coordinateList) {

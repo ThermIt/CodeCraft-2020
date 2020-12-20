@@ -3,7 +3,6 @@ package mystrategy.maps.light;
 import model.*;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EntitiesMap;
-import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,11 +36,17 @@ public class BuildOrders {
         buildQueue = new ArrayList<>();
         repairQueue = new ArrayList<>();
 
-        buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 2), 0, false));
-        buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(5, 2), 0, false));
-        buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 5), 0, false));
-        buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(8, 2), 0, false));
-        buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 8), 0, false));
+        if (playerView.isRound1()) {
+            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 2), 0, false));
+            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(5, 2), 0, false));
+            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 5), 0, false));
+        } else {
+            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 2), 0, false));
+            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(5, 2), 0, false));
+            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 5), 0, false));
+            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(8, 2), 0, false));
+            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 8), 0, false));
+        }
 /*
         buildQueue.add(new Entity(-1, getMyId(), EntityType.TURRET, new Coordinate(10, 5), 0, false));
         buildQueue.add(new Entity(-1, getMyId(), EntityType.TURRET, new Coordinate(5, 10), 0, false));
@@ -100,14 +105,14 @@ public class BuildOrders {
 
             if (entity.isMy(order.getEntityType()) && entity.getHealth() != entity.getProperties().getMaxHealth()) {
                 order.setActive(true);
-                DebugInterface.print("A+", order.getPosition());
+//                DebugInterface.print("A+", order.getPosition());
 //                single = false;
             } else if (!entitiesMap.isOrderFree(order)) {
                 order.setActive(false);
             } else if (me.getResource() >= order.getProperties().getInitialCost()
                     && !entity.isMy(order.getEntityType())) {
                 order.setActive(true);
-                DebugInterface.print("A", order.getPosition());
+//                DebugInterface.print("A", order.getPosition());
                 single = false;
                 if (order.getEntityType() == EntityType.RANGED_BASE) {
                     single = false;
@@ -124,7 +129,7 @@ public class BuildOrders {
             List<Coordinate> adjacentCoordinates = order.getAdjacentCoordinates();
             for (Coordinate location : adjacentCoordinates) {
                 orderMap[location.getX()][location.getY()] = order;
-                DebugInterface.print("RX", location);
+//                DebugInterface.print("RX", location);
             }
         }
         return activeOrders;

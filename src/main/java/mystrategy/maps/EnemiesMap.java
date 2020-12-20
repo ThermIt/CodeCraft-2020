@@ -1,9 +1,11 @@
 package mystrategy.maps;
 
 import model.Coordinate;
+import model.Entity;
 import model.EntityProperties;
 import model.PlayerView;
 import mystrategy.Constants;
+import mystrategy.collections.AllEntities;
 import util.DebugInterface;
 
 import java.util.HashSet;
@@ -11,12 +13,13 @@ import java.util.List;
 import java.util.Set;
 
 public class EnemiesMap {
+    private int[][] shootDangerNextTick;
     private int[][] distanceByFoot;
     private int[][] shootDanger;
     private EntitiesMap entitiesMap;
     private int mapSize;
 
-    public EnemiesMap(PlayerView playerView, EntitiesMap entitiesMap) {
+    public EnemiesMap(PlayerView playerView, EntitiesMap entitiesMap, AllEntities entities) {
         this.entitiesMap = entitiesMap;
         mapSize = playerView.getMapSize();
         distanceByFoot = new int[mapSize][mapSize];
@@ -50,6 +53,76 @@ public class EnemiesMap {
         List<Coordinate> coordinates = Arrays.stream(playerView.getEntities()).filter(ent -> ent.getPlayerId() != playerView.getMyId())
                 .map(box -> new Coordinate(box.getPosition())).collect(Collectors.toList());
 */
+
+        shootDangerNextTick = new int[mapSize][mapSize];
+        for (Entity enemy : entities.getEnemyAttackers()) {
+            int size = enemy.getProperties().getSize();
+            int attackRange = enemy.getProperties().getAttack().getAttackRange();
+            int attackDamage = enemy.getProperties().getAttack().getDamage();
+            int x = enemy.getPosition().getX();
+            int y = enemy.getPosition().getY();
+
+            if (enemy.getHealth() > 10) { /* fat bonus */
+                attackDamage += 5;
+            }
+
+            if (size == 1) {
+                fillShootDangerForSize1(attackRange + 1 /*mobile bonus*/, attackDamage, x, y);
+            } else {
+                fillShootDangerForSize2(attackRange, attackDamage, x, y, size);
+            }
+        }
+
+        if (DebugInterface.isDebugEnabled()) {
+            for (int i = 0; i < mapSize; i++) {
+                for (int j = 0; j < mapSize; j++) {
+                    if (shootDangerNextTick[i][j] > 0) {
+                        DebugInterface.print(Integer.toString(shootDangerNextTick[i][j]), i, j);
+                    }
+                }
+            }
+        }
+    }
+
+    public void addDamage(int[][] map, int attackDamage, int x, int y) {
+        if (x < mapSize && y < mapSize && x >= 0 && y >= 0) {
+            map[x][y] += attackDamage;
+        }
+    }
+
+    public void fillShootDangerForSize1(int attackRange, int attackDamage, int x, int y) {
+        for (int i = 1; i <= attackRange; i++) {
+            int rangeY = attackRange - i;
+            addDamage(shootDangerNextTick, attackDamage, x + i, y);
+            addDamage(shootDangerNextTick, attackDamage, x - i, y);
+            addDamage(shootDangerNextTick, attackDamage, x, y + i);
+            addDamage(shootDangerNextTick, attackDamage, x, y - i);
+            for (int j = 1; j <= rangeY; j++) {
+                addDamage(shootDangerNextTick, attackDamage, x + i, y + j);
+                addDamage(shootDangerNextTick, attackDamage, x - i, y + j);
+                addDamage(shootDangerNextTick, attackDamage, x + i, y - j);
+                addDamage(shootDangerNextTick, attackDamage, x - i, y - j);
+            }
+        }
+    }
+
+    public void fillShootDangerForSize2(int attackRange, int attackDamage, int x, int y, int size) {
+        int SIZE_DELTA = size - 1;
+        for (int i = 1; i <= attackRange; i++) {
+            int rangeY = attackRange - i;
+            for (int j = 0; j < size; j++) {
+                addDamage(shootDangerNextTick, attackDamage, x + i + SIZE_DELTA, y + j);
+                addDamage(shootDangerNextTick, attackDamage, x - i, y + j);
+                addDamage(shootDangerNextTick, attackDamage, x + j, y + i + SIZE_DELTA);
+                addDamage(shootDangerNextTick, attackDamage, x + j, y - i);
+            }
+            for (int j = 1; j <= rangeY; j++) {
+                addDamage(shootDangerNextTick, attackDamage, x + i + SIZE_DELTA, y + j + SIZE_DELTA);
+                addDamage(shootDangerNextTick, attackDamage, x - i, y + j + SIZE_DELTA);
+                addDamage(shootDangerNextTick, attackDamage, x + i + SIZE_DELTA, y - j);
+                addDamage(shootDangerNextTick, attackDamage, x - i, y - j);
+            }
+        }
     }
 
 
@@ -64,18 +137,19 @@ public class EnemiesMap {
         return distanceByFoot[x][y];
     }
 
-    private void fillShootDanger(int[][] dangerMap, Set<Coordinate> coordinateList5, Set<Coordinate> coordinateList1) {
+    private void fillShootDanger(
+            int[][] dangerMap, Set<Coordinate> coordinateList5,
+            Set<Coordinate> coordinateList1
+    ) {
         int delta = 1;
         Set<Coordinate> coordinateList = coordinateList5;
-        for (int i = 6+delta; i > 0; i--) {
+        for (int i = 6 + delta; i > 0; i--) {
             Set<Coordinate> coordinateListNext = new HashSet<>(128);
-            if (i == 3+delta) {
+            if (i == 3 + delta) {
                 coordinateListNext.addAll(coordinateList1);
             }
             for (Coordinate coordinate : coordinateList) {
-                if (coordinate.getX() >= 0 && coordinate.getX() < mapSize
-                        && coordinate.getY() >= 0 && coordinate.getY() < mapSize
-                        && dangerMap[coordinate.getX()][coordinate.getY()] < i) {
+                if (coordinate.isInBounds() && dangerMap[coordinate.getX()][coordinate.getY()] < i) {
                     dangerMap[coordinate.getX()][coordinate.getY()] = i;
                     coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
                     coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
@@ -180,5 +254,12 @@ public class EnemiesMap {
             position = getMinOfTwoPositions(position, newPosition);
         }
         return position;
+    }
+
+    public int getDamageOnNextTick(Coordinate newPosition) {
+        if (newPosition.isOutOfBounds()) {
+            return 0;
+        }
+        return shootDangerNextTick[newPosition.getX()][newPosition.getY()];
     }
 }

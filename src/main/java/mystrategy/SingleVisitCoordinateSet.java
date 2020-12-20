@@ -2,17 +2,14 @@ package mystrategy;
 
 import model.Coordinate;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class SingleVisitCoordinateSet implements Iterable<Coordinate> {
     private final int MAP_SIZE = 80;
     boolean[][] beenThere = new boolean[MAP_SIZE][MAP_SIZE];
-    Set<Coordinate> coordinateList = new HashSet<>(256);
-    Set<Coordinate> coordinateListNextStep = new HashSet<>(256);
+    List<Coordinate> coordinateList = new ArrayList<>(256);
+    List<Coordinate> coordinateListNextStep = new ArrayList<>(256);
 
     @Override
     public Iterator<Coordinate> iterator() {
@@ -55,7 +52,7 @@ public class SingleVisitCoordinateSet implements Iterable<Coordinate> {
 
     public void nextStep() {
         coordinateList = coordinateListNextStep;
-        coordinateListNextStep = new HashSet<>(256);
+        coordinateListNextStep = new ArrayList<>(256);
     }
 
     public Set<Coordinate> getSet() {

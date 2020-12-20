@@ -109,4 +109,57 @@ public class EntitiesMap {
         }
         return true;
     }
+
+    public Entity choosePossibleAttackTarget(Entity unit) {
+        int attackRange = 5;
+        Entity opponent = null;
+        int x = unit.getPosition().getX();
+        int y = unit.getPosition().getY();
+        for (int i = 1; i <= attackRange; i++) {
+            int rangeY = attackRange - i;
+            opponent = selectBetterOpponent(opponent, x + i, y);
+            opponent = selectBetterOpponent(opponent, x - i, y);
+            opponent = selectBetterOpponent(opponent, x, y + i);
+            opponent = selectBetterOpponent(opponent, x, y - i);
+            for (int j = 1; j <= rangeY; j++) {
+                opponent = selectBetterOpponent(opponent, x + i, y + j);
+                opponent = selectBetterOpponent(opponent, x - i, y + j);
+                opponent = selectBetterOpponent(opponent, x + i, y - j);
+                opponent = selectBetterOpponent(opponent, x - i, y - j);
+            }
+        }
+        return opponent;
+    }
+
+    public Entity selectBetterOpponent(Entity current, int x, int y) {
+        if (x < mapSize && y < mapSize && x >= 0 && y >= 0) {
+            Entity entity = getEntity(x, y);
+
+            if (entity.getPlayerId() != null && entity.getPlayerId() != null && !entity.isMy()) {
+                if (entity.getHealthAfterDamage() > 0) {
+                    current = judgeOpponents(current, entity);
+                }
+            }
+        }
+        return current;
+    }
+
+    private Entity judgeOpponents(Entity current, Entity other) {
+        if (current == null) {
+            return other;
+        }
+        if (current.isBuilding() && other.isUnit()) {
+            return other;
+        }
+        if (other.isBuilding() && current.isUnit()) {
+            return current;
+        }
+        if (other.getHealthAfterDamage() <= 5 && other.getHealthAfterDamage() > 0) {
+            return other;
+        }
+
+//        current.getEntityType();
+//        other.getEntityType();
+        return current;
+    }
 }
