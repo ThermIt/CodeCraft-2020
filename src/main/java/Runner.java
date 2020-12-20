@@ -1,6 +1,6 @@
 import mystrategy.strategies.DefaultStrategy;
 import mystrategy.strategies.DelegatingStrategy;
-import older.v05.strange.strategies.Older5StrangeVersion;
+import older.v06.ranger.stream.strategies.Older6RangerStream;
 import util.DebugInterface;
 import util.Strategy;
 import util.StreamUtil;
@@ -49,16 +49,16 @@ public class Runner {
         }
         if (args.length > 3 && "multiply2".equals(args[3])) {
             runOnceMultithreaded(host, port, token, new DelegatingStrategy());
-            runOnceMultithreaded(host, port + 1, token, new Older5StrangeVersion());
+            runOnceMultithreaded(host, port + 1, token, new Older6RangerStream());
         } else if (args.length > 3 && "multiply3".equals(args[3])) {
             runOnceMultithreaded(host, port, token, new DelegatingStrategy());
-            runOnceMultithreaded(host, port + 1, token, new Older5StrangeVersion());
-            runOnceMultithreaded(host, port + 2, token, new Older5StrangeVersion());
+            runOnceMultithreaded(host, port + 1, token, new Older6RangerStream());
+            runOnceMultithreaded(host, port + 2, token, new Older6RangerStream());
         } else if (args.length > 3 && "multiply4".equals(args[3])) {
             runOnceMultithreaded(host, port, token, new DelegatingStrategy());
-            runOnceMultithreaded(host, port + 1, token, new Older5StrangeVersion());
-            runOnceMultithreaded(host, port + 2, token, new Older5StrangeVersion());
-            runOnceMultithreaded(host, port + 3, token, new Older5StrangeVersion());
+            runOnceMultithreaded(host, port + 1, token, new Older6RangerStream());
+            runOnceMultithreaded(host, port + 2, token, new Older6RangerStream());
+            runOnceMultithreaded(host, port + 3, token, new Older6RangerStream());
         } else {
             runOnceSameThread(host, port, token, new DelegatingStrategy());
         }
