@@ -3,7 +3,7 @@ package older.v03.random.base.maps;
 import model.Coordinate;
 import model.EntityType;
 import model.PlayerView;
-import mystrategy.Constants;
+import common.Constants;
 import older.v03.random.base.AllEntities;
 import util.DebugInterface;
 
@@ -68,14 +68,18 @@ public class SimCityMap {
                     }
 
                     for (int k = 0; k <= houseSize + 1; k++) { // hack
-                        if (i - 1 >= 0)
-                        rangedBaseBuildCoordinates[i - 1][j + k] = new Coordinate(i, j);
-                        if (j - 1 >= 0)
-                        rangedBaseBuildCoordinates[i + k][j  - 1] = new Coordinate(i, j);
-                        if (j + houseSize + 2 < mapSize)
-                        rangedBaseBuildCoordinates[i + k][j + houseSize + 2] = new Coordinate(i, j);
-                        if (i + houseSize + 2 < mapSize)
-                        rangedBaseBuildCoordinates[i + houseSize + 2][j + k] = new Coordinate(i, j);
+                        if (i - 1 >= 0) {
+                            rangedBaseBuildCoordinates[i - 1][j + k] = new Coordinate(i, j);
+                        }
+                        if (j - 1 >= 0) {
+                            rangedBaseBuildCoordinates[i + k][j - 1] = new Coordinate(i, j);
+                        }
+                        if (j + houseSize + 2 < mapSize) {
+                            rangedBaseBuildCoordinates[i + k][j + houseSize + 2] = new Coordinate(i, j);
+                        }
+                        if (i + houseSize + 2 < mapSize) {
+                            rangedBaseBuildCoordinates[i + houseSize + 2][j + k] = new Coordinate(i, j);
+                        }
                     }
 
                     for (int k = 1; k <= houseSize; k++) {

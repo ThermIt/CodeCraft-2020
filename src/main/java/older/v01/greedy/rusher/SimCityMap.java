@@ -3,7 +3,7 @@ package older.v01.greedy.rusher;
 import model.Coordinate;
 import model.EntityType;
 import model.PlayerView;
-import mystrategy.Constants;
+import common.Constants;
 import util.DebugInterface;
 
 import java.util.ArrayList;

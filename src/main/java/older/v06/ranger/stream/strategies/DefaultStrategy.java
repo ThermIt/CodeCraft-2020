@@ -6,7 +6,6 @@ import older.v06.ranger.stream.maps.EnemiesMap;
 import older.v06.ranger.stream.maps.EntitiesMap;
 import older.v06.ranger.stream.maps.RepairMap;
 import older.v06.ranger.stream.maps.SimCityMap;
-import older.v06.mystrategy.maps.light.*;
 import older.v06.ranger.stream.maps.light.*;
 import util.DebugInterface;
 import util.StrategyDelegate;
@@ -116,14 +115,14 @@ public class DefaultStrategy implements StrategyDelegate {
                 .anyMatch(ent1 -> ent1.isMy(EntityType.RANGED_BASE) && !ent1.isActive())) {
             second = true;
             if (DebugInterface.isDebugEnabled()) {
-                System.out.println(playerView.getCurrentTick() + "BR");
+//                System.out.println(playerView.getCurrentTick() + "BR");
             }
         }
         if (!third && allEntities.getMyBuildings().stream()
                 .anyMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive())) {
             third = true;
             if (DebugInterface.isDebugEnabled()) {
-                System.out.println(playerView.getCurrentTick() + "BR+");
+                System.out.println(playerView.getCurrentTick() + "Old strat barracks done");
             }
         }
 
@@ -265,6 +264,7 @@ public class DefaultStrategy implements StrategyDelegate {
             }
         }
 
+/*
         for (Entity unit : allEntities.getMyUnits()) {
             if (unit.getAttackAction() != null) {
                 if (unit.getAttackAction().getAutoAttack() != null) {
@@ -287,6 +287,7 @@ public class DefaultStrategy implements StrategyDelegate {
                 DebugInterface.line(unit.getPosition(), unit.getMoveAction().getTarget());
             }
         }
+*/
 
         // buildings
         handleBuildings();

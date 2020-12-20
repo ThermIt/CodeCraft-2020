@@ -1,7 +1,7 @@
 package older.v06.ranger.stream.maps.light;
 
+import common.Constants;
 import model.*;
-import older.v06.ranger.stream.Constants;
 import older.v06.ranger.stream.SingleVisitCoordinateSet;
 import older.v06.ranger.stream.collections.AllEntities;
 import older.v06.ranger.stream.maps.EnemiesMap;

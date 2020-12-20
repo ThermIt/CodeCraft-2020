@@ -1,6 +1,6 @@
 package model;
 
-import mystrategy.Decision;
+import common.Decision;
 import util.Initializer;
 import util.StreamUtil;
 import util.Task;

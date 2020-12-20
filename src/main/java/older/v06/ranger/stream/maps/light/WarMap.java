@@ -1,8 +1,8 @@
 package older.v06.ranger.stream.maps.light;
 
+import common.Constants;
+import common.Decision;
 import model.*;
-import older.v06.ranger.stream.Constants;
-import older.v06.ranger.stream.Decision;
 import older.v06.ranger.stream.SingleVisitCoordinateSet;
 import older.v06.ranger.stream.collections.AllEntities;
 import older.v06.ranger.stream.maps.EnemiesMap;
@@ -454,7 +454,7 @@ public class WarMap {
     public void decideMoveForRangedUnit(Entity unit) {
         if (unit.getAttackAction() != null) {
             takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
-            DebugInterface.print("0 - attacking", unit.getPosition().getX(), unit.getPosition().getY());
+//            DebugInterface.print("0 - attacking", unit.getPosition().getX(), unit.getPosition().getY());
             unit.setMoveAction(null);
             unit.setMoveDecision(Decision.DECIDED);
             return;
@@ -483,17 +483,17 @@ public class WarMap {
 
         if (!Objects.equals(moveTo, unit.getPosition()) && otherUnit.getEntityType() != EntityType.RESOURCE) {
             takenSpace[moveTo.getX()][moveTo.getY()] = true;
-            DebugInterface.print("0 - move", moveTo.getX(), moveTo.getY());
+//            DebugInterface.print("0 - move", moveTo.getX(), moveTo.getY());
             MoveAction moveAction = new MoveAction(moveTo, true, true);
             unit.setMoveAction(moveAction);
         } else if (otherUnit.getEntityType() == EntityType.RESOURCE) {
             takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
-            DebugInterface.print("0 - cleaning", unit.getPosition().getX(), unit.getPosition().getY());
+//            DebugInterface.print("0 - cleaning", unit.getPosition().getX(), unit.getPosition().getY());
             MoveAction moveAction = new MoveAction(moveTo, true, true);
             unit.setMoveAction(moveAction);
         } else {
             takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
-            DebugInterface.print("0 - not moving", unit.getPosition().getX(), unit.getPosition().getY());
+//            DebugInterface.print("0 - not moving", unit.getPosition().getX(), unit.getPosition().getY());
             unit.setMoveAction(null);
         }
         unit.setMoveDecision(Decision.DECIDED);

@@ -86,9 +86,11 @@ public class DefaultStrategy implements StrategyDelegate {
         if (!third && allEntities.getMyBuildings().stream()
                 .anyMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive())) {
             third = true;
+/*
             if (DebugInterface.isDebugEnabled()) {
                 System.out.println(playerView.getCurrentTick() + "Old strat barracks done");
             }
+*/
         }
 
         Action result = new Action(new HashMap<>());

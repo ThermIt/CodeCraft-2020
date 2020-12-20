@@ -1,9 +1,9 @@
 package older.v06.ranger.stream.maps.light;
 
+import common.Constants;
 import model.Coordinate;
 import model.Entity;
 import model.PlayerView;
-import older.v06.ranger.stream.Constants;
 import older.v06.ranger.stream.collections.AllEntities;
 import util.DebugInterface;
 

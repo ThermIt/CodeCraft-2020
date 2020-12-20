@@ -3,7 +3,7 @@ package mystrategy.maps.light;
 import model.Coordinate;
 import model.Entity;
 import model.PlayerView;
-import mystrategy.Constants;
+import common.Constants;
 import mystrategy.collections.AllEntities;
 import util.DebugInterface;
 

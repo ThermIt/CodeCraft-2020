@@ -1,8 +1,8 @@
 package mystrategy.maps.light;
 
 import model.*;
-import mystrategy.Constants;
-import mystrategy.SingleVisitCoordinateSet;
+import common.Constants;
+import mystrategy.utils.SingleVisitCoordinateSet;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;

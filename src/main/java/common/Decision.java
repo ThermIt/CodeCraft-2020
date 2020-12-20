@@ -1,4 +1,4 @@
-package older.v06.ranger.stream;
+package common;
 
 public enum Decision {
     NONE,
