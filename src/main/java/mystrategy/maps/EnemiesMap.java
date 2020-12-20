@@ -10,12 +10,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class EnemiesMap {
+    private final EntitiesMap entitiesMap;
+    private final AllEntities entities;
     private int[][] shootDangerNextTick;
     private int[][] shootDanger;
     private int mapSize;
 
     public EnemiesMap(PlayerView playerView, EntitiesMap entitiesMap, AllEntities entities) {
         mapSize = playerView.getMapSize();
+        this.entitiesMap = entitiesMap;
+        this.entities = entities;
         shootDanger = new int[mapSize][mapSize];
 
         Set<Coordinate> shoot5Coordinates = new HashSet<>(128);
@@ -52,8 +56,18 @@ public class EnemiesMap {
             int x = enemy.getPosition().getX();
             int y = enemy.getPosition().getY();
 
-            if (enemy.getHealth() > 10) { /* fat bonus */
+            if (enemy.isActive() && enemy.getHealth() > 10) { /* fat bonus */
                 attackDamage += 5;
+            }
+
+            int health;
+            if (size == 1) {
+                health = calculateNeighbors(attackRange + 2, x, y, size);
+            } else {
+                health = calculateNeighbors(attackRange + 1, x, y, size);
+            }
+            if (health >= 60) {
+                continue;
             }
 
             if (size == 1) {
@@ -115,6 +129,38 @@ public class EnemiesMap {
                 addDamage(shootDangerNextTick, attackDamage, x - i, y - j);
             }
         }
+    }
+
+    public int calculateNeighbors(int attackRange, int x, int y, int size) {
+        int SIZE_DELTA = size - 1;
+        int result = 0;
+        for (int i = 1; i <= attackRange; i++) {
+            int rangeY = attackRange - i;
+            for (int j = 0; j < size; j++) {
+                result += getHealthOfMyUnit(i + j, x + i + SIZE_DELTA, y + j);
+                result += getHealthOfMyUnit(i + j, x - i, y + j);
+                result += getHealthOfMyUnit(i + j, x + j, y + i + SIZE_DELTA);
+                result += getHealthOfMyUnit(i + j, x + j, y - i);
+            }
+            for (int j = 1; j <= rangeY; j++) {
+                result += getHealthOfMyUnit(i + j, x + i + SIZE_DELTA, y + j + SIZE_DELTA);
+                result += getHealthOfMyUnit(i + j, x - i, y + j + SIZE_DELTA);
+                result += getHealthOfMyUnit(i + j, x + i + SIZE_DELTA, y - j);
+                result += getHealthOfMyUnit(i + j, x - i, y - j);
+            }
+        }
+        return result;
+    }
+
+    private int getHealthOfMyUnit(int distance, int x, int y) {
+        Entity entity = entitiesMap.getEntity(x, y);
+        if (entity.isUnit() && entity.isMy()) {
+            return entity.getHealth();
+        }
+        if (entity.isBuilding() && entity.isMy() && distance <= 5) { // protect buildings
+            return 100;
+        }
+        return 0;
     }
 
 
