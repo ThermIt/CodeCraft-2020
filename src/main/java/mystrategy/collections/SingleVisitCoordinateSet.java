@@ -1,4 +1,4 @@
-package mystrategy.utils;
+package mystrategy.collections;
 
 import model.Coordinate;
 
