@@ -5,7 +5,6 @@ import model.Entity;
 import model.EntityProperties;
 import model.PlayerView;
 import older.v07.angry.rusher.collections.AllEntities;
-import older.v07.angry.rusher.maps.EntitiesMap;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -63,7 +62,7 @@ public class EnemiesMap {
 
             int health;
             if (size == 1) {
-                health = calculateNeighbors(attackRange + 2, x, y, size); // comment out to not attack in 6x
+                health = calculateNeighbors(attackRange + 2, x, y, size);
             } else {
                 health = calculateNeighbors(attackRange + 1, x, y, size);
             }
