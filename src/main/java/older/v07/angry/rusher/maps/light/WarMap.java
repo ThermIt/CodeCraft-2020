@@ -3,13 +3,10 @@ package older.v07.angry.rusher.maps.light;
 import common.Constants;
 import common.Decision;
 import model.*;
-import mystrategy.collections.AllEntities;
-import mystrategy.collections.SingleVisitCoordinateSet;
-import mystrategy.maps.EnemiesMap;
-import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.light.RangedUnitMagnet;
-import mystrategy.maps.light.VirtualResources;
-import mystrategy.maps.light.VisibilityMap;
+import older.v07.angry.rusher.collections.AllEntities;
+import older.v07.angry.rusher.collections.SingleVisitCoordinateSet;
+import older.v07.angry.rusher.maps.EnemiesMap;
+import older.v07.angry.rusher.maps.EntitiesMap;
 import util.DebugInterface;
 
 import java.util.*;

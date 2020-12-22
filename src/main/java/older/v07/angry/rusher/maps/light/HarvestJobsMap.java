@@ -2,11 +2,11 @@ package older.v07.angry.rusher.maps.light;
 
 import model.*;
 import common.Constants;
-import mystrategy.collections.SingleVisitCoordinateSet;
-import mystrategy.collections.AllEntities;
-import mystrategy.maps.EnemiesMap;
-import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.light.VirtualResources;
+import older.v07.angry.rusher.collections.SingleVisitCoordinateSet;
+import older.v07.angry.rusher.collections.AllEntities;
+import older.v07.angry.rusher.maps.EnemiesMap;
+import older.v07.angry.rusher.maps.EntitiesMap;
+import older.v07.angry.rusher.maps.light.VirtualResources;
 import util.DebugInterface;
 
 import java.util.Comparator;

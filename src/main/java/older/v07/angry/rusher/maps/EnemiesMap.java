@@ -4,8 +4,8 @@ import model.Coordinate;
 import model.Entity;
 import model.EntityProperties;
 import model.PlayerView;
-import mystrategy.collections.AllEntities;
-import mystrategy.maps.EntitiesMap;
+import older.v07.angry.rusher.collections.AllEntities;
+import older.v07.angry.rusher.maps.EntitiesMap;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,10 +1,8 @@
 package older.v07.angry.rusher.maps.light;
 
 import model.PlayerView;
-import mystrategy.collections.AllEntities;
-import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.light.VirtualResources;
-import mystrategy.maps.light.WarMap;
+import older.v07.angry.rusher.collections.AllEntities;
+import older.v07.angry.rusher.maps.EntitiesMap;
 
 public class SimCityPlan {
 

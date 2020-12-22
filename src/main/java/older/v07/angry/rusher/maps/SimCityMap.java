@@ -3,10 +3,10 @@ package older.v07.angry.rusher.maps;
 import model.Coordinate;
 import model.EntityType;
 import model.PlayerView;
-import mystrategy.collections.AllEntities;
-import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.light.SimCityPlan;
-import mystrategy.maps.light.WarMap;
+import older.v07.angry.rusher.collections.AllEntities;
+import older.v07.angry.rusher.maps.EntitiesMap;
+import older.v07.angry.rusher.maps.light.SimCityPlan;
+import older.v07.angry.rusher.maps.light.WarMap;
 
 import java.util.HashSet;
 import java.util.Set;

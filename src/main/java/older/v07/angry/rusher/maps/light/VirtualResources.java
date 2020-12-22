@@ -4,14 +4,14 @@ import model.Coordinate;
 import model.Entity;
 import model.EntityType;
 import model.PlayerView;
-import mystrategy.collections.AllEntities;
-import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.light.VisibilityMap;
+import older.v07.angry.rusher.collections.AllEntities;
+import older.v07.angry.rusher.maps.EntitiesMap;
+import older.v07.angry.rusher.maps.light.VisibilityMap;
 
 public class VirtualResources {
     public static final int VIRTUAL_PATCH_SIZE = 10;
     private int mapSize;
-    private mystrategy.maps.light.VisibilityMap visibility;
+    private older.v07.angry.rusher.maps.light.VisibilityMap visibility;
     private int playersCount;
     private PlayerView playerView;
     private AllEntities allEntities;

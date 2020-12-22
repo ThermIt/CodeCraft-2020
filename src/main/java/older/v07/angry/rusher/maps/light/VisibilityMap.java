@@ -4,7 +4,7 @@ import model.Coordinate;
 import model.Entity;
 import model.PlayerView;
 import common.Constants;
-import mystrategy.collections.AllEntities;
+import older.v07.angry.rusher.collections.AllEntities;
 import util.DebugInterface;
 
 import java.util.HashSet;

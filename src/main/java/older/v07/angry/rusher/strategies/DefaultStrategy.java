@@ -1,12 +1,12 @@
 package older.v07.angry.rusher.strategies;
 
 import model.*;
-import mystrategy.collections.AllEntities;
-import mystrategy.maps.EnemiesMap;
-import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.RepairMap;
-import mystrategy.maps.SimCityMap;
-import mystrategy.maps.light.*;
+import older.v07.angry.rusher.collections.AllEntities;
+import older.v07.angry.rusher.maps.EnemiesMap;
+import older.v07.angry.rusher.maps.EntitiesMap;
+import older.v07.angry.rusher.maps.RepairMap;
+import older.v07.angry.rusher.maps.SimCityMap;
+import older.v07.angry.rusher.maps.light.*;
 import util.DebugInterface;
 import util.StrategyDelegate;
 import util.Task;

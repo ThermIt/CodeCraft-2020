@@ -1,8 +1,8 @@
 package older.v07.angry.rusher.maps.light;
 
 import model.*;
-import mystrategy.collections.AllEntities;
-import mystrategy.maps.EntitiesMap;
+import older.v07.angry.rusher.collections.AllEntities;
+import older.v07.angry.rusher.maps.EntitiesMap;
 
 import java.util.ArrayList;
 import java.util.Iterator;

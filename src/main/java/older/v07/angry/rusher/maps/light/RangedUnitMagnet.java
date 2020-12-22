@@ -4,11 +4,11 @@ import common.Constants;
 import model.Coordinate;
 import model.Entity;
 import model.EntityType;
-import mystrategy.collections.AllEntities;
-import mystrategy.collections.SingleVisitCoordinateSet;
-import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.light.VirtualResources;
-import mystrategy.maps.light.VisibilityMap;
+import older.v07.angry.rusher.collections.AllEntities;
+import older.v07.angry.rusher.collections.SingleVisitCoordinateSet;
+import older.v07.angry.rusher.maps.EntitiesMap;
+import older.v07.angry.rusher.maps.light.VirtualResources;
+import older.v07.angry.rusher.maps.light.VisibilityMap;
 import util.DebugInterface;
 import util.Initializer;
 
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RangedUnitMagnet {
-    private mystrategy.maps.light.VisibilityMap visibility;
+    private older.v07.angry.rusher.maps.light.VisibilityMap visibility;
     private EntitiesMap entitiesMap;
     private AllEntities entities;
     private VirtualResources resources;

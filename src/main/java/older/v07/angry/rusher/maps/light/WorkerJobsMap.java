@@ -2,11 +2,11 @@ package older.v07.angry.rusher.maps.light;
 
 import model.*;
 import common.Constants;
-import mystrategy.collections.AllEntities;
-import mystrategy.maps.EnemiesMap;
-import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.light.BuildOrders;
-import mystrategy.maps.light.WarMap;
+import older.v07.angry.rusher.collections.AllEntities;
+import older.v07.angry.rusher.maps.EnemiesMap;
+import older.v07.angry.rusher.maps.EntitiesMap;
+import older.v07.angry.rusher.maps.light.BuildOrders;
+import older.v07.angry.rusher.maps.light.WarMap;
 import util.DebugInterface;
 import util.Task;
 
@@ -24,7 +24,7 @@ public class WorkerJobsMap {
     private AllEntities allEntities;
     private EnemiesMap enemiesMap;
     private Player me;
-    private mystrategy.maps.light.WarMap warMap;
+    private older.v07.angry.rusher.maps.light.WarMap warMap;
 
     public WorkerJobsMap(
             PlayerView playerView,

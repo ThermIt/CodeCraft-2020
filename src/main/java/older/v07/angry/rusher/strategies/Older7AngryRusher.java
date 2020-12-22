@@ -3,8 +3,7 @@ package older.v07.angry.rusher.strategies;
 import model.Action;
 import model.DebugCommand;
 import model.PlayerView;
-import mystrategy.maps.light.*;
-import mystrategy.strategies.DefaultStrategy;
+import older.v07.angry.rusher.maps.light.*;
 import util.*;
 
 public class Older7AngryRusher implements Strategy {
@@ -40,7 +39,7 @@ public class Older7AngryRusher implements Strategy {
     }
 
     private void initDefaultStrategy() {
-        mystrategy.strategies.DefaultStrategy currentStrategy = new DefaultStrategy(buildOrders, visibility, resources, warMap, simCityPlan);
+        older.v07.angry.rusher.strategies.DefaultStrategy currentStrategy = new DefaultStrategy(buildOrders, visibility, resources, warMap, simCityPlan);
         this.currentStrategy = currentStrategy;
         this.trigger = currentStrategy;
     }
