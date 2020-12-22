@@ -122,7 +122,7 @@ public class DefaultStrategy implements StrategyDelegate {
                 .anyMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive())) {
             third = true;
             if (DebugInterface.isDebugEnabled()) {
-                System.out.println(playerView.getCurrentTick() + "BR+");
+                System.out.println(playerView.getCurrentTick() + "oldBR+");
             }
         }
 
