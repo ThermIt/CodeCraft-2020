@@ -20,6 +20,7 @@ public class AllEntities {
     private List<Entity> myActors = new ArrayList<>();
     private List<Entity> myBuilders = new ArrayList<>();
     private List<Entity> myRangedBases = new ArrayList<>();
+    private List<Entity> myMeleeBases = new ArrayList<>();
 
     private List<Entity> enemyAttackers = new ArrayList<>();
     private List<Entity> enemyUnits = new ArrayList<>();
@@ -56,6 +57,9 @@ public class AllEntities {
                         myActors.add(entity);
                         if (entity.getEntityType() == EntityType.RANGED_BASE) {
                             myRangedBases.add(entity);
+                        }
+                        if (entity.getEntityType() == EntityType.MELEE_BASE) {
+                            myMeleeBases.add(entity);
                         }
                     }
                 } else if (entity.getEntityType().isUnit()) {
@@ -148,6 +152,10 @@ public class AllEntities {
 
     public List<Entity> getMyRangedBases() {
         return myRangedBases;
+    }
+
+    public List<Entity> getMyMeleeBases() {
+        return myMeleeBases;
     }
 
     public List<Entity> getMyBuilders() {

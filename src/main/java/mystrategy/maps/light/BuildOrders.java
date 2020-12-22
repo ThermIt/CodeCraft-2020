@@ -134,8 +134,4 @@ public class BuildOrders {
         }
         return activeOrders;
     }
-
-    public void placeBarracks(Coordinate rbBuildCoordinates) {
-        buildQueue.add(new Entity(-1, getMyId(), EntityType.RANGED_BASE, rbBuildCoordinates, 0, true));
-    }
 }
