@@ -28,6 +28,8 @@ public class AllEntities {
     private List<Entity> enemyBuilders = new ArrayList<>();
     private List<Entity> enemyRangedUnits = new ArrayList<>();
     private List<Entity> enemyMeleeUnits = new ArrayList<>();
+    private List<Entity> myMeleeUnits = new ArrayList<>();;
+    private List<Entity> myRangedUnits = new ArrayList<>();;
 
     private int currentUnits;
     private int maxUnits;
@@ -65,6 +67,10 @@ public class AllEntities {
                 } else if (entity.getEntityType().isUnit()) {
                     if (entity.getEntityType() == EntityType.BUILDER_UNIT) {
                         myBuilders.add(entity);
+                    } else if (entity.getEntityType() == EntityType.RANGED_UNIT) {
+                        myRangedUnits.add(entity);
+                    } else if (entity.getEntityType() == EntityType.MELEE_UNIT) {
+                        myMeleeUnits.add(entity);
                     }
                     myUnits.add(entity);
                     myActors.add(entity);
@@ -168,5 +174,13 @@ public class AllEntities {
 
     public List<Entity> getEnemyMeleeUnits() {
         return enemyMeleeUnits;
+    }
+
+    public List<Entity> getMyMeleeUnits() {
+        return myMeleeUnits;
+    }
+
+    public List<Entity> getMyRangedUnits() {
+        return myRangedUnits;
     }
 }
