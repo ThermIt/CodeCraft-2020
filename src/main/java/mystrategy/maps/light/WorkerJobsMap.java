@@ -1,7 +1,7 @@
 package mystrategy.maps.light;
 
-import common.Constants;
 import model.*;
+import common.Constants;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
@@ -61,7 +61,7 @@ public class WorkerJobsMap {
             }
         }
 
-        int minWorkers = 4;
+        int minWorkers = 3;
         Set<Coordinate> buildCoordinates = new HashSet<>(128);
         for (Entity order : buildOrders.updateAndGetActiveOrders(allEntities, entitiesMap, me)) {
             if (order.getEntityType() == EntityType.RANGED_BASE || order.getEntityType() == EntityType.MELEE_BASE) {
@@ -170,7 +170,7 @@ public class WorkerJobsMap {
                 if (coordinate.isInBounds()
                         && getDistanceUnsafe(distanceMap, coordinate) == 0
                         && isPassable(coordinate)
-                        && resources.getResourceCount(coordinate) <= 10
+                        && resources.getResourceCount(coordinate) <= 1
                 ) {
                     Entity entity = entitiesMap.getEntity(coordinate);
 //                    DebugInterface.print(Integer.toString(i), coordinate); // build distance

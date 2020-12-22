@@ -358,11 +358,13 @@ failedLimits
         }
 
         if (playerView.isFinials()) {
-            buildersLimit = 1000;
+            buildersLimit = 65;
         }
 
         if (entityType == EntityType.BUILDER_UNIT
-                && allEntities.getMyWorkers().size() > buildersLimit) {
+                && allEntities.getMyWorkers().size() >= buildersLimit
+//                && !allEntities.getEnemyUnits().stream().anyMatch(enemy -> enemy.getPosition().getY() + enemy.getPosition().getX() < 80)
+        ) {
             return buildAction;
         }
 
