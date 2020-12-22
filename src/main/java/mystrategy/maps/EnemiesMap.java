@@ -62,7 +62,7 @@ public class EnemiesMap {
 
             int health;
             if (size == 1) {
-                health = calculateNeighbors(attackRange + 2, x, y, size);
+                health = 0;// calculateNeighbors(attackRange + 2, x, y, size);
             } else {
                 health = calculateNeighbors(attackRange + 1, x, y, size);
             }
@@ -82,7 +82,10 @@ public class EnemiesMap {
             for (int i = 0; i < mapSize; i++) {
                 for (int j = 0; j < mapSize; j++) {
                     if (shootDangerNextTick[i][j] > 0) {
-                        DebugInterface.print(Integer.toString(shootDangerNextTick[i][j]), i, j);
+                        DebugInterface.println(shootDangerNextTick[i][j] / 5, i, j, 0);
+                    }
+                    if (shootDanger[i][j] > 0 && shootDanger[i][j] <= 2) {
+                        DebugInterface.println(shootDanger[i][j], i, j, 1);
                     }
                 }
             }
@@ -187,15 +190,17 @@ public class EnemiesMap {
             coordinateList = coordinateListNext;
         }
 
-//        if (DebugInterface.isDebugEnabled()) {
-//            for (int i = 0; i < mapSize; i++) {
-//                for (int j = 0; j < mapSize; j++) {
-//                    if (shootDanger[i][j] > 0) {
-//                        DebugInterface.print(Integer.toString(shootDanger[i][j]), i, j);
-//                    }
-//                }
-//            }
-//        }
+/*
+        if (DebugInterface.isDebugEnabled()) {
+            for (int i = 0; i < mapSize; i++) {
+                for (int j = 0; j < mapSize; j++) {
+                    if (shootDanger[i][j] > 0) {
+                        DebugInterface.print(Integer.toString(shootDanger[i][j]), i, j);
+                    }
+                }
+            }
+        }
+*/
     }
 
     public int getDangerLevel(Coordinate from) {

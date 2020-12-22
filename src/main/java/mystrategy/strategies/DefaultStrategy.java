@@ -92,7 +92,7 @@ public class DefaultStrategy implements StrategyDelegate {
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();
         enemiesMap = new EnemiesMap(playerView, entitiesMap, allEntities);
-        this.warMap.init(playerView, entitiesMap, allEntities, enemiesMap);
+        this.warMap.init(playerView, entitiesMap, allEntities, enemiesMap, allEntities);
         buildOrders.init(playerView, allEntities);
 
         this.jobs = new WorkerJobsMap(
@@ -115,7 +115,7 @@ public class DefaultStrategy implements StrategyDelegate {
                 .anyMatch(ent1 -> ent1.isMy(EntityType.RANGED_BASE) && !ent1.isActive())) {
             second = true;
             if (DebugInterface.isDebugEnabled()) {
-                System.out.println(playerView.getCurrentTick() + "BR");
+//                System.out.println(playerView.getCurrentTick() + "BR");
             }
         }
         if (!third && allEntities.getMyBuildings().stream()
@@ -267,19 +267,19 @@ public class DefaultStrategy implements StrategyDelegate {
         for (Entity unit : allEntities.getMyUnits()) {
             if (unit.getAttackAction() != null) {
                 if (unit.getAttackAction().getAutoAttack() != null) {
-                    DebugInterface.print("U", unit.getPosition());
+                    DebugInterface.println("U", unit.getPosition(), 2);
                 } else {
-                    DebugInterface.print("A", unit.getPosition());
+                    DebugInterface.println("A", unit.getPosition(), 2);
                 }
             } else if (unit.getBuildAction() != null) {
-                DebugInterface.print("B", unit.getPosition());
+                DebugInterface.println("B", unit.getPosition(), 2);
             } else if (unit.getRepairAction() != null) {
-                DebugInterface.print("T", unit.getPosition());
+                DebugInterface.println("T", unit.getPosition(), 2);
             } else if (unit.getMoveAction() != null) {
                 if (unit.getTask() == Task.RUN_FOOLS) {
-                    DebugInterface.print("R", unit.getPosition());
+                    DebugInterface.println("R", unit.getPosition(), 2);
                 } else {
-                    DebugInterface.print("M", unit.getPosition());
+                    DebugInterface.println("M", unit.getPosition(), 2);
                 }
             }
             if (unit.getMoveAction() != null) {
@@ -351,7 +351,7 @@ failedLimits
             buildersLimit = 110;
         }
 */
-        int buildersLimit = allEntities.getEnemyBuilders().size() + 20;
+        int buildersLimit = allEntities.getEnemyWorkers().size() + 20;
         if (playerView.isRound2()) {
             buildersLimit = 650;
         }

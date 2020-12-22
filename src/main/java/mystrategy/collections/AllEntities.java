@@ -18,13 +18,15 @@ public class AllEntities {
     private List<Entity> myAttackers = new ArrayList<>();
     private List<Entity> myBuildings = new ArrayList<>();
     private List<Entity> myActors = new ArrayList<>();
-    private List<Entity> enemyAttackers = new ArrayList<>();
+    private List<Entity> myBuilders = new ArrayList<>();
+    private List<Entity> myRangedBases = new ArrayList<>();
 
+    private List<Entity> enemyAttackers = new ArrayList<>();
     private List<Entity> enemyUnits = new ArrayList<>();
     private List<Entity> enemyBuildings = new ArrayList<>();
     private List<Entity> enemyBuilders = new ArrayList<>();
-    private List<Entity> myBuilders = new ArrayList<>();
-    private List<Entity> myRangedBases = new ArrayList<>();
+    private List<Entity> enemyRangedUnits = new ArrayList<>();
+    private List<Entity> enemyMeleeUnits = new ArrayList<>();
 
     private int currentUnits;
     private int maxUnits;
@@ -77,6 +79,10 @@ public class AllEntities {
                 if (entity.getEntityType().isUnit()) {
                     if (entity.getEntityType() == EntityType.BUILDER_UNIT) {
                         enemyBuilders.add(entity);
+                    } else if (entity.getEntityType() == EntityType.RANGED_UNIT) {
+                        enemyRangedUnits.add(entity);
+                    } else {
+                        enemyMeleeUnits.add(entity);
                     }
                     enemyUnits.add(entity);
                 }
@@ -100,7 +106,7 @@ public class AllEntities {
         return enemyAttackers;
     }
 
-    public List<Entity> getEnemyBuilders() {
+    public List<Entity> getEnemyWorkers() {
         return enemyBuilders;
     }
 
@@ -142,5 +148,17 @@ public class AllEntities {
 
     public List<Entity> getMyRangedBases() {
         return myRangedBases;
+    }
+
+    public List<Entity> getMyBuilders() {
+        return myBuilders;
+    }
+
+    public List<Entity> getEnemyRangedUnits() {
+        return enemyRangedUnits;
+    }
+
+    public List<Entity> getEnemyMeleeUnits() {
+        return enemyMeleeUnits;
     }
 }

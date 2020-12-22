@@ -1,10 +1,10 @@
 package mystrategy.maps.light;
 
-import model.*;
 import common.Constants;
 import common.Decision;
-import mystrategy.collections.SingleVisitCoordinateSet;
+import model.*;
 import mystrategy.collections.AllEntities;
+import mystrategy.collections.SingleVisitCoordinateSet;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import util.DebugInterface;
@@ -29,6 +29,7 @@ public class WarMap {
     private AllEntities allEntities;
     private VisibilityMap visibility;
     private VirtualResources resources;
+    private RangedUnitMagnet rangedUnitMagnet;
     private int tick;
 
     public WarMap(VisibilityMap visibility, VirtualResources resources) {
@@ -50,7 +51,9 @@ public class WarMap {
             PlayerView playerView,
             EntitiesMap entitiesMap,
             AllEntities allEntities,
-            EnemiesMap enemiesMap) {
+            EnemiesMap enemiesMap,
+            AllEntities entities
+    ) {
         tick = playerView.getCurrentTick();
         this.playerView = playerView;
         this.entitiesMap = entitiesMap;
@@ -130,6 +133,11 @@ public class WarMap {
         fillEnemyDistances(enemyDominance);
         fillMyAttackersDistances(myAttackersLocations);
         fillEnemyWorkerDistances(enemyWorkerLocations);
+
+        this.rangedUnitMagnet = new RangedUnitMagnet(visibility, entitiesMap, entities, resources);
+        rangedUnitMagnet.addAll(enemyUnitLocations);
+        rangedUnitMagnet.addAll(enemyBuildingLocations);
+        rangedUnitMagnet.fillDistances();
     }
 
     private boolean isPassable(Coordinate coordinate) {
@@ -326,25 +334,16 @@ public class WarMap {
         if (old == null) {
             return newPosition;
         }
-        int newDistance = getDistanceToEnemy(newPosition);
-        int distanceToEnemyWorker = getDistanceToEnemyWorker(newPosition);
-        if (distanceToEnemyWorker > 0 && distanceToEnemyWorker < newDistance) {
-            newDistance = distanceToEnemyWorker;
-        }
+        int newDistance = rangedUnitMagnet.getDistanceToEnemy(newPosition);
         if (newDistance == 0) {
             return old;
         }
-
-        int oldDistance = getDistanceToEnemy(old);
-        int oldDistanceToEnemyWorker = getDistanceToEnemyWorker(old);
-        if (oldDistanceToEnemyWorker > 0 && oldDistanceToEnemyWorker < oldDistance) {
-            oldDistance = oldDistanceToEnemyWorker;
-        }
+        int oldDistance = rangedUnitMagnet.getDistanceToEnemy(old);
         if (newDistance < oldDistance) {
             return newPosition;
         }
 
-        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) { // scatters a bit
+        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) { // scatters a bit RANGED
             return newPosition;
         }
         return old;
@@ -454,7 +453,7 @@ public class WarMap {
     public void decideMoveForRangedUnit(Entity unit) {
         if (unit.getAttackAction() != null) {
             takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
-            DebugInterface.print("0 - attacking", unit.getPosition().getX(), unit.getPosition().getY());
+// *           DebugInterface.print("0 - attacking", unit.getPosition().getX(), unit.getPosition().getY());
             unit.setMoveAction(null);
             unit.setMoveDecision(Decision.DECIDED);
             return;
@@ -483,17 +482,17 @@ public class WarMap {
 
         if (!Objects.equals(moveTo, unit.getPosition()) && otherUnit.getEntityType() != EntityType.RESOURCE) {
             takenSpace[moveTo.getX()][moveTo.getY()] = true;
-            DebugInterface.print("0 - move", moveTo.getX(), moveTo.getY());
+// *            DebugInterface.print("0 - move", moveTo.getX(), moveTo.getY());
             MoveAction moveAction = new MoveAction(moveTo, true, true);
             unit.setMoveAction(moveAction);
         } else if (otherUnit.getEntityType() == EntityType.RESOURCE) {
             takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
-            DebugInterface.print("0 - cleaning", unit.getPosition().getX(), unit.getPosition().getY());
+// *            DebugInterface.print("0 - cleaning", unit.getPosition().getX(), unit.getPosition().getY());
             MoveAction moveAction = new MoveAction(moveTo, true, true);
             unit.setMoveAction(moveAction);
         } else {
             takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
-            DebugInterface.print("0 - not moving", unit.getPosition().getX(), unit.getPosition().getY());
+// *            DebugInterface.print("0 - not moving", unit.getPosition().getX(), unit.getPosition().getY());
             unit.setMoveAction(null);
         }
         unit.setMoveDecision(Decision.DECIDED);

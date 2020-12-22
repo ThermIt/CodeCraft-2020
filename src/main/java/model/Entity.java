@@ -221,6 +221,20 @@ public class Entity {
         accumulatedDamage += damage;
     }
 
+    public List<Coordinate> getInsideCoordinates() {
+        List<Coordinate> coordinateList = new ArrayList<>();
+        int size = getProperties().getSize();
+        if (size == 1) {
+            coordinateList.add(position);
+        } else {
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    coordinateList.add(new Coordinate(position.getX() + i, position.getY() + j));
+                }
+            }
+        }
+        return coordinateList;
+    }
 
     public List<Coordinate> getAdjacentCoordinates() {
         int size = getProperties().getSize();

@@ -10,6 +10,7 @@ import static util.Initializer.getDebugInterface;
 
 public class DebugInterface {
 
+    public static final int TEXT_SIZE = 30;
     private static final DebugState EMPTY_STATE = new DebugState();
     private static boolean debugEnabled = false;
     private InputStream inputStream;
@@ -36,8 +37,22 @@ public class DebugInterface {
         print(test, pos.getX(), pos.getY());
     }
 
+    public static void println(String test, Coordinate pos, int line) {
+        println(test, pos.getX(), pos.getY(), line);
+    }
+
+    public static void println(Integer test, Coordinate pos, int line) {
+        if (test != null) {
+            println(test.toString(), pos.getX(), pos.getY(), line);
+        }
+    }
+
     public static void print(Integer test, int x, int y) {
         print(test.toString(), x, y);
+    }
+
+    public static void println(Integer test, int x, int y, int line) {
+        println(test.toString(), x, y, line);
     }
 
     public static void print(String test, int x, int y) {
@@ -46,7 +61,18 @@ public class DebugInterface {
         }
         DebugCommand.Add command = new DebugCommand.Add();
         ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(x, y), new Vec2Float(0, 0), new Color(0, 0, 0, 0.5f));
-        DebugData data = new DebugData.PlacedText(coloredVertex, test, -1, 24);
+        DebugData data = new DebugData.PlacedText(coloredVertex, test, 0, TEXT_SIZE);
+        command.setData(data);
+        getDebugInterface().send(command);
+    }
+
+    public static void println(String test, int x, int y, int line) {
+        if (!isDebugEnabled()) {
+            return;
+        }
+        DebugCommand.Add command = new DebugCommand.Add();
+        ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(x, y), new Vec2Float(0, line * TEXT_SIZE + 1), new Color(0, 0, 0, 0.5f));
+        DebugData data = new DebugData.PlacedText(coloredVertex, test, 0, TEXT_SIZE);
         command.setData(data);
         getDebugInterface().send(command);
     }
@@ -56,9 +82,9 @@ public class DebugInterface {
             return;
         }
         DebugCommand.Add command = new DebugCommand.Add();
-        ColoredVertex coloredVertex1 = new ColoredVertex(new Vec2Float(pos.getX()+0.5f, pos.getY()+0.5f), new Vec2Float(0, 0), new Color(1, 1, 1, 0.7f));
-        ColoredVertex coloredVertex2 = new ColoredVertex(new Vec2Float((pos.getX()+tgt.getX())/2.0f+0.5f, (pos.getY()+tgt.getY())/2.0f+0.5f), new Vec2Float(0, 0), new Color(0, 0, 0, 0.7f));
-        ColoredVertex[] vertices = {coloredVertex1,coloredVertex2};
+        ColoredVertex coloredVertex1 = new ColoredVertex(new Vec2Float(pos.getX() + 0.5f, pos.getY() + 0.5f), new Vec2Float(0, 0), new Color(1, 1, 1, 0.7f));
+        ColoredVertex coloredVertex2 = new ColoredVertex(new Vec2Float((pos.getX() + tgt.getX()) / 2.0f + 0.5f, (pos.getY() + tgt.getY()) / 2.0f + 0.5f), new Vec2Float(0, 0), new Color(0, 0, 0, 0.7f));
+        ColoredVertex[] vertices = {coloredVertex1, coloredVertex2};
         DebugData data = new DebugData.Primitives(vertices, PrimitiveType.LINES);
         command.setData(data);
         getDebugInterface().send(command);

@@ -64,9 +64,20 @@ public class SingleVisitCoordinateSet implements Iterable<Coordinate> {
         return new HashSet<>(coordinateList);
     }
 
-    public void addAll(Set<Coordinate> coordinates) {
+    public void addAll(Iterable<Coordinate> coordinates) {
         for (Coordinate pos : coordinates) {
             add(pos);
         }
+    }
+
+    public void remove(Coordinate coordinate) {
+        if (coordinate.isOutOfBounds()) {
+            return;
+        }
+        if (!beenThere[coordinate.getX()][coordinate.getY()]) {
+            beenThere[coordinate.getX()][coordinate.getY()] = true;
+            return;
+        }
+        coordinateList.remove(coordinate);
     }
 }
