@@ -1,6 +1,7 @@
 import mystrategy.strategies.DefaultStrategy;
 import mystrategy.strategies.DelegatingStrategy;
 import older.v06.ranger.stream.strategies.Older6RangerStream;
+import older.v07.angry.rusher.strategies.Older7AngryRusher;
 import util.DebugInterface;
 import util.Strategy;
 import util.StreamUtil;
@@ -49,7 +50,7 @@ public class Runner {
         }
         if (args.length > 3 && "multiply2".equals(args[3])) {
             runOnceMultithreaded(host, port, token, new DelegatingStrategy());
-            runOnceMultithreaded(host, port + 1, token, new Older6RangerStream());
+            runOnceMultithreaded(host, port + 1, token, new Older7AngryRusher());
         } else if (args.length > 3 && "multiply3".equals(args[3])) {
             runOnceMultithreaded(host, port, token, new DelegatingStrategy());
             runOnceMultithreaded(host, port + 1, token, new Older6RangerStream());

@@ -62,7 +62,7 @@ public class EnemiesMap {
 
             int health;
             if (size == 1) {
-                health = 0;// calculateNeighbors(attackRange + 2, x, y, size);
+                health = calculateNeighbors(attackRange + 2, x, y, size); // comment out to not attack in 6x
             } else {
                 health = calculateNeighbors(attackRange + 1, x, y, size);
             }
