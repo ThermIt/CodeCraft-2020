@@ -102,7 +102,8 @@ public class DefaultStrategy implements StrategyDelegate {
                 enemiesMap,
                 me,
                 buildOrders,
-                warMap
+                warMap,
+                resources
         );
 
 //        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);

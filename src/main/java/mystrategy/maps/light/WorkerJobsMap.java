@@ -1,7 +1,7 @@
 package mystrategy.maps.light;
 
-import model.*;
 import common.Constants;
+import model.*;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
@@ -23,6 +23,7 @@ public class WorkerJobsMap {
     private EnemiesMap enemiesMap;
     private Player me;
     private WarMap warMap;
+    private VirtualResources resources;
 
     public WorkerJobsMap(
             PlayerView playerView,
@@ -31,8 +32,10 @@ public class WorkerJobsMap {
             EnemiesMap enemiesMap,
             Player me,
             BuildOrders buildOrders,
-            WarMap warMap
+            WarMap warMap,
+            VirtualResources resources
     ) {
+        this.resources = resources;
         warMap.checkTick(playerView);
         this.warMap = warMap;
         this.entitiesMap = entitiesMap;
@@ -58,7 +61,7 @@ public class WorkerJobsMap {
             }
         }
 
-        int minWorkers = 3;
+        int minWorkers = 4;
         Set<Coordinate> buildCoordinates = new HashSet<>(128);
         for (Entity order : buildOrders.updateAndGetActiveOrders(allEntities, entitiesMap, me)) {
             if (order.getEntityType() == EntityType.RANGED_BASE || order.getEntityType() == EntityType.MELEE_BASE) {
@@ -71,14 +74,16 @@ public class WorkerJobsMap {
         fillBuildOrderDistance(buildDistanceByFoot, buildCoordinates, minWorkers);
 /*
         if (DebugInterface.isDebugEnabled()) {
-            for (Coordinate pos:buildCoordinates) {
-                    DebugInterface.print("X", pos.getX(), pos.getY());
+            for (Coordinate pos : buildCoordinates) {
+                DebugInterface.print("X", pos.getX(), pos.getY());
             }
-//            for (int i = 0; i < mapSize; i++) {
-//                for (int j = 0; j < mapSize; j++) {
-//                    DebugInterface.print(Integer.toString(distanceByFoot[i][j]), i, j);
-//                }
-//            }
+            for (int i = 0; i < mapSize; i++) {
+                for (int j = 0; j < mapSize; j++) {
+                    if (buildDistanceByFoot[i][j] > 0) {
+                        DebugInterface.print(Integer.toString(buildDistanceByFoot[i][j]), i, j);
+                    }
+                }
+            }
         }
 */
     }
@@ -164,7 +169,9 @@ public class WorkerJobsMap {
             for (Coordinate coordinate : coordinateList) {
                 if (coordinate.isInBounds()
                         && getDistanceUnsafe(distanceMap, coordinate) == 0
-                        && isPassable(coordinate)) {
+                        && isPassable(coordinate)
+                        && resources.getResourceCount(coordinate) <= 10
+                ) {
                     Entity entity = entitiesMap.getEntity(coordinate);
 //                    DebugInterface.print(Integer.toString(i), coordinate); // build distance
                     if (entity.isMy(EntityType.BUILDER_UNIT)) {
