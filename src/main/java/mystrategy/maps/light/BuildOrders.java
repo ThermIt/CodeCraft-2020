@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static util.Initializer.getMyId;
-
 public class BuildOrders {
     private List<Entity> buildQueue;
     private List<Entity> repairQueue;
@@ -36,6 +34,7 @@ public class BuildOrders {
         buildQueue = new ArrayList<>();
         repairQueue = new ArrayList<>();
 
+/*
         if (playerView.isRound1()) {
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 2), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(5, 2), 0, false));
@@ -47,6 +46,7 @@ public class BuildOrders {
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(8, 2), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 8), 0, false));
         }
+*/
 /*
         buildQueue.add(new Entity(-1, getMyId(), EntityType.TURRET, new Coordinate(10, 5), 0, false));
         buildQueue.add(new Entity(-1, getMyId(), EntityType.TURRET, new Coordinate(5, 10), 0, false));
@@ -77,7 +77,8 @@ public class BuildOrders {
     }
 
     public boolean isFreeToAdd() {
-        return entities.getMyRangedBases().size() > 0 && entities.getMyRangedBases().get(0).getHealth() > 10;
+//        return entities.getMyRangedBases().size() > 0 && entities.getMyRangedBases().get(0).getHealth() > 10;
+        return true;
     }
 
     public List<Entity> updateAndGetActiveOrders(AllEntities allEntities, EntitiesMap entitiesMap, Player me) {

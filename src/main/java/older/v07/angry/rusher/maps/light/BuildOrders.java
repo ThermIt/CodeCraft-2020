@@ -77,7 +77,8 @@ public class BuildOrders {
     }
 
     public boolean isFreeToAdd() {
-        return entities.getMyRangedBases().size() > 0 && entities.getMyRangedBases().get(0).getHealth() > 10;
+//        return entities.getMyRangedBases().size() > 0 && entities.getMyRangedBases().get(0).getHealth() > 10;
+        return entities.getMyMaxFood() >= 30;
     }
 
     public List<Entity> updateAndGetActiveOrders(AllEntities allEntities, EntitiesMap entitiesMap, Player me) {

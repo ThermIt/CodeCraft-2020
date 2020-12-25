@@ -88,9 +88,11 @@ public class RangedUnitMagnet {
             }
         }
 
+/*
         for (Coordinate pos : coordinates) {
             DebugInterface.println("X", pos, 0);
         }
+*/
     }
 
 /*

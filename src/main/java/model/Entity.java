@@ -1,6 +1,7 @@
 package model;
 
 import common.Decision;
+import mystrategy.chaos.control.MoveOrder;
 import util.Initializer;
 import util.StreamUtil;
 import util.Task;
@@ -30,6 +31,7 @@ public class Entity {
 
     private Task task = Task.IDLE;
     private Decision moveDecision = Decision.NONE;
+    private List<MoveOrder> orderSequence;
 
     public Entity() {
     }
@@ -279,5 +281,13 @@ public class Entity {
 
     public void setMoveDecision(Decision moveDecision) {
         this.moveDecision = moveDecision;
+    }
+
+    public List<MoveOrder> getOrderSequence() {
+        return orderSequence;
+    }
+
+    public void setOrderSequence(List<MoveOrder> orderSequence) {
+        this.orderSequence = orderSequence;
     }
 }

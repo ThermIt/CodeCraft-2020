@@ -1,6 +1,7 @@
 package mystrategy.strategies;
 
 import model.*;
+import mystrategy.chaos.control.TickRepresentation;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
@@ -41,6 +42,7 @@ public class DefaultStrategy implements StrategyDelegate {
     private WarMap warMap;
     private WorkerJobsMap jobs;
     private SimCityPlan simCityPlan;
+    private TickRepresentation tickRepresentation;
 
     public DefaultStrategy(
             BuildOrders buildOrders,
@@ -112,6 +114,14 @@ public class DefaultStrategy implements StrategyDelegate {
         simCityPlan.init(playerView, entitiesMap, allEntities, warMap, resources);
         simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, warMap, simCityPlan);
 
+        if (tickRepresentation == null) {
+            tickRepresentation = new TickRepresentation();
+            tickRepresentation.init(playerView, harvestJobs);
+        } else {
+            tickRepresentation = tickRepresentation.getNextTick();
+            tickRepresentation.update(playerView, harvestJobs);
+        }
+
         if (!second && allEntities.getMyBuildings().stream()
                 .anyMatch(ent1 -> ent1.isMy(EntityType.RANGED_BASE) && !ent1.isActive())) {
             second = true;
@@ -146,12 +156,13 @@ public class DefaultStrategy implements StrategyDelegate {
                         if (canRepairId != null) {
                             repairAction = new RepairAction(canRepairId);
                         } else if (resource != null) {
-                            attackAction = new AttackAction(resource.getId(), null);
+//                            attackAction = new AttackAction(resource.getId(), null);
                             resource.increaseDamage(unit.getProperties().getAttack().getDamage());
                         }
                     }
                     Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
                     Coordinate rbBuildCoordinates = simCityMap.getRangedBaseBuildCoordinates(unit.getPosition());
+/*
                     if (simCityMap.isNeedBarracks() // hack
                             && me.getResource() >= playerView.getEntityProperties().get(EntityType.RANGED_BASE).getInitialCost()
                             && rbBuildCoordinates != null
@@ -164,6 +175,7 @@ public class DefaultStrategy implements StrategyDelegate {
 
 //                        simCityMap.setNeedBarracks(false);
                     }
+*/
                     if (needMoreHouses()
                             && buildOrders.isFreeToAdd()
                             && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
@@ -209,9 +221,11 @@ public class DefaultStrategy implements StrategyDelegate {
                     // MELEE+WORKERS
                     EntityType[] validAutoAttackTargets;
                     validAutoAttackTargets = new EntityType[0];
-                    attackAction = new AttackAction(
-                            null, new AutoAttack(5, validAutoAttackTargets)
-                    );
+                    if (unit.getEntityType() != EntityType.BUILDER_UNIT) {
+                        attackAction = new AttackAction(
+                                null, new AutoAttack(5, validAutoAttackTargets)
+                        );
+                    }
                     unit.setAttackAction(attackAction);
                     unit.setBuildAction(null);
                     unit.setRepairAction(null);
@@ -223,6 +237,7 @@ public class DefaultStrategy implements StrategyDelegate {
         for (Entity unit : allEntities.getMyUnits()) {
             MoveAction moveAction;
             if (resources.getTotalResourceCount() > 0 && unit.getEntityType() == EntityType.BUILDER_UNIT) {
+/*
                 Coordinate moveTo = null;
                 if (unit.getTask() == Task.BUILD) {
                     moveTo = null;
@@ -238,6 +253,7 @@ public class DefaultStrategy implements StrategyDelegate {
                     moveAction = new MoveAction(moveTo, true, true);
                     unit.setMoveAction(moveAction);
                 }
+*/
             } else { // all
                 if (unit.getEntityType() == EntityType.RANGED_UNIT) {
                     continue;
@@ -358,7 +374,7 @@ failedLimits
         }
 
         if (playerView.isFinials()) {
-            buildersLimit = 65;
+            buildersLimit = 60;
         }
 
         if (entityType == EntityType.BUILDER_UNIT
@@ -392,6 +408,9 @@ failedLimits
                     buildPosition
             );
         } else {
+            if (1 == 1) {
+                return buildAction;
+            }
 /*
             if (entityType == EntityType.MELEE_UNIT) {
                 return buildAction;

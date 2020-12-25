@@ -30,4 +30,8 @@ public class MoveAction {
         StreamUtil.writeBoolean(stream, findClosestPosition);
         StreamUtil.writeBoolean(stream, breakThrough);
     }
+
+    public boolean isValid() {
+        return target != null && target.isInBounds();
+    }
 }

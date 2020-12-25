@@ -30,6 +30,7 @@ public class AllEntities {
 
     private int currentUnits;
     private int maxUnits;
+    private int myMaxFood;
 
     public AllEntities(PlayerView playerView) {
         myId = playerView.getMyId();
@@ -49,6 +50,7 @@ public class AllEntities {
                 continue;
             }
             if (entity.getPlayerId() == myId) { //my
+                myMaxFood += entity.getProperties().getPopulationProvide();
                 myEntities.add(entity);
                 if (entity.getEntityType().isBuilding()) {
                     myBuildings.add(entity);
@@ -160,5 +162,9 @@ public class AllEntities {
 
     public List<Entity> getEnemyMeleeUnits() {
         return enemyMeleeUnits;
+    }
+
+    public int getMyMaxFood() {
+        return myMaxFood;
     }
 }

@@ -66,6 +66,17 @@ public class DebugInterface {
         getDebugInterface().send(command);
     }
 
+    public static void printRed(String test, int x, int y) {
+        if (!isDebugEnabled()) {
+            return;
+        }
+        DebugCommand.Add command = new DebugCommand.Add();
+        ColoredVertex coloredVertex = new ColoredVertex(new Vec2Float(x, y), new Vec2Float(0, 0), new Color(1, 0, 0, 0.7f));
+        DebugData data = new DebugData.PlacedText(coloredVertex, test, 0, TEXT_SIZE);
+        command.setData(data);
+        getDebugInterface().send(command);
+    }
+
     public static void println(String test, int x, int y, int line) {
         if (!isDebugEnabled()) {
             return;

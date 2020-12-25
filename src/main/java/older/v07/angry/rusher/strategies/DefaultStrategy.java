@@ -151,6 +151,7 @@ public class DefaultStrategy implements StrategyDelegate {
                     }
                     Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
                     Coordinate rbBuildCoordinates = simCityMap.getRangedBaseBuildCoordinates(unit.getPosition());
+/*
                     if (simCityMap.isNeedBarracks() // hack
                             && me.getResource() >= playerView.getEntityProperties().get(EntityType.RANGED_BASE).getInitialCost()
                             && rbBuildCoordinates != null
@@ -163,6 +164,7 @@ public class DefaultStrategy implements StrategyDelegate {
 
 //                        simCityMap.setNeedBarracks(false);
                     }
+*/
                     if (needMoreHouses()
                             && buildOrders.isFreeToAdd()
                             && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
@@ -357,7 +359,7 @@ failedLimits
         }
 
         if (playerView.isFinials()) {
-            buildersLimit = 40;
+            buildersLimit = 60;
         }
 
         if (entityType == EntityType.BUILDER_UNIT
@@ -389,6 +391,9 @@ failedLimits
                     buildPosition
             );
         } else {
+            if (1 == 1) {
+                return buildAction;
+            }
 /*
             if (entityType == EntityType.MELEE_UNIT) {
                 return buildAction;

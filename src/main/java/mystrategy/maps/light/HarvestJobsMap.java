@@ -213,4 +213,8 @@ public class HarvestJobsMap {
 
         return position;
     }
+
+    public int getDistance(Coordinate position) {
+        return resourceDistanceByFootAllResources[position.getX()][position.getY()];
+    }
 }

@@ -94,7 +94,7 @@ public class WorkerJobsMap {
         }
         worker.setTask(Task.RUN_FOOLS);
         Coordinate runTo = getRunDirections(worker.getPosition());
-        worker.setMoveAction(new MoveAction(runTo, false, true));
+//        worker.setMoveAction(new MoveAction(runTo, false, true));
         Entity blockingEntity = entitiesMap.getEntity(runTo);
         if (blockingEntity.isMy(EntityType.BUILDER_UNIT)) {
             markRun(blockingEntity);
