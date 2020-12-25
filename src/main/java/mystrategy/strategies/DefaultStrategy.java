@@ -11,10 +11,7 @@ import util.DebugInterface;
 import util.StrategyDelegate;
 import util.Task;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DefaultStrategy implements StrategyDelegate {
@@ -85,6 +82,8 @@ public class DefaultStrategy implements StrategyDelegate {
 
         this.playerView = playerView;
         allEntities = new AllEntities(playerView);
+
+
         entitiesMap = new EntitiesMap(playerView);
         me = Arrays.stream(playerView.getPlayers()).filter(player -> player.getId() == playerView.getMyId()).findAny().get();
         this.visibility.init(playerView, allEntities);
@@ -162,7 +161,7 @@ public class DefaultStrategy implements StrategyDelegate {
 //                        buildOrders.placeBarracks(rbBuildCoordinates);
 //                    maxUnits += playerView.getEntityProperties().get(EntityType.RANGED_BASE).getPopulationProvide();
 
-//                        simCityMap.setNeedBarracks(false);
+                        simCityMap.setNeedBarracks(false);
                     }
                     if (needMoreHouses()
                             && buildOrders.isFreeToAdd()
@@ -358,12 +357,12 @@ failedLimits
         }
 
         if (playerView.isFinials()) {
-            buildersLimit = 65;
+            buildersLimit = 40;
         }
 
         if (entityType == EntityType.BUILDER_UNIT
                 && allEntities.getMyWorkers().size() >= buildersLimit
-//                && !allEntities.getEnemyUnits().stream().anyMatch(enemy -> enemy.getPosition().getY() + enemy.getPosition().getX() < 80)
+                + (allEntities.getEnemyUnits().stream().noneMatch(enemy -> Math.min(enemy.getPosition().getY(), enemy.getPosition().getX()) < 40) ? 40 : 0)
         ) {
             return buildAction;
         }

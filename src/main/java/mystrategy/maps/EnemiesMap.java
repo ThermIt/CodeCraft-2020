@@ -61,28 +61,50 @@ public class EnemiesMap {
             }
 
             int health;
+            int health2 = 0;
             if (size == 1) {
-                health = 0;// calculateNeighbors(attackRange + 2, x, y, size);
+                health = calculateNeighbors(attackRange + 2, x, y, size);
+                health2 = calculateNeighbors(attackRange + 1, x, y, size);
             } else {
                 health = calculateNeighbors(attackRange + 1, x, y, size);
             }
-            if (health >= 60) {
+            if (size > 1 && health >= 60) {
+                continue;
+            }
+            if (size == 1 && health2 >= 60) {
                 continue;
             }
 
             if (size == 1) {
-                fillShootDangerForSize1(attackRange + 1 /*mobile bonus*/, attackDamage, x, y);
+                fillShootDangerForSize1(attackRange + (health < 40 ? 1 : 0) /*mobile bonus*/, attackDamage, x, y);
             } else {
                 fillShootDangerForSize2(attackRange, attackDamage, x, y, size);
             }
         }
+/*
+        for (Entity ranger : entities.getMyRangedUnits()) {
+            for (int i = -5; i <= 5; i++) {
+                if (i != 0) {
+                    addDamage(shootDangerNextTick, -5, ranger.getPosition().getX() + i, ranger.getPosition().getY() + i);
+                    addDamage(shootDangerNextTick, -5, ranger.getPosition().getX() + i, ranger.getPosition().getY() - i);
+                }
+                if (i <= -2 || (i >= 1 && i <= 4)) {
+                    addDamage(shootDangerNextTick, -5, ranger.getPosition().getX() + i + 1, ranger.getPosition().getY() + i);
+                    addDamage(shootDangerNextTick, -5, ranger.getPosition().getX() + i , ranger.getPosition().getY() + i + 1);
+                    addDamage(shootDangerNextTick, -5, ranger.getPosition().getX() + i + 1, ranger.getPosition().getY() - i);
+                    addDamage(shootDangerNextTick, -5, ranger.getPosition().getX() + i , ranger.getPosition().getY() - i - 1);
+                }
+
+            }
+        }
+*/
 
 /*
         if (DebugInterface.isDebugEnabled()) {
             for (int i = 0; i < mapSize; i++) {
                 for (int j = 0; j < mapSize; j++) {
-                    if (shootDangerNextTick[i][j] > 0) {
-                        DebugInterface.println(shootDangerNextTick[i][j] / 5, i, j, 0);
+                    if (shootDangerNextTick[i][j] != 0) {
+                        DebugInterface.println(shootDangerNextTick[i][j], i, j, 0);
                     }
                     if (shootDanger[i][j] > 0 && shootDanger[i][j] <= 2) {
                         DebugInterface.println(shootDanger[i][j], i, j, 1);

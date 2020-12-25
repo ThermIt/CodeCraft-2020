@@ -137,7 +137,9 @@ public class WarMap {
         this.rangedUnitMagnet = new RangedUnitMagnet(visibility, entitiesMap, entities, resources);
         rangedUnitMagnet.addAll(enemyUnitLocations);
         rangedUnitMagnet.addAll(enemyBuildingLocations);
+        rangedUnitMagnet.addAllHarass(enemyBuildingLocations);
         rangedUnitMagnet.fillDistances();
+        rangedUnitMagnet.fillDistancesHarass();
     }
 
     private boolean isPassable(Coordinate coordinate) {
@@ -327,18 +329,18 @@ public class WarMap {
         return old;
     }
 
-    public Coordinate getMinOfTwoPositionsForRangedUnit(Coordinate old, Coordinate newPosition) {
+    public Coordinate getMinOfTwoPositionsForRangedUnit(Coordinate old, Coordinate newPosition, int random) {
         if (newPosition.isOutOfBounds()) {
             return old;
         }
         if (old == null) {
             return newPosition;
         }
-        int newDistance = rangedUnitMagnet.getDistanceToEnemy(newPosition);
+        int newDistance = rangedUnitMagnet.getDistanceToEnemy(newPosition, random);
         if (newDistance == 0) {
             return old;
         }
-        int oldDistance = rangedUnitMagnet.getDistanceToEnemy(old);
+        int oldDistance = rangedUnitMagnet.getDistanceToEnemy(old, random);
         if (newDistance < oldDistance) {
             return newPosition;
         }
@@ -406,9 +408,9 @@ public class WarMap {
         List<Coordinate> possibleMoves = fromUnit.getPosition().getAdjacentListWithSelf();
         for (Coordinate newPosition : possibleMoves) {
             if (newPosition.isInBounds()
-                    && (enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth() || fromUnit.getHealth() <= 5)
+                    && (enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth()/* || fromUnit.getHealth() <= 5*/)
                     && !takenSpace[newPosition.getX()][newPosition.getY()]) {
-                closestCandidate = getMinOfTwoPositionsForRangedUnit(closestCandidate, newPosition);
+                closestCandidate = getMinOfTwoPositionsForRangedUnit(closestCandidate, newPosition, fromUnit.getId());
             }
         }
         return closestCandidate == null ? fromUnit.getPosition() : closestCandidate;

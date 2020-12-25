@@ -3,16 +3,19 @@ package mystrategy.collections;
 import model.Entity;
 import model.EntityType;
 import model.PlayerView;
+import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AllEntities {
 
+    private static List<Entity> myRangedUnitsOld = new ArrayList<>();
+    private static List<Entity> myHalfRangedUnitsOld = new ArrayList<>();
+    private static int deadTotal = 0;
+    private static int hdeadTotal = 0;
     private int myId;
-
     private List<Entity> resources = new ArrayList<>();
-
     private List<Entity> myEntities = new ArrayList<>();
     private List<Entity> myUnits = new ArrayList<>();
     private List<Entity> myAttackers = new ArrayList<>();
@@ -21,16 +24,14 @@ public class AllEntities {
     private List<Entity> myBuilders = new ArrayList<>();
     private List<Entity> myRangedBases = new ArrayList<>();
     private List<Entity> myMeleeBases = new ArrayList<>();
-
     private List<Entity> enemyAttackers = new ArrayList<>();
     private List<Entity> enemyUnits = new ArrayList<>();
     private List<Entity> enemyBuildings = new ArrayList<>();
     private List<Entity> enemyBuilders = new ArrayList<>();
     private List<Entity> enemyRangedUnits = new ArrayList<>();
     private List<Entity> enemyMeleeUnits = new ArrayList<>();
-    private List<Entity> myMeleeUnits = new ArrayList<>();;
-    private List<Entity> myRangedUnits = new ArrayList<>();;
-
+    private List<Entity> myMeleeUnits = new ArrayList<>();
+    private List<Entity> myRangedUnits = new ArrayList<>();
     private int currentUnits;
     private int maxUnits;
 
@@ -96,6 +97,36 @@ public class AllEntities {
                     }
                     enemyUnits.add(entity);
                 }
+            }
+        }
+
+        if (DebugInterface.isDebugEnabled()) {
+            int ded = 0;
+            int hded = 0;
+            for (Entity ranger : myRangedUnitsOld) {
+                if (myRangedUnits.stream().noneMatch(ent -> ent.getId() == ranger.getId())) {
+                    ded++;
+                }
+            }
+            for (Entity ranger : myHalfRangedUnitsOld) {
+                if (myRangedUnits.stream().noneMatch(ent -> ent.getId() == ranger.getId())) {
+                    hded++;
+                }
+            }
+            myRangedUnitsOld = new ArrayList<>();
+            myHalfRangedUnitsOld = new ArrayList<>();
+            for (Entity ranger : myRangedUnits) {
+                if (ranger.getHealth() < 10) {
+                    myHalfRangedUnitsOld.add(ranger);
+                } else {
+                    myRangedUnitsOld.add(ranger);
+                }
+            }
+            if (ded > 0 || hded > 0) {
+                hdeadTotal += hded;
+                deadTotal += ded;
+                System.out.println("ded:" + ded + ";hded:" + hded + ";dt:" + deadTotal + ";hdt:" + hdeadTotal + ";%" + 100 * deadTotal / (deadTotal + hdeadTotal));
+
             }
         }
     }
