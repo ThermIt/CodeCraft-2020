@@ -7,6 +7,7 @@ import mystrategy.collections.AllEntities;
 import mystrategy.collections.SingleVisitCoordinateSet;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
+import mystrategy.utils.Team;
 import util.DebugInterface;
 
 import java.util.*;
@@ -329,25 +330,38 @@ public class WarMap {
         return old;
     }
 
-    public Coordinate getMinOfTwoPositionsForRangedUnit(Coordinate old, Coordinate newPosition, int random) {
+    public Coordinate getMinOfTwoPositionsForRangedUnit(Coordinate old, Coordinate newPosition, Team teamNumber) {
         if (newPosition.isOutOfBounds()) {
             return old;
         }
         if (old == null) {
             return newPosition;
         }
-        int newDistance = rangedUnitMagnet.getDistanceToEnemy(newPosition, random);
+        int newDistance = rangedUnitMagnet.getDistanceToEnemy(newPosition, teamNumber);
         if (newDistance == 0) {
             return old;
         }
-        int oldDistance = rangedUnitMagnet.getDistanceToEnemy(old, random);
+        int oldDistance = rangedUnitMagnet.getDistanceToEnemy(old, teamNumber);
         if (newDistance < oldDistance) {
             return newPosition;
         }
 
-        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) { // scatters a bit RANGED
+        if (newDistance == oldDistance && !entitiesMap.isEmpty(old)) { // scatters a bit RANGED
             return newPosition;
         }
+        if (teamNumber == Team.MAIN && newDistance == oldDistance
+                && Math.abs(newPosition.getY() - newPosition.getX()) < Math.abs(old.getY() - old.getX())) { // stream in the middle
+            return newPosition;
+        }
+        if (teamNumber == Team.HARASSERS && newDistance == oldDistance
+                && newPosition.getY() > old.getY()) { // top
+            return newPosition;
+        }
+        if (teamNumber == Team.HARASSERS2 && newDistance == oldDistance
+                && newPosition.getX() > old.getX()) { // bottom
+            return newPosition;
+        }
+
         return old;
     }
 
@@ -404,13 +418,30 @@ public class WarMap {
     }
 
     public Coordinate getPositionClosestToForRangedUnit(Entity fromUnit) {
+        Team teamNumber;
+//        teamNumber = fromUnit.getId() % 41 > 20 ? Team.HARASSERS : Team.MAIN;
+        switch ((fromUnit.getId() % 41) % 3) {
+            case 1:
+                teamNumber = Team.HARASSERS;
+                break;
+            case 2:
+                teamNumber = Team.HARASSERS2;
+                break;
+            default:
+                teamNumber = Team.MAIN;
+                break;
+        }
+        if (fromUnit.getEntityType() == EntityType.BUILDER_UNIT) {
+            teamNumber = Team.HARASSERS;
+        }
+
         Coordinate closestCandidate = null;
         List<Coordinate> possibleMoves = fromUnit.getPosition().getAdjacentListWithSelf();
         for (Coordinate newPosition : possibleMoves) {
             if (newPosition.isInBounds()
                     && (enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth()/* || fromUnit.getHealth() <= 5*/)
                     && !takenSpace[newPosition.getX()][newPosition.getY()]) {
-                closestCandidate = getMinOfTwoPositionsForRangedUnit(closestCandidate, newPosition, fromUnit.getId());
+                closestCandidate = getMinOfTwoPositionsForRangedUnit(closestCandidate, newPosition, teamNumber);
             }
         }
         return closestCandidate == null ? fromUnit.getPosition() : closestCandidate;

@@ -1,7 +1,7 @@
 package mystrategy.maps.light;
 
-import model.*;
 import common.Constants;
+import model.*;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
@@ -65,7 +65,9 @@ public class WorkerJobsMap {
         Set<Coordinate> buildCoordinates = new HashSet<>(128);
         for (Entity order : buildOrders.updateAndGetActiveOrders(allEntities, entitiesMap, me)) {
             if (order.getEntityType() == EntityType.RANGED_BASE || order.getEntityType() == EntityType.MELEE_BASE) {
-                minWorkers = 10;
+                minWorkers += 7;
+            } else {
+                minWorkers += 1;
             }
             List<Coordinate> adjacentCoordinates = order.getAdjacentCoordinates();
             buildCoordinates.addAll(adjacentCoordinates);

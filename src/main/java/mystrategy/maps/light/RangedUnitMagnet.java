@@ -7,6 +7,7 @@ import model.EntityType;
 import mystrategy.collections.AllEntities;
 import mystrategy.collections.SingleVisitCoordinateSet;
 import mystrategy.maps.EntitiesMap;
+import mystrategy.utils.Team;
 import util.DebugInterface;
 import util.Initializer;
 
@@ -250,16 +251,16 @@ public class RangedUnitMagnet {
 */
     }
 
-    public int getDistanceToEnemy(Coordinate position, int random) {
-        return getDistanceToEnemy(position.getX(), position.getY(), random);
+    public int getDistanceToEnemy(Coordinate position, Team teamNumber) {
+        return getDistanceToEnemy(position.getX(), position.getY(), teamNumber);
     }
 
-    public int getDistanceToEnemy(int x, int y, int random) {
+    public int getDistanceToEnemy(int x, int y, Team teamNumber) {
         if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) {
             return 0;
         }
-        if (random % 41 > 30) {
-            return distanceHarass[x][y];
+        if (teamNumber == Team.HARASSERS || teamNumber == Team.HARASSERS2) {
+            return distanceHarass[x][y] == 0 ? distance[x][y] : distanceHarass[x][y];
         } else {
             return distance[x][y];
         }
