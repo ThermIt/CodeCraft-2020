@@ -3,11 +3,7 @@ package mystrategy.maps;
 import model.Coordinate;
 import model.Entity;
 import model.PlayerView;
-import common.Constants;
-import util.DebugInterface;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class RepairMap {
@@ -47,37 +43,6 @@ public class RepairMap {
 
     public int getDistance(int x, int y) {
         return distanceByFoot[x][y];
-    }
-
-    private void fillDistances(int[][] distanceMap, List<Coordinate> coordinateList) {
-        for (int i = 1; !coordinateList.isEmpty(); i++) {
-            List<Coordinate> coordinateListNext = new ArrayList<>();
-            for (Coordinate coordinate : coordinateList) {
-                if (coordinate.getX() >= 0 && coordinate.getX() < mapSize
-                        && coordinate.getY() >= 0 && coordinate.getY() < mapSize
-                        && distanceMap[coordinate.getX()][coordinate.getY()] == 0
-                        && isPassable(coordinate)) {
-                    distanceMap[coordinate.getX()][coordinate.getY()] = i;
-                    coordinateListNext.add(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
-                    coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
-                    coordinateListNext.add(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
-                    coordinateListNext.add(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
-                }
-            }
-            coordinateList = coordinateListNext;
-
-            if (i > Constants.MAX_CYCLES) {
-                if (DebugInterface.isDebugEnabled()) {
-                    throw new RuntimeException("protection from endless cycles");
-                } else {
-                    break;
-                }
-            }
-        }
-    }
-
-    private boolean isPassable(Coordinate coordinate) {
-        return this.entitiesMap.isPassable(coordinate.getX(), coordinate.getY());
     }
 
     public Integer canRepairId(Coordinate from) {

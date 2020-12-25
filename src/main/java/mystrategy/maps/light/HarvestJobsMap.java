@@ -1,12 +1,14 @@
 package mystrategy.maps.light;
 
-import model.*;
 import common.Constants;
-import mystrategy.collections.SingleVisitCoordinateSet;
+import common.Decision;
+import model.*;
 import mystrategy.collections.AllEntities;
+import mystrategy.collections.SingleVisitCoordinateSet;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import util.DebugInterface;
+import util.Task;
 
 import java.util.Comparator;
 import java.util.List;
@@ -21,9 +23,12 @@ public class HarvestJobsMap {
     private int[][] resourceDistanceByFoot;
     private int[][] resourceDistanceByFootWithObstacles;
     private int[][] resourceDistanceByFootAllResources;
+    private boolean[][] takenSpace;
     private EntitiesMap entitiesMap;
     private EnemiesMap enemiesMap;
     private Player me;
+    private PlayerView playerView;
+    private WorkerJobsMap otherJobs;
 
     public HarvestJobsMap(
             PlayerView playerView,
@@ -31,8 +36,10 @@ public class HarvestJobsMap {
             AllEntities allEntities,
             EnemiesMap enemiesMap,
             Player me,
-            VirtualResources resources
-    ) {
+            VirtualResources resources,
+            WorkerJobsMap jobs) {
+        this.playerView = playerView;
+        otherJobs = jobs;
         resources.checkTick(playerView);
         this.entitiesMap = entitiesMap;
         this.mapSize = playerView.getMapSize();
@@ -41,6 +48,8 @@ public class HarvestJobsMap {
         this.resourceDistanceByFoot = new int[mapSize][mapSize];
         this.resourceDistanceByFootWithObstacles = new int[mapSize][mapSize];
         this.resourceDistanceByFootAllResources = new int[mapSize][mapSize];
+
+        this.takenSpace = new boolean[mapSize][mapSize];
 
         this.harvest = new int[mapSize][mapSize];
         this.workers = new int[mapSize][mapSize];
@@ -98,7 +107,54 @@ public class HarvestJobsMap {
         fillDistances(resourceDistanceByFoot, restrictedResourceCoordinates, false);
         fillDistances(resourceDistanceByFootWithObstacles, restrictedResourceCoordinatesWithObstacles, true);
         fillDistances(resourceDistanceByFootAllResources, allResourceCoordinates, false);
+
+/*
+        for (int i = 0; i < 80; i++) {
+            for (int j = 0; j < 80; j++) {
+                if (resourceDistanceByFoot[i][j] > 0 && resourceDistanceByFoot[i][j] < 50) {
+                    DebugInterface.println(resourceDistanceByFoot[i][j], i, j, 0);
+                }
+                if (resourceDistanceByFootWithObstacles[i][j] > 0 && resourceDistanceByFootWithObstacles[i][j] < 50) {
+                    DebugInterface.println(resourceDistanceByFootWithObstacles[i][j], i, j, 1);
+                }
+                if (resourceDistanceByFootAllResources[i][j] > 0 && resourceDistanceByFootAllResources[i][j] < 50) {
+                    DebugInterface.println(resourceDistanceByFootAllResources[i][j], i, j, 2);
+                }
+            }
+        }
+*/
     }
+
+/*
+    public void updateFreeSpaceMaskForHarvesters() {
+        takenSpace = new boolean[mapSize][mapSize];
+        for (Entity entity : playerView.getEntities()) {
+            if (entity.isMy(EntityType.BUILDER_UNIT)) {
+                continue;
+            }
+            if (entity.getEntityType() == EntityType.RESOURCE) {
+//                DebugInterface.print("-", entity.getPosition().getX(), entity.getPosition().getY());
+                continue;
+            }
+            if (entity.getMoveAction() != null && entity.getAttackAction() == null && entity.getRepairAction() == null && entity.getBuildAction() == null) {
+                takenSpace[entity.getMoveAction().getTarget().getX()][entity.getMoveAction().getTarget().getY()] = true;
+//                DebugInterface.print("X", entity.getMoveAction().getTarget().getX(), entity.getMoveAction().getTarget().getY());
+            } else {
+                int size = entity.getProperties().getSize();
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < size; j++) {
+                        takenSpace[entity.getPosition().getX() + i][entity.getPosition().getY() + j] = true;
+//                        DebugInterface.print("X", entity.getPosition().getX() + i, entity.getPosition().getY() + j);
+                    }
+                }
+                if (entity.getBuildAction() != null) {
+                    // ignore for now, does not matter on the field of battle
+                }
+            }
+        }
+    }
+*/
+
 
     public Entity getResource(Coordinate position) {
         return position
@@ -122,6 +178,12 @@ public class HarvestJobsMap {
         }
         int oldDistance = getDistance(old, distanceMap);
         if (oldDistance == 0 || newDistance < oldDistance) {
+            return newPosition;
+        }
+        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) {
+            return newPosition;
+        }
+        if (newDistance == oldDistance && !takenSpace[newPosition.getX()][newPosition.getY()]) {
             return newPosition;
         }
         return old;
@@ -165,7 +227,7 @@ public class HarvestJobsMap {
     }
 
     private boolean isPassableWithObstacles(Coordinate coordinate) {
-        return this.entitiesMap.isEmpty(coordinate);
+        return this.entitiesMap.isEmpty(coordinate) || this.entitiesMap.getEntity(coordinate).getEntityType() == EntityType.BUILDER_UNIT;
     }
 
     public Coordinate getPositionClosestToResource(Coordinate from) {
@@ -181,7 +243,14 @@ public class HarvestJobsMap {
         if (!newList.isEmpty()) {
             coordinateList = newList;
         }
+        coordinateList = coordinateList.stream()
+                .filter(pos -> !pos.isOutOfBounds())
+                .filter(pos -> !takenSpace[pos.getX()][pos.getY()])
+                .collect(Collectors.toList());
 
+        // TODO: sort by enemiesMap.getDangerLevel(pos)
+
+/*
         Coordinate coordinate = newList.stream()
                 .filter(o -> entitiesMap.isEmpty(o))
                 .max(Comparator.comparingInt(o -> harvest[o.getX()][o.getY()]))
@@ -189,6 +258,7 @@ public class HarvestJobsMap {
         if (harvest[coordinate.getX()][coordinate.getY()] > 0) { // go to max resources
             return coordinate;
         }
+*/
 
         Coordinate position = from;
         for (Coordinate newPosition : coordinateList) {
@@ -207,10 +277,102 @@ public class HarvestJobsMap {
             return position;
         }
 
+/*
         for (Coordinate newPosition : coordinateList) {
             position = getMinOfTwoPositions(position, newPosition, resourceDistanceByFootAllResources);
         }
+*/
 
         return position;
+    }
+
+    public void decideMoveForBuilderUnit(Entity unit) {
+        if (unit.getBuildAction() != null || unit.getRepairAction() != null || unit.getAttackAction() != null) {
+//            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
+// *           DebugInterface.print("0 - attacking", unit.getPosition().getX(), unit.getPosition().getY());
+            unit.setMoveAction(null);
+            unit.setMoveDecision(Decision.DECIDED);
+            return;
+        }
+        if (unit.getMoveDecision() == Decision.DECIDED) {
+            return;
+        }
+        unit.setMoveDecision(Decision.DECIDING);
+        Coordinate moveTo = getMoveTo(unit);
+
+
+        Entity otherUnit = entitiesMap.getEntity(moveTo.getX(), moveTo.getY());
+        if (!Objects.equals(moveTo, unit.getPosition()) // not self
+                && otherUnit.isMy(EntityType.BUILDER_UNIT)
+                && otherUnit.getMoveDecision() != Decision.DECIDED // DECIDING marks his place as taken
+        ) {
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
+            decideMoveForBuilderUnit(otherUnit);
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = false;
+            if (takenSpace[moveTo.getX()][moveTo.getY()]) {
+                takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true; // so it tries to move anyway
+                decideMoveForBuilderUnit(unit);
+                takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = false;
+                return;
+            }
+        }
+
+        if (!Objects.equals(moveTo, unit.getPosition()) // not self
+                && otherUnit.isMy(EntityType.BUILDER_UNIT)
+                && (otherUnit.getBuildAction() != null || otherUnit.getRepairAction() != null || otherUnit.getAttackAction() != null)
+        ) {
+            otherUnit.setBuildAction(null);
+            otherUnit.setAttackAction(null);
+            otherUnit.setRepairAction(null);
+            otherUnit.setTask(Task.IDLE);
+            otherUnit.setMoveDecision(Decision.DECIDING);
+//            DebugInterface.print("X", moveTo);
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true; // so it tries to move anyway
+            takenSpace[otherUnit.getPosition().getX()][unit.getPosition().getY()] = true; // so it tries to move anyway
+            decideMoveForBuilderUnit(otherUnit);
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = false;
+            takenSpace[otherUnit.getPosition().getX()][unit.getPosition().getY()] = false;
+        }
+
+        if (!Objects.equals(moveTo, unit.getPosition()) && otherUnit.getEntityType() != EntityType.RESOURCE) {
+            takenSpace[moveTo.getX()][moveTo.getY()] = true;
+// *            DebugInterface.print("0 - move", moveTo.getX(), moveTo.getY());
+            MoveAction moveAction = new MoveAction(moveTo, true, true);
+            unit.setMoveAction(moveAction);
+        } else if (otherUnit.getEntityType() == EntityType.RESOURCE) {
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
+// *            DebugInterface.print("0 - cleaning", unit.getPosition().getX(), unit.getPosition().getY());
+            MoveAction moveAction = new MoveAction(moveTo, true, true);
+            unit.setMoveAction(moveAction);
+        } else {
+            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
+// *            DebugInterface.print("0 - not moving", unit.getPosition().getX(), unit.getPosition().getY());
+            unit.setMoveAction(null);
+        }
+        unit.setMoveDecision(Decision.DECIDED);
+    }
+
+    public Coordinate getMoveTo(Entity unit) {
+        Coordinate moveTo = unit.getPosition();
+        if (unit.getTask() == Task.BUILD) {
+            moveTo = unit.getPosition();
+        } else if (unit.getTask() == Task.MOVE_TO_BUILD) {
+            moveTo = otherJobs.getPositionClosestToBuild(unit.getPosition(), takenSpace);
+        } else if (unit.getTask() != Task.RUN_FOOLS) { // idle workers
+            moveTo = getPositionClosestToResource(unit.getPosition());
+        }
+        return moveTo;
+    }
+
+    public void printTakenMap() {
+        if (DebugInterface.isDebugEnabled()) {
+            for (int i = 0; i < 80; i++) {
+                for (int j = 0; j < 80; j++) {
+                    if (takenSpace[i][j]) {
+                        DebugInterface.println("X", i, j,0);
+                    }
+                }
+            }
+        }
     }
 }

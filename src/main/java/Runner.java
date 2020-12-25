@@ -1,7 +1,7 @@
 import mystrategy.strategies.DefaultStrategy;
 import mystrategy.strategies.DelegatingStrategy;
-import older.v00.empty.EmptyStrategy;
 import older.v06.ranger.stream.strategies.Older6RangerStream;
+import older.v09.finals1.strategies.Older9Finals1;
 import util.DebugInterface;
 import util.Strategy;
 import util.StreamUtil;
@@ -50,7 +50,7 @@ public class Runner {
         }
         if (args.length > 3 && "multiply2".equals(args[3])) {
             runOnceMultithreaded(host, port, token, new DelegatingStrategy());
-            runOnceMultithreaded(host, port + 1, token, new EmptyStrategy());
+            runOnceMultithreaded(host, port + 1, token, new Older9Finals1());
         } else if (args.length > 3 && "multiply3".equals(args[3])) {
             runOnceMultithreaded(host, port, token, new DelegatingStrategy());
             runOnceMultithreaded(host, port + 1, token, new Older6RangerStream());

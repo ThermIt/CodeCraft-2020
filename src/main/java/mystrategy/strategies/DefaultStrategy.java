@@ -11,7 +11,10 @@ import util.DebugInterface;
 import util.StrategyDelegate;
 import util.Task;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultStrategy implements StrategyDelegate {
@@ -106,7 +109,7 @@ public class DefaultStrategy implements StrategyDelegate {
         );
 
 //        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
-        harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me, resources);
+        harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me, resources, jobs);
         repairMap = new RepairMap(playerView, entitiesMap);
         simCityPlan.init(playerView, entitiesMap, allEntities, warMap, resources);
         simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, warMap, simCityPlan);
@@ -222,21 +225,7 @@ public class DefaultStrategy implements StrategyDelegate {
         for (Entity unit : allEntities.getMyUnits()) {
             MoveAction moveAction;
             if (resources.getTotalResourceCount() > 0 && unit.getEntityType() == EntityType.BUILDER_UNIT) {
-                Coordinate moveTo = null;
-                if (unit.getTask() == Task.BUILD) {
-                    moveTo = null;
-                } else if (unit.getTask() == Task.MOVE_TO_BUILD) {
-                    moveTo = jobs.getPositionClosestToBuild(unit.getPosition());
-                } else if (unit.getTask() != Task.RUN_FOOLS) { // idle workers
-                    moveTo = harvestJobs.getPositionClosestToResource(unit.getPosition());
-                    if (moveTo == null) {
-                        moveTo = new Coordinate(35, 35);
-                    }
-                }
-                if (moveTo != null) {
-                    moveAction = new MoveAction(moveTo, true, true);
-                    unit.setMoveAction(moveAction);
-                }
+                harvestJobs.decideMoveForBuilderUnit(unit);
             } else { // all
                 if (unit.getEntityType() == EntityType.RANGED_UNIT) {
                     continue;
@@ -255,6 +244,7 @@ public class DefaultStrategy implements StrategyDelegate {
                 }
             }
         }
+        harvestJobs.printTakenMap();
 
         warMap.updateFreeSpaceMaskForRangedUnits();
         for (Entity unit : allEntities.getMyUnits()) {

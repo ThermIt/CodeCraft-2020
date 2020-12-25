@@ -216,10 +216,11 @@ public class WorkerJobsMap {
         return this.entitiesMap.isEmpty(coordinate);
     }
 
-    public Coordinate getPositionClosestToBuild(Coordinate position) {
+    public Coordinate getPositionClosestToBuild(Coordinate position, boolean[][] takenSpace) {
         return position.getAdjacentListWithSelf().stream()
                 .filter(pos -> enemiesMap.getDangerLevel(pos) == 0
-                        && buildDistanceByFoot[pos.getX()][pos.getY()] != 0)
-                .min(Comparator.comparingInt(o -> buildDistanceByFoot[o.getX()][o.getY()])).orElse(null);
+                        && buildDistanceByFoot[pos.getX()][pos.getY()] != 0
+                        && !takenSpace[pos.getX()][pos.getY()])
+                .min(Comparator.comparingInt(o -> buildDistanceByFoot[o.getX()][o.getY()])).orElse(position);
     }
 }
