@@ -119,6 +119,9 @@ public class TickRepresentation {
                     }
                 } else if (newMapId != null) {
                     newMapValue.getEntity().setOrderSequence(oldMapValue.getEntity().getOrderSequence());
+                    if (newMapValue.getEntity().getHealth() != oldMapValue.getEntity().getHealth()) {
+                        updateEntity(new Coordinate(i, j), newMapValue);
+                    }
                 }
             }
         }
@@ -136,7 +139,7 @@ public class TickRepresentation {
         }
     }
 
-    private void updateEntity(Coordinate coordinate, MapEntry newValue) {
+    private void  updateEntity(Coordinate coordinate, MapEntry newValue) {
         MapEntry old = map[coordinate.getX()][coordinate.getY()];
         if (old != null && old.isTaken()) {
             clearEntity(coordinate, old.getEntity().getId());
@@ -263,11 +266,14 @@ public class TickRepresentation {
                         if (!possibleOrder.isOppositeOf(currentMapNextPosition.order)) {
                             MapEntry nextMap = nextTick.lookAtTheMap(nextPosition);
 
-                            if (nextMap.getResourceAmount() > 0) {
+                            if (nextMap.getEntity() != null && nextMap.getEntity().getHealth() < nextMap.getEntity().getProperties().getMaxHealth()) {
+//                                replaceDummy(dummiesMapNext, nextTickDummies, dummy, possibleOrder.getRepairOrder(), dummy.getPosition(), dummy.getScore() + 1/* REPAIR */);
+                                return new DummyWorker(dummy, nextPosition, dummy.getScore() + 1, possibleOrder.getRepairOrder());
+                            } else if (nextMap.getResourceAmount() > 0) {
                                 // declare winner?
                                 MapEntry currentMapCurrentPosition = currentTick.lookAtTheMap(dummy.getPosition());
                                 if (currentMapCurrentPosition.isPassableBy(worker.getId())) {
-//                                    replaceDummy(dummiesMapNext, nextTickDummies, dummy, possibleOrder.getHarvestOrder(), dummy.getPosition(), dummy.getScore() + 1/* HARVEST */);
+//                                    replaceDummy(dummiesMapNext, nextTickDummies, dummy, possibleOrder.getHarvestOrder(), dummy.getPosition(), dummy.getScore()/* HARVEST */);
                                     return new DummyWorker(dummy, nextPosition, dummy.getScore() + 1, possibleOrder.getHarvestOrder());
                                 }
                             } else if (nextMap.isPassableBy(worker.getId())) {
@@ -306,7 +312,7 @@ public class TickRepresentation {
             int score
     ) {
         DummyWorker nextTickDummy = dummiesMapNext[nextPosition.getX()][nextPosition.getY()];
-        if (nextTickDummy == null || nextTickDummy.getScore() < parent.getScore() + score) {
+        if (nextTickDummy == null || nextTickDummy.getScore() < score) {
             if (nextTickDummy != null) {
                 nextTickDummies.remove(nextTickDummy);
             }

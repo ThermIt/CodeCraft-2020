@@ -12,7 +12,11 @@ public enum MoveOrder {
     HARVEST_LEFT("<h", true),
     HARVEST_RIGHT(">h", true),
     HARVEST_UP("^h", true),
-    HARVEST_DOWN("vh", true);
+    HARVEST_DOWN("vh", true),
+    REPAIR_LEFT("<b", true),
+    REPAIR_RIGHT(">b", true),
+    REPAIR_UP("^b", true),
+    REPAIR_DOWN("vb", true);
 
     public static MoveOrder[] ALL_MOVES = {MOVE_DOWN, MOVE_UP, MOVE_LEFT, MOVE_RIGHT};
     private String displaySymbol;
@@ -40,6 +44,20 @@ public enum MoveOrder {
                 return HARVEST_UP;
             case MOVE_DOWN:
                 return HARVEST_DOWN;
+        }
+        return this;
+    }
+
+    public MoveOrder getRepairOrder() {
+        switch (this) {
+            case MOVE_LEFT:
+                return REPAIR_LEFT;
+            case MOVE_RIGHT:
+                return REPAIR_RIGHT;
+            case MOVE_UP:
+                return REPAIR_UP;
+            case MOVE_DOWN:
+                return REPAIR_DOWN;
         }
         return this;
     }
