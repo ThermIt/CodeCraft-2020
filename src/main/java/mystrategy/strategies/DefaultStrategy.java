@@ -361,6 +361,7 @@ failedLimits
         }
 
         if (entityType == EntityType.BUILDER_UNIT
+//                && allEntities.getMyWorkers().size() >=40
                 && allEntities.getMyWorkers().size() >= buildersLimit
                 + (allEntities.getEnemyUnits().stream().noneMatch(enemy -> Math.min(enemy.getPosition().getY(), enemy.getPosition().getX()) < 40) ? 40 : 0)
         ) {

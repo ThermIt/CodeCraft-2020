@@ -346,9 +346,11 @@ public class WarMap {
             return newPosition;
         }
 
+/*
         if (newDistance == oldDistance && !entitiesMap.isEmpty(old)) { // scatters a bit RANGED
             return newPosition;
         }
+*/
         if (teamNumber == Team.MAIN && newDistance == oldDistance
                 && Math.abs(newPosition.getY() - newPosition.getX()) < Math.abs(old.getY() - old.getX())) { // stream in the middle
             return newPosition;

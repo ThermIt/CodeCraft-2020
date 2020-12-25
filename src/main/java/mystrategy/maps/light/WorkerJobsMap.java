@@ -61,7 +61,7 @@ public class WorkerJobsMap {
             }
         }
 
-        int minWorkers = 3;
+        int minWorkers = 2;
         Set<Coordinate> buildCoordinates = new HashSet<>(128);
         for (Entity order : buildOrders.updateAndGetActiveOrders(allEntities, entitiesMap, me)) {
             if (order.getEntityType() == EntityType.RANGED_BASE || order.getEntityType() == EntityType.MELEE_BASE) {

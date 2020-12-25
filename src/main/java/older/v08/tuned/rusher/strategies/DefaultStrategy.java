@@ -6,7 +6,6 @@ import older.v08.tuned.rusher.maps.EnemiesMap;
 import older.v08.tuned.rusher.maps.EntitiesMap;
 import older.v08.tuned.rusher.maps.RepairMap;
 import older.v08.tuned.rusher.maps.SimCityMap;
-import older.v08.mystrategy.maps.light.*;
 import older.v08.tuned.rusher.maps.light.*;
 import util.DebugInterface;
 import util.StrategyDelegate;

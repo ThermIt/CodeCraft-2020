@@ -3,7 +3,6 @@ package older.v08.tuned.rusher.strategies;
 import model.Action;
 import model.DebugCommand;
 import model.PlayerView;
-import older.v08.mystrategy.maps.light.*;
 import older.v08.tuned.rusher.maps.light.*;
 import util.*;
 

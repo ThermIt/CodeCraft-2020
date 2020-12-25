@@ -46,6 +46,8 @@ public class BuildOrders {
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 5), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(8, 2), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 8), 0, false));
+//            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(11, 2), 0, false));
+//            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 11), 0, false));
         }
 /*
         buildQueue.add(new Entity(-1, getMyId(), EntityType.TURRET, new Coordinate(10, 5), 0, false));
@@ -77,7 +79,8 @@ public class BuildOrders {
     }
 
     public boolean isFreeToAdd() {
-        return entities.getMyRangedBases().size() > 0 && entities.getMyRangedBases().get(0).getHealth() > 10;
+        return /*(entities.getMyHouses().size() >= 4 && entities.getMyHouses().size() <= 8)
+                || */(entities.getMyRangedBases().size() > 0 && entities.getMyRangedBases().get(0).getHealth() > 10);
     }
 
     public List<Entity> updateAndGetActiveOrders(AllEntities allEntities, EntitiesMap entitiesMap, Player me) {
@@ -93,7 +96,7 @@ public class BuildOrders {
             Entity order = iterator.next();
 
             Entity entity = entitiesMap.getEntity(order.getPosition());
-            if (entity.isMy(order.getEntityType()) && entity.isActive()) {
+            if (entity.isMy(order.getEntityType())) {
                 iterator.remove();
                 continue;
             }
