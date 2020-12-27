@@ -6,6 +6,7 @@ import model.Entity;
 import model.EntityType;
 import mystrategy.collections.AllEntities;
 import mystrategy.collections.SingleVisitCoordinateSet;
+import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import mystrategy.utils.Team;
 import util.DebugInterface;
@@ -18,7 +19,7 @@ public class RangedUnitMagnet {
     private EntitiesMap entitiesMap;
     private AllEntities entities;
     private VirtualResources resources;
-    private AllEntities allEntities;
+    private EnemiesMap enemiesMap;
     private int[][] distance;
     private int[][] distanceHarass;
     private int mapSize = 80;
@@ -32,12 +33,13 @@ public class RangedUnitMagnet {
             EntitiesMap entitiesMap,
             AllEntities entities,
             VirtualResources resources,
-            AllEntities allEntities) {
+            EnemiesMap enemiesMap
+    ) {
         this.visibility = visibility;
         this.entitiesMap = entitiesMap;
         this.entities = entities;
         this.resources = resources;
-        this.allEntities = allEntities;
+        this.enemiesMap = enemiesMap;
         this.distance = new int[Initializer.getMapSize()][Initializer.getMapSize()];
         this.distanceHarass = new int[Initializer.getMapSize()][Initializer.getMapSize()];
 
@@ -144,7 +146,7 @@ public class RangedUnitMagnet {
     }
 
     public void fillDistances() {
-        if (allEntities.getMyRangedUnits().size() == 0) {
+        if (entities.getMyRangedUnits().size() == 0) {
             // TODO: stop when all rangers captured
             return;
         }
@@ -167,7 +169,9 @@ public class RangedUnitMagnet {
                         distance[coordinate.getX()][coordinate.getY()] = i;
                         prettyprint(i, coordinate);
                         // do not attract to taken places and workers
-                        if (!isBuilder(coordinate) && !entitiesMap.getEntity(coordinate).isMy(EntityType.RANGED_UNIT)) {
+                        boolean isFrontlineUnit = entitiesMap.getEntity(coordinate).isMy(EntityType.RANGED_UNIT)
+                                && enemiesMap.getDangerLevel(coordinate) > 0;
+                        if (!isBuilder(coordinate) && !isFrontlineUnit) {
                             waveCoordinates.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
                             waveCoordinates.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
                             waveCoordinates.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
@@ -199,7 +203,7 @@ public class RangedUnitMagnet {
     }
 
     public void fillDistancesHarass() {
-        if (allEntities.getMyRangedUnits().size() == 0) {
+        if (entities.getMyRangedUnits().size() == 0) {
             // TODO: stop when all rangers captured
             return;
         }
@@ -221,7 +225,9 @@ public class RangedUnitMagnet {
                         distanceHarass[coordinate.getX()][coordinate.getY()] = i;
                         prettyprint(i, coordinate);
                         // do not attract to taken places and workers
-                        if (!isBuilder(coordinate) && !entitiesMap.getEntity(coordinate).isMy(EntityType.RANGED_UNIT)) {
+                        boolean isFrontlineUnit = entitiesMap.getEntity(coordinate).isMy(EntityType.RANGED_UNIT)
+                                && enemiesMap.getDangerLevel(coordinate) > 0;
+                        if (!isBuilder(coordinate) && !isFrontlineUnit) {
                             waveCoordinatesHarass.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
                             waveCoordinatesHarass.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
                             waveCoordinatesHarass.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));

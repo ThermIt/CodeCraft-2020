@@ -24,6 +24,7 @@ public class WorkerJobsMap {
     private Player me;
     private WarMap warMap;
     private VirtualResources resources;
+    private final HealerUnitMagnet healerUnitMagnet;
 
     public WorkerJobsMap(
             PlayerView playerView,
@@ -33,9 +34,11 @@ public class WorkerJobsMap {
             Player me,
             BuildOrders buildOrders,
             WarMap warMap,
-            VirtualResources resources
+            VirtualResources resources,
+            HealerUnitMagnet healerUnitMagnet
     ) {
         this.resources = resources;
+        this.healerUnitMagnet = healerUnitMagnet;
         warMap.checkTick(playerView);
         this.warMap = warMap;
         this.entitiesMap = entitiesMap;
@@ -56,7 +59,7 @@ public class WorkerJobsMap {
 */
 
         for (Entity worker : allEntities.getMyWorkers()) {
-            if (enemiesMap.getDangerLevel(worker.getPosition()) > 0) {
+            if (enemiesMap.getDangerLevel(worker.getPosition()) > (worker.getTask() == Task.HEAL ? 1 : 0)) {
                 markRun(worker);
             }
         }
@@ -105,6 +108,51 @@ public class WorkerJobsMap {
             markRun(blockingEntity);
         }
 */
+    }
+
+    public Coordinate getHealerDirections(Coordinate from, boolean[][] takenSpace) {
+        Coordinate result = from;
+
+        List<Coordinate> possibleMoveLocations = from.getAdjacentListWithSelf().stream()
+                .filter(pos -> entitiesMap.isPassable(pos) && !takenSpace[pos.getX()][pos.getY()])
+                .filter(pos -> {
+                    MoveAction otherMoveAction = entitiesMap.getEntity(pos).getMoveAction();
+                    return otherMoveAction == null || !Objects.equals(otherMoveAction.getTarget(), from);
+                })
+                .collect(Collectors.toList());
+        int minDanger = possibleMoveLocations.stream()
+                .map(pos -> enemiesMap.getDangerLevel(pos))
+                .min(Integer::compareTo)
+                .orElse(enemiesMap.getDangerLevel(from));
+        List<Coordinate> lowestDangerPassablePoints = possibleMoveLocations.stream()
+                .filter(pos -> enemiesMap.getDangerLevel(pos) == minDanger)
+                .collect(Collectors.toList());
+
+        if (lowestDangerPassablePoints.size() > 0 && !lowestDangerPassablePoints.contains(result)) {
+            result = lowestDangerPassablePoints.get(0);
+        }
+
+        int maxMagnet = lowestDangerPassablePoints.stream()
+                .map(healerUnitMagnet::getDistance)
+                .min(Integer::compareTo)
+                .orElse(healerUnitMagnet.getDistance(from));
+        List<Coordinate> lowestDangerMaxDominancePassablePoints = possibleMoveLocations.stream()
+                .filter(pos -> healerUnitMagnet.getDistance(pos) == maxMagnet)
+                .collect(Collectors.toList());
+
+        if (lowestDangerMaxDominancePassablePoints.size() > 0 && !lowestDangerMaxDominancePassablePoints.contains(result)) {
+            result = lowestDangerMaxDominancePassablePoints.get(0);
+        }
+
+        List<Coordinate> lowestDangerMaxDistanceEmptyPoints = lowestDangerMaxDominancePassablePoints.stream()
+                .filter(entitiesMap::isEmpty)
+                .collect(Collectors.toList());
+
+        if (lowestDangerMaxDistanceEmptyPoints.size() > 0 && !lowestDangerMaxDistanceEmptyPoints.contains(result)) {
+            result = lowestDangerMaxDistanceEmptyPoints.get(0);
+        }
+
+        return result;
     }
 
     public Coordinate getRunDirections(Coordinate from, boolean[][] takenSpace) {

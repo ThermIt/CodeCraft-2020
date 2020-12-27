@@ -259,6 +259,7 @@ public class DefaultStrategy implements StrategyDelegate {
             }
         }
 
+/*
         for (Entity unit : allEntities.getMyUnits()) {
             if (unit.getAttackAction() != null) {
                 if (unit.getAttackAction().getAutoAttack() != null) {
@@ -281,6 +282,7 @@ public class DefaultStrategy implements StrategyDelegate {
                 DebugInterface.line(unit.getPosition(), unit.getMoveAction().getTarget());
             }
         }
+*/
 
         // buildings
         handleBuildings();

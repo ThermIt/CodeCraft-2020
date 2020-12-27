@@ -304,7 +304,7 @@ public class HarvestJobsMap {
         }
         unit.setMoveDecision(Decision.DECIDING);
         Coordinate moveTo = getMoveTo(unit);
-        DebugInterface.println("moveTo", moveTo, 0);
+//        DebugInterface.println("moveTo", moveTo, 0);
 
         // untie knots
         Entity otherUnit = entitiesMap.getEntity(moveTo.getX(), moveTo.getY());
@@ -368,10 +368,12 @@ public class HarvestJobsMap {
             moveTo = unit.getPosition();
         } else if (unit.getTask() == Task.MOVE_TO_BUILD) {
             moveTo = otherJobs.getPositionClosestToBuild(unit.getPosition(), takenSpace);
-        } else if (unit.getTask() != Task.RUN_FOOLS) { // idle workers
-            moveTo = getPositionClosestToResource(unit.getPosition());
         } else if (unit.getTask() == Task.RUN_FOOLS) {
-            moveTo = otherJobs.getRunDirections(unit.getPosition(), takenSpace); // костыль же
+            moveTo = otherJobs.getRunDirections(unit.getPosition(), takenSpace);
+        } else if (unit.getTask() == Task.HEAL) {
+            moveTo = otherJobs.getHealerDirections(unit.getPosition(), takenSpace);
+        } else { // idle workers
+            moveTo = getPositionClosestToResource(unit.getPosition());
         }
         return moveTo;
     }

@@ -3,7 +3,6 @@ package mystrategy.collections;
 import model.Entity;
 import model.EntityType;
 import model.PlayerView;
-import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +77,7 @@ public class AllEntities {
                     myUnits.add(entity);
                     myActors.add(entity);
                 }
-                if (entity.getProperties().getAttack() != null && entity.getProperties().getAttack().getDamage() > 0) {
+                if (entity.getProperties().getAttack() != null && entity.getProperties().getAttack().getDamage() > 1) {
                     myAttackers.add(entity);
                 }
 
@@ -102,6 +101,7 @@ public class AllEntities {
             }
         }
 
+/*
         if (DebugInterface.isDebugEnabled()) {
             int ded = 0;
             int hded = 0;
@@ -131,6 +131,7 @@ public class AllEntities {
 
             }
         }
+*/
     }
 
     public int getMyId() {

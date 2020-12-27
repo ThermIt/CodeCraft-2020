@@ -95,7 +95,7 @@ public class WorkerJobsMap {
             return;
         }
         worker.setTask(Task.RUN_FOOLS);
-        DebugInterface.println("RUN", worker.getPosition(), 1);
+//        DebugInterface.println("RUN", worker.getPosition(), 1);
 /*
         Coordinate runTo = getRunDirections(worker.getPosition());
         worker.setMoveAction(new MoveAction(runTo, false, true));

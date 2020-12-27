@@ -3,7 +3,6 @@ package older.v11.mystrategy.collections;
 import model.Entity;
 import model.EntityType;
 import model.PlayerView;
-import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,6 +101,7 @@ public class AllEntities {
             }
         }
 
+/*
         if (DebugInterface.isDebugEnabled()) {
             int ded = 0;
             int hded = 0;
@@ -131,6 +131,7 @@ public class AllEntities {
 
             }
         }
+*/
     }
 
     public int getMyId() {

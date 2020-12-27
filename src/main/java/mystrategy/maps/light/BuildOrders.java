@@ -46,9 +46,16 @@ public class BuildOrders {
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 5), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(8, 2), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 8), 0, false));
-//            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(11, 2), 0, false));
-//            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 11), 0, false));
         }
+/*
+        for (int i = 0; i < 10; i++) {
+            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(11+i*3, 0), 0, false));
+            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(0, 12+i*3), 0, false));
+
+//            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(11+i*3, 4), 0, false));
+//            buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(4, 12+i*3), 0, false));
+        }
+*/
 /*
         buildQueue.add(new Entity(-1, getMyId(), EntityType.TURRET, new Coordinate(10, 5), 0, false));
         buildQueue.add(new Entity(-1, getMyId(), EntityType.TURRET, new Coordinate(5, 10), 0, false));

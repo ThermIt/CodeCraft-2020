@@ -3,10 +3,7 @@ package mystrategy.strategies;
 import model.*;
 import mystrategy.collections.AllEntities;
 import mystrategy.collections.SingleVisitCoordinateSet;
-import mystrategy.maps.EnemiesMap;
-import mystrategy.maps.EntitiesMap;
-import mystrategy.maps.RepairMap;
-import mystrategy.maps.SimCityMap;
+import mystrategy.maps.*;
 import mystrategy.maps.light.*;
 import util.DebugInterface;
 import util.StrategyDelegate;
@@ -42,6 +39,8 @@ public class DefaultStrategy implements StrategyDelegate {
     private WarMap warMap;
     private WorkerJobsMap jobs;
     private SimCityPlan simCityPlan;
+    private Healers healers;
+    private HealerUnitMagnet healerUnitMagnet;
 
     public DefaultStrategy(
             BuildOrders buildOrders,
@@ -98,6 +97,8 @@ public class DefaultStrategy implements StrategyDelegate {
         this.warMap.init(playerView, entitiesMap, allEntities, enemiesMap, allEntities);
         buildOrders.init(playerView, allEntities);
 
+        this.healers = new Healers(playerView, entitiesMap, allEntities, warMap); // before jobs
+        healerUnitMagnet = new HealerUnitMagnet(playerView, visibility, entitiesMap, allEntities, resources, warMap, healers);
         this.jobs = new WorkerJobsMap(
                 playerView,
                 entitiesMap,
@@ -106,12 +107,13 @@ public class DefaultStrategy implements StrategyDelegate {
                 me,
                 buildOrders,
                 warMap,
-                resources
+                resources,
+                healerUnitMagnet
         );
 
 //        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
         harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me, resources, jobs);
-        repairMap = new RepairMap(playerView, entitiesMap);
+        repairMap = new RepairMap(playerView, entitiesMap, enemiesMap);
         simCityPlan.init(playerView, entitiesMap, allEntities, warMap, resources);
         simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, warMap, simCityPlan);
 
@@ -187,6 +189,19 @@ public class DefaultStrategy implements StrategyDelegate {
                         } else {
                             buildAction = new BuildAction(order.getEntityType(), order.getPosition());
                         }
+                    }
+                } else if (unit.getTask() == Task.HEAL) {
+                    Integer canRepairId = repairMap.canRepairId(unit.getPosition());
+                    if (canRepairId != null) {
+                        if (DebugInterface.isDebugEnabled()) {
+                            if (allEntities.getMyUnits().stream().anyMatch(un -> un.getId() == canRepairId)) {
+                                Healers.totalHealed++;
+                                System.out.println("healed unit " + playerView.getCurrentTick() + "/" +Healers.totalHealed);
+                            } else {
+                                System.out.println("healed something " + playerView.getCurrentTick());
+                            }
+                        }
+                        repairAction = new RepairAction(canRepairId);
                     }
                 }
 

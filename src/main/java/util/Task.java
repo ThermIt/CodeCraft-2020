@@ -9,6 +9,7 @@ public enum Task {
     MOVE,
     RECKON,
     REPAIR,
-    RUN_FOOLS
+    RUN_FOOLS,
+    HEAL
 
 }

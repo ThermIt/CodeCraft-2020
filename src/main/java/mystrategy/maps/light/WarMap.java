@@ -135,7 +135,7 @@ public class WarMap {
         fillMyAttackersDistances(myAttackersLocations);
         fillEnemyWorkerDistances(enemyWorkerLocations);
 
-        this.rangedUnitMagnet = new RangedUnitMagnet(visibility, entitiesMap, entities, resources, allEntities);
+        this.rangedUnitMagnet = new RangedUnitMagnet(visibility, entitiesMap, entities, resources, enemiesMap);
         rangedUnitMagnet.addAll(enemyUnitLocations);
         rangedUnitMagnet.addAll(enemyBuildingLocations);
         rangedUnitMagnet.addAllHarass(enemyBuildingLocations);
@@ -303,7 +303,7 @@ public class WarMap {
 /*
         for (int i = 0; i < mapSize; i++) {
             for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled()) {
+                if (DebugInterface.isDebugEnabled() && dominanceMap[i][j] > 0 && dominanceMap[i][j] < 20) {
                     DebugInterface.print(dominanceMap[i][j], i, j);
                 }
             }
@@ -440,10 +440,18 @@ public class WarMap {
         Coordinate closestCandidate = null;
         List<Coordinate> possibleMoves = fromUnit.getPosition().getAdjacentListWithSelf();
         for (Coordinate newPosition : possibleMoves) {
-            if (newPosition.isInBounds()
-                    && (enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth()/* || fromUnit.getHealth() <= 5*/)
-                    && !takenSpace[newPosition.getX()][newPosition.getY()]) {
-                closestCandidate = getMinOfTwoPositionsForRangedUnit(closestCandidate, newPosition, teamNumber);
+            if (newPosition.isInBounds()) {
+                Entity other = entitiesMap.getEntity(newPosition);
+                boolean builderMovingAtMe =
+                        other != null
+                                && other.isMy(EntityType.BUILDER_UNIT)
+                                && other.getMoveAction() != null
+                                && Objects.equals(other.getMoveAction().getTarget(), fromUnit.getPosition());
+                if ((enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth()/* || fromUnit.getHealth() <= 5*/)
+                        && !takenSpace[newPosition.getX()][newPosition.getY()]
+                        && !builderMovingAtMe) {
+                    closestCandidate = getMinOfTwoPositionsForRangedUnit(closestCandidate, newPosition, teamNumber);
+                }
             }
         }
         return closestCandidate == null ? fromUnit.getPosition() : closestCandidate;

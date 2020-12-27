@@ -304,7 +304,7 @@ public class HarvestJobsMap {
         }
         unit.setMoveDecision(Decision.DECIDING);
         Coordinate moveTo = getMoveTo(unit);
-        DebugInterface.println("moveTo", moveTo, 0);
+//        DebugInterface.println("moveTo", moveTo, 0);
 
         // untie knots
         Entity otherUnit = entitiesMap.getEntity(moveTo.getX(), moveTo.getY());

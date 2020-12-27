@@ -3,19 +3,24 @@ package mystrategy.maps;
 import model.Coordinate;
 import model.Entity;
 import model.PlayerView;
+import util.DebugInterface;
 
 import java.util.Objects;
 
 public class RepairMap {
     private int[][] distanceByFoot;
+    private PlayerView playerView;
     private EntitiesMap entitiesMap;
     private int mapSize;
+    private EnemiesMap enemiesMap;
     private int myId;
 
-    public RepairMap(PlayerView playerView, EntitiesMap entitiesMap) {
+    public RepairMap(PlayerView playerView, EntitiesMap entitiesMap, EnemiesMap enemiesMap) {
+        this.playerView = playerView;
         this.entitiesMap = entitiesMap;
         myId = playerView.getMyId();
         mapSize = playerView.getMapSize();
+        this.enemiesMap = enemiesMap;
         distanceByFoot = new int[mapSize][mapSize];
 
 /*
@@ -52,8 +57,14 @@ public class RepairMap {
 
     private Integer repairRequired(Coordinate position) {
         Entity entity = entitiesMap.getEntity(position);
-        if (entity.isPlayer(myId)
-                && entity.getHealth() < entity.getProperties().getMaxHealth()) {
+        if (entity.isMy() && entity.getHealth() < entity.getProperties().getMaxHealth()) {
+            return entity.getId();
+        } else if (entity.isMy() && enemiesMap.getDangerLevel(entity.getPosition()) > 1) {
+            if (DebugInterface.isDebugEnabled()) {
+                DebugInterface.println("HHH", position, 0);
+                Healers.totalHealed+=5;
+                System.out.println("heal " + playerView.getCurrentTick() + "/" + Healers.totalHealed);
+            }
             return entity.getId();
         }
         return null;
@@ -62,15 +73,15 @@ public class RepairMap {
     public Integer canBuildId(Coordinate position) {
         int x = position.getX();
         int y = position.getY();
-        Integer entity = buildingRequired(x-1, y);
+        Integer entity = buildingRequired(x - 1, y);
         if (entity == null) {
-            entity = buildingRequired(x, y-1);
+            entity = buildingRequired(x, y - 1);
         }
         if (entity == null) {
-            entity = buildingRequired(x, y+1);
+            entity = buildingRequired(x, y + 1);
         }
         if (entity == null) {
-            entity = buildingRequired(x+1, y);
+            entity = buildingRequired(x + 1, y);
         }
         return entity;
     }
