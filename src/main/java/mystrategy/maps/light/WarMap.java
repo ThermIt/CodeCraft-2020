@@ -422,7 +422,7 @@ public class WarMap {
     public Coordinate getPositionClosestToForRangedUnit(Entity fromUnit) {
         Team teamNumber;
 //        teamNumber = fromUnit.getId() % 41 > 20 ? Team.HARASSERS : Team.MAIN;
-        switch ((fromUnit.getId() % 41) % 3) {
+        switch ((fromUnit.getId() % 41) % 5) {
             case 1:
                 teamNumber = Team.HARASSERS;
                 break;

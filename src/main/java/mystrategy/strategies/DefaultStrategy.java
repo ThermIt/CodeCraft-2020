@@ -98,7 +98,7 @@ public class DefaultStrategy implements StrategyDelegate {
         buildOrders.init(playerView, allEntities);
 
         this.healers = new Healers(playerView, entitiesMap, allEntities, warMap); // before jobs
-        healerUnitMagnet = new HealerUnitMagnet(playerView, visibility, entitiesMap, allEntities, resources, warMap, healers);
+        healerUnitMagnet = new HealerUnitMagnet(playerView, visibility, entitiesMap, allEntities, resources, warMap, healers, enemiesMap);
         this.jobs = new WorkerJobsMap(
                 playerView,
                 entitiesMap,
@@ -193,13 +193,11 @@ public class DefaultStrategy implements StrategyDelegate {
                 } else if (unit.getTask() == Task.HEAL) {
                     Integer canRepairId = repairMap.canRepairId(unit.getPosition());
                     if (canRepairId != null) {
-                        if (DebugInterface.isDebugEnabled()) {
-                            if (allEntities.getMyUnits().stream().anyMatch(un -> un.getId() == canRepairId)) {
-                                Healers.totalHealed++;
-                                System.out.println("healed unit " + playerView.getCurrentTick() + "/" +Healers.totalHealed);
-                            } else {
-                                System.out.println("healed something " + playerView.getCurrentTick());
-                            }
+                        if (allEntities.getMyUnits().stream().anyMatch(un -> un.getId() == canRepairId)) {
+                            Healers.totalHealed++;
+                            System.out.println("healed unit " + playerView.getCurrentTick() + "/" + Healers.totalHealed);
+                        } else {
+                            System.out.println("healed something " + playerView.getCurrentTick());
                         }
                         repairAction = new RepairAction(canRepairId);
                     }

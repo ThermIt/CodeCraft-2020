@@ -7,10 +7,16 @@ import mystrategy.maps.light.WarMap;
 import util.DebugInterface;
 import util.Task;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Healers {
+    public static final int NUM_HEALERS = 5;
     public static int totalHealed = 0;
     public static int id1 = -1;
     public static int id2 = -1;
+    public static List<Integer> ids = new ArrayList<>();
+    public static List<Entity> healers = new ArrayList<>();
     private PlayerView playerView;
     private EntitiesMap map;
     private AllEntities entities;
@@ -26,55 +32,28 @@ public class Healers {
         if (!isEnabled()) {
             return;
         }
+        healers = new ArrayList<>();
 
-        Entity healer1 = null;
-        Entity healer2 = null;
         for (Entity worker : entities.getMyWorkers()) {
-            if (id1 == worker.getId()) {
-                healer1 = worker;
+            if (ids.contains(worker.getId())) {
+                healers.add(worker);
             }
-            if (id2 == worker.getId()) {
-                healer2 = worker;
-            }
+        }
+        if (healers.size() < ids.size()) {
+            System.out.println("H deds " + (ids.size() - healers.size()) + "/" + playerView.getCurrentTick());
+            totalHealed -= 10 * (ids.size() - healers.size());
         }
         for (Entity worker : entities.getMyWorkers()) {
-/*
-            if (warMap.getDistanceToGoodGuys(worker.getPosition()) == 0) {
-                continue;
-            }
-*/
-            if (healer1 == null && id1 != -1) {
-                System.out.println("H1 ded " + id1 + "/" + playerView.getCurrentTick());
-                totalHealed -= 10;
-            }
-            if (healer2 == null && id2 != -1) {
-                System.out.println("H2 ded " + id2 + "/" + playerView.getCurrentTick());
-                totalHealed -= 10;
-            }
-
-
-            if (healer1 == null) {
-                healer1 = worker;
-            } else if (healer2 == null) {
-                healer2 = worker;
+            if (healers.size() < NUM_HEALERS) {
+                healers.add(worker);
+            } else {
+                break;
             }
         }
 
-        if (healer1 != null) {
-            if (healer1.getId() != id1) {
-                System.out.println("id1 changed");
-            }
-            id1 = healer1.getId();
-            healer1.setTask(Task.HEAL);
-            DebugInterface.println("HEAL1", healer1.getPosition(), 2);
-        }
-        if (healer2 != null) {
-            if (healer1.getId() != id1) {
-                System.out.println("i2 changed");
-            }
-            id2 = healer2.getId();
-            healer2.setTask(Task.HEAL);
-            DebugInterface.println("HEAL2", healer2.getPosition(), 2);
+        for (Entity healer : healers) {
+            healer.setTask(Task.HEAL);
+            DebugInterface.println("HEAL", healer.getPosition(), 2);
         }
     }
 

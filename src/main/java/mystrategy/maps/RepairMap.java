@@ -60,11 +60,9 @@ public class RepairMap {
         if (entity.isMy() && entity.getHealth() < entity.getProperties().getMaxHealth()) {
             return entity.getId();
         } else if (entity.isMy() && enemiesMap.getDangerLevel(entity.getPosition()) > 1) {
-            if (DebugInterface.isDebugEnabled()) {
-                DebugInterface.println("HHH", position, 0);
-                Healers.totalHealed+=5;
-                System.out.println("heal " + playerView.getCurrentTick() + "/" + Healers.totalHealed);
-            }
+            DebugInterface.println("HHH", position, 0);
+            Healers.totalHealed+=5;
+            System.out.println("heal " + playerView.getCurrentTick() + "/" + Healers.totalHealed);
             return entity.getId();
         }
         return null;

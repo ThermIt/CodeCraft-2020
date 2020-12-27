@@ -5,6 +5,7 @@ import model.Coordinate;
 import model.PlayerView;
 import mystrategy.collections.AllEntities;
 import mystrategy.collections.SingleVisitCoordinateSet;
+import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import mystrategy.maps.Healers;
 import util.DebugInterface;
@@ -13,6 +14,8 @@ import util.Initializer;
 import java.util.Comparator;
 
 public class HealerUnitMagnet {
+    private final PlayerView playerView;
+    private final WarMap warMap;
     private VisibilityMap visibility;
     private EntitiesMap entitiesMap;
     private AllEntities entities;
@@ -22,6 +25,7 @@ public class HealerUnitMagnet {
     private int mapSize = 80;
     private SingleVisitCoordinateSet waveCoordinates;
     private Healers healers;
+    private EnemiesMap enemiesMap;
 
 
     public HealerUnitMagnet(
@@ -31,8 +35,13 @@ public class HealerUnitMagnet {
             AllEntities entities,
             VirtualResources resources,
             WarMap warMap,
-            Healers healers
+            Healers healers,
+            EnemiesMap enemiesMap
     ) {
+        this.enemiesMap = enemiesMap;
+        warMap.checkTick(playerView);
+        this.playerView = playerView;
+        this.warMap = warMap;
         this.healers = healers;
         warMap.checkTick(playerView);
         this.visibility = visibility;
@@ -46,14 +55,14 @@ public class HealerUnitMagnet {
 
         entities.getMyRangedUnits().stream()
                 .filter(unit -> warMap.getDistanceToEnemy(unit.getPosition()) != 0 || unit.getHealth() < unit.getProperties().getMaxHealth())
-                .sorted(Comparator.comparingInt(unit -> warMap.getDistanceToEnemy(unit.getPosition()) + 2*unit.getHealth()))
-                .limit(20)
+                .sorted(Comparator.comparingInt(unit -> warMap.getDistanceToEnemy(unit.getPosition()) + 2 * unit.getHealth()))
+                .limit(10)
                 .forEach(unit -> waveCoordinates.add(unit.getPosition()));
         fillDistances();
     }
 
     private boolean isPassable(Coordinate coordinate) {
-        return entitiesMap.isPassable(coordinate);
+        return entitiesMap.isPassable(coordinate) && enemiesMap.getDangerLevel(coordinate) <= 1;
     }
 
     public void fillDistances() {
