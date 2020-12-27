@@ -86,8 +86,8 @@ public class BuildOrders {
     }
 
     public boolean isFreeToAdd() {
-        return (entities.getMyHouses().size() >= 4 && entities.getMyHouses().size() <= 8)
-                || (entities.getMyRangedBases().size() > 0 && entities.getMyRangedBases().get(0).getHealth() > 10);
+        return /*(entities.getMyHouses().size() >= 4 && entities.getMyHouses().size() <= 8)
+                || */(entities.getMyRangedBases().size() > 0 && entities.getMyRangedBases().get(0).getHealth() > 10);
     }
 
     public List<Entity> updateAndGetActiveOrders(AllEntities allEntities, EntitiesMap entitiesMap, Player me) {

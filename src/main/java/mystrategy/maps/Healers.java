@@ -79,6 +79,6 @@ public class Healers {
     }
 
     public boolean isEnabled() {
-        return this.playerView.isFogOfWar() && this.entities.getMyRangedUnits().size() > 0 && this.entities.getMyWorkers().size() > 30;
+        return this.playerView.isFogOfWar() && this.entities.getMyRangedUnits().size() > 0 && this.entities.getMyWorkers().size() > 50;
     }
 }
