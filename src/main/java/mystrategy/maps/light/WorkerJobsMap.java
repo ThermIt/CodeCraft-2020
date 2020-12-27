@@ -95,19 +95,23 @@ public class WorkerJobsMap {
             return;
         }
         worker.setTask(Task.RUN_FOOLS);
+        DebugInterface.println("RUN", worker.getPosition(), 1);
+/*
         Coordinate runTo = getRunDirections(worker.getPosition());
         worker.setMoveAction(new MoveAction(runTo, false, true));
+        DebugInterface.println("runTo", runTo, 1);
         Entity blockingEntity = entitiesMap.getEntity(runTo);
         if (blockingEntity.isMy(EntityType.BUILDER_UNIT)) {
             markRun(blockingEntity);
         }
+*/
     }
 
-    private Coordinate getRunDirections(Coordinate from) {
+    public Coordinate getRunDirections(Coordinate from, boolean[][] takenSpace) {
         Coordinate result = from;
 
         List<Coordinate> possibleRunLocations = from.getAdjacentList().stream()
-                .filter(pos -> entitiesMap.isPassable(pos))
+                .filter(pos -> entitiesMap.isPassable(pos) && !takenSpace[pos.getX()][pos.getY()])
                 .filter(pos -> {
                     MoveAction otherMoveAction = entitiesMap.getEntity(pos).getMoveAction();
                     return otherMoveAction == null || !Objects.equals(otherMoveAction.getTarget(), from);

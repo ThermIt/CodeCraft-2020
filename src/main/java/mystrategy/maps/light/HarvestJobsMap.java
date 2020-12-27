@@ -180,11 +180,13 @@ public class HarvestJobsMap {
         if (oldDistance == 0 || newDistance < oldDistance) {
             return newPosition;
         }
-        if (newDistance == oldDistance && entitiesMap.isEmpty(newPosition)) {
-            return newPosition;
-        }
-        if (newDistance == oldDistance && !takenSpace[newPosition.getX()][newPosition.getY()]) {
-            return newPosition;
+        if (newDistance == oldDistance) {
+            if (takenSpace[newPosition.getX()][newPosition.getY()]) {
+                return old;
+            }
+            if (entitiesMap.isEmpty(newPosition)) {
+                return newPosition;
+            }
         }
         return old;
     }
@@ -287,6 +289,11 @@ public class HarvestJobsMap {
     }
 
     public void decideMoveForBuilderUnit(Entity unit) {
+        if (unit.getTask() == Task.RUN_FOOLS) {
+            unit.setBuildAction(null); // drop all legacy tasks and run
+            unit.setAttackAction(null);
+            unit.setRepairAction(null);
+        }
         if (unit.getBuildAction() != null || unit.getRepairAction() != null || unit.getAttackAction() != null) {
 //            takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
 // *           DebugInterface.print("0 - attacking", unit.getPosition().getX(), unit.getPosition().getY());
@@ -299,13 +306,17 @@ public class HarvestJobsMap {
         }
         unit.setMoveDecision(Decision.DECIDING);
         Coordinate moveTo = getMoveTo(unit);
+        DebugInterface.println("moveTo", moveTo, 0);
 
-
+        // untie knots
         Entity otherUnit = entitiesMap.getEntity(moveTo.getX(), moveTo.getY());
         if (!Objects.equals(moveTo, unit.getPosition()) // not self
                 && otherUnit.isMy(EntityType.BUILDER_UNIT)
-                && otherUnit.getMoveDecision() != Decision.DECIDED // DECIDING marks his place as taken
+                && otherUnit.getMoveDecision() != Decision.DECIDED // DECIDING marks his place as taken while calculating other units
         ) {
+            if (unit.getTask() == Task.RUN_FOOLS) {
+                otherUnit.setTask(Task.RUN_FOOLS);
+            }
             takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
             decideMoveForBuilderUnit(otherUnit);
             takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = false;
@@ -317,6 +328,7 @@ public class HarvestJobsMap {
             }
         }
 
+        // force push
         if (!Objects.equals(moveTo, unit.getPosition()) // not self
                 && otherUnit.isMy(EntityType.BUILDER_UNIT)
                 && (otherUnit.getBuildAction() != null || otherUnit.getRepairAction() != null || otherUnit.getAttackAction() != null)
@@ -334,17 +346,17 @@ public class HarvestJobsMap {
             takenSpace[otherUnit.getPosition().getX()][unit.getPosition().getY()] = false;
         }
 
-        if (!Objects.equals(moveTo, unit.getPosition()) && otherUnit.getEntityType() != EntityType.RESOURCE) {
+        if (!Objects.equals(moveTo, unit.getPosition()) && otherUnit.getEntityType() != EntityType.RESOURCE) { // move
             takenSpace[moveTo.getX()][moveTo.getY()] = true;
 // *            DebugInterface.print("0 - move", moveTo.getX(), moveTo.getY());
             MoveAction moveAction = new MoveAction(moveTo, true, true);
             unit.setMoveAction(moveAction);
-        } else if (otherUnit.getEntityType() == EntityType.RESOURCE) {
+        } else if (otherUnit.getEntityType() == EntityType.RESOURCE) { // take self owned place in case of resource
             takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
 // *            DebugInterface.print("0 - cleaning", unit.getPosition().getX(), unit.getPosition().getY());
             MoveAction moveAction = new MoveAction(moveTo, true, true);
             unit.setMoveAction(moveAction);
-        } else {
+        } else { // not move
             takenSpace[unit.getPosition().getX()][unit.getPosition().getY()] = true;
 // *            DebugInterface.print("0 - not moving", unit.getPosition().getX(), unit.getPosition().getY());
             unit.setMoveAction(null);
@@ -360,11 +372,14 @@ public class HarvestJobsMap {
             moveTo = otherJobs.getPositionClosestToBuild(unit.getPosition(), takenSpace);
         } else if (unit.getTask() != Task.RUN_FOOLS) { // idle workers
             moveTo = getPositionClosestToResource(unit.getPosition());
+        } else if (unit.getTask() == Task.RUN_FOOLS) {
+            moveTo = otherJobs.getRunDirections(unit.getPosition(), takenSpace); // костыль же
         }
         return moveTo;
     }
 
     public void printTakenMap() {
+/*
         if (DebugInterface.isDebugEnabled()) {
             for (int i = 0; i < 80; i++) {
                 for (int j = 0; j < 80; j++) {
@@ -374,5 +389,6 @@ public class HarvestJobsMap {
                 }
             }
         }
+*/
     }
 }

@@ -222,6 +222,10 @@ public class DefaultStrategy implements StrategyDelegate {
         }
 
         // JUST MOVING
+        // run first
+        allEntities.getMyWorkers().stream().filter(worker -> worker.getTask() == Task.RUN_FOOLS).forEach(unit -> {
+            harvestJobs.decideMoveForBuilderUnit(unit);
+        });
         for (Entity unit : allEntities.getMyUnits()) {
             MoveAction moveAction;
             if (resources.getTotalResourceCount() > 0 && unit.getEntityType() == EntityType.BUILDER_UNIT) {
@@ -342,18 +346,19 @@ failedLimits
         }
 */
         int buildersLimit = allEntities.getEnemyWorkers().size() + 20;
-        if (playerView.isRound2()) {
-            buildersLimit = 650;
-        }
 
         if (playerView.isFinials()) {
-            buildersLimit = 40;
+            buildersLimit = 40 + (allEntities.getEnemyUnits().stream().noneMatch(enemy -> Math.min(enemy.getPosition().getY(), enemy.getPosition().getX()) < 40) ? 40 : 0);
+        } else if (playerView.isRound2()) {
+            buildersLimit = 40 + (allEntities.getEnemyUnits().stream().noneMatch(enemy -> Math.min(enemy.getPosition().getY(), enemy.getPosition().getX()) < 40) ? 40 : 0);
+        } else {
+            buildersLimit = 61;
         }
+
 
         if (entityType == EntityType.BUILDER_UNIT
 //                && allEntities.getMyWorkers().size() >=40
                 && allEntities.getMyWorkers().size() >= buildersLimit
-                + (allEntities.getEnemyUnits().stream().noneMatch(enemy -> Math.min(enemy.getPosition().getY(), enemy.getPosition().getX()) < 40) ? 40 : 0)
         ) {
             return buildAction;
         }
