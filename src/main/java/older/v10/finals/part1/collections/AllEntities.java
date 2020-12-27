@@ -3,6 +3,7 @@ package older.v10.finals.part1.collections;
 import model.Entity;
 import model.EntityType;
 import model.PlayerView;
+import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,7 +102,6 @@ public class AllEntities {
             }
         }
 
-/*
         if (DebugInterface.isDebugEnabled()) {
             int ded = 0;
             int hded = 0;
@@ -127,11 +127,10 @@ public class AllEntities {
             if (ded > 0 || hded > 0) {
                 hdeadTotal += hded;
                 deadTotal += ded;
-                System.out.println("ded:" + ded + ";hded:" + hded + ";dt:" + deadTotal + ";hdt:" + hdeadTotal + ";%" + 100 * deadTotal / (deadTotal + hdeadTotal));
+                System.out.println("+++ded:" + ded + ";hded:" + hded + ";dt:" + deadTotal + ";hdt:" + hdeadTotal + ";%" + 100 * deadTotal / (deadTotal + hdeadTotal));
 
             }
         }
-*/
     }
 
     public int getMyId() {

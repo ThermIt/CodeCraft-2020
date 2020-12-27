@@ -279,11 +279,9 @@ public class HarvestJobsMap {
             return position;
         }
 
-/*
         for (Coordinate newPosition : coordinateList) {
             position = getMinOfTwoPositions(position, newPosition, resourceDistanceByFootAllResources);
         }
-*/
 
         return position;
     }

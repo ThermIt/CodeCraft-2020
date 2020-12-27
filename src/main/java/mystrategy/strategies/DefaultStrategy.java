@@ -2,6 +2,7 @@ package mystrategy.strategies;
 
 import model.*;
 import mystrategy.collections.AllEntities;
+import mystrategy.collections.SingleVisitCoordinateSet;
 import mystrategy.maps.EnemiesMap;
 import mystrategy.maps.EntitiesMap;
 import mystrategy.maps.RepairMap;
@@ -356,11 +357,43 @@ failedLimits
         }
 
 
-        if (entityType == EntityType.BUILDER_UNIT
-//                && allEntities.getMyWorkers().size() >=40
-                && allEntities.getMyWorkers().size() >= buildersLimit
-        ) {
-            return buildAction;
+        if (entityType == EntityType.BUILDER_UNIT) {
+            if (allEntities.getMyWorkers().size() < buildersLimit) {
+                SingleVisitCoordinateSet testStand = new SingleVisitCoordinateSet();
+                testStand.addAll(entity.getAdjacentCoordinates());
+                int resourceSpotCount = 0;
+                int iterationsRemaining = 40;
+                while (!testStand.isEmpty() && iterationsRemaining > 0) {
+                    iterationsRemaining--;
+                    for (Coordinate pos : testStand) {
+                        boolean isResource = false;
+                        for (Coordinate adjacent : pos.getAdjacentList()) {
+                            boolean resource = resources.getResourceCount(adjacent) > 0;
+                            if (!resource && entitiesMap.isPassable(adjacent)) {
+                                testStand.addOnNextStep(adjacent);
+                            } else if (resource) {
+                                isResource = true;
+                            }
+                        }
+                        if (isResource) {
+                            resourceSpotCount++;
+//                            DebugInterface.println("Rx" + resourceSpotCount, pos, 0);
+                        }/* else {
+                            DebugInterface.println("X", pos, 1);
+                        }*/
+                    }
+                    testStand.nextStep();
+                }
+                if (iterationsRemaining > 0) {
+                    buildersLimit = Math.min(buildersLimit, resourceSpotCount);
+                }
+
+                if (allEntities.getMyWorkers().size() >= buildersLimit) {
+                    return buildAction;
+                }
+            } else {
+                return buildAction;
+            }
         }
 
         Coordinate defaultBuildPosition = new Coordinate(

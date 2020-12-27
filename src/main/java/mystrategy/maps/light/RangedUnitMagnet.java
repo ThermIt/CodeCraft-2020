@@ -18,6 +18,7 @@ public class RangedUnitMagnet {
     private EntitiesMap entitiesMap;
     private AllEntities entities;
     private VirtualResources resources;
+    private AllEntities allEntities;
     private int[][] distance;
     private int[][] distanceHarass;
     private int mapSize = 80;
@@ -30,12 +31,13 @@ public class RangedUnitMagnet {
             VisibilityMap visibility,
             EntitiesMap entitiesMap,
             AllEntities entities,
-            VirtualResources resources
-    ) {
+            VirtualResources resources,
+            AllEntities allEntities) {
         this.visibility = visibility;
         this.entitiesMap = entitiesMap;
         this.entities = entities;
         this.resources = resources;
+        this.allEntities = allEntities;
         this.distance = new int[Initializer.getMapSize()][Initializer.getMapSize()];
         this.distanceHarass = new int[Initializer.getMapSize()][Initializer.getMapSize()];
 
@@ -142,7 +144,11 @@ public class RangedUnitMagnet {
     }
 
     public void fillDistances() {
-        // TODO: stop when all rangers captured
+        if (allEntities.getMyRangedUnits().size() == 0) {
+            // TODO: stop when all rangers captured
+            return;
+        }
+
         int[][] delayFuseForCalculation = new int[mapSize][mapSize];
 
         for (int i = 8; !waveCoordinates.isEmpty(); i++) {
@@ -193,7 +199,10 @@ public class RangedUnitMagnet {
     }
 
     public void fillDistancesHarass() {
-        // TODO: stop when all rangers captured
+        if (allEntities.getMyRangedUnits().size() == 0) {
+            // TODO: stop when all rangers captured
+            return;
+        }
         int[][] delayFuseForCalculation = new int[mapSize][mapSize];
 
         for (int i = 8; !waveCoordinatesHarass.isEmpty(); i++) {
@@ -203,7 +212,7 @@ public class RangedUnitMagnet {
                         && isPassable(coordinate)) {
                     int resourceCount = resources.getResourceCount(coordinate);
                     if (resourceCount > 0 && delayFuseForCalculation[coordinate.getX()][coordinate.getY()] == 0) {
-                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()] = resourceCount / 5 + 1; // magic
+                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()] = (resourceCount-1) / 5 + 1; // magic
                     }
                     if (delayFuseForCalculation[coordinate.getX()][coordinate.getY()] > 1) {
                         delayFuseForCalculation[coordinate.getX()][coordinate.getY()]--;

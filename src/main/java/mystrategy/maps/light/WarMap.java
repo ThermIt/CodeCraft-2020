@@ -135,7 +135,7 @@ public class WarMap {
         fillMyAttackersDistances(myAttackersLocations);
         fillEnemyWorkerDistances(enemyWorkerLocations);
 
-        this.rangedUnitMagnet = new RangedUnitMagnet(visibility, entitiesMap, entities, resources);
+        this.rangedUnitMagnet = new RangedUnitMagnet(visibility, entitiesMap, entities, resources, allEntities);
         rangedUnitMagnet.addAll(enemyUnitLocations);
         rangedUnitMagnet.addAll(enemyBuildingLocations);
         rangedUnitMagnet.addAllHarass(enemyBuildingLocations);
