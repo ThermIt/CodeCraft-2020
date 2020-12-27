@@ -1,9 +1,8 @@
-package older.v09.finals1.collections;
+package older.v10.finals.part1.collections;
 
 import model.Entity;
 import model.EntityType;
 import model.PlayerView;
-import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +101,8 @@ public class AllEntities {
             }
         }
 
-        if (1 == 0 && DebugInterface.isDebugEnabled()) {
+/*
+        if (DebugInterface.isDebugEnabled()) {
             int ded = 0;
             int hded = 0;
             for (Entity ranger : myRangedUnitsOld) {
@@ -131,6 +131,7 @@ public class AllEntities {
 
             }
         }
+*/
     }
 
     public int getMyId() {
