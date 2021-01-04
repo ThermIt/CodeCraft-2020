@@ -420,6 +420,10 @@ public class WarMap {
     }
 
     public Coordinate getPositionClosestToForRangedUnit(Entity fromUnit) {
+/*
+        if (Healers.ids.size() > 0 && fromUnit.getHealth() <= 6)
+            return fromUnit.getPosition();
+*/
         Team teamNumber;
 //        teamNumber = fromUnit.getId() % 41 > 20 ? Team.HARASSERS : Team.MAIN;
         switch ((fromUnit.getId() % 41) % 5) {
@@ -447,7 +451,7 @@ public class WarMap {
                                 && other.isMy(EntityType.BUILDER_UNIT)
                                 && other.getMoveAction() != null
                                 && Objects.equals(other.getMoveAction().getTarget(), fromUnit.getPosition());
-                if ((enemiesMap.getDamageOnNextTick(newPosition) < fromUnit.getHealth()/* || fromUnit.getHealth() <= 5*/)
+                if ((enemiesMap.getDamageOnNextTick(newPosition) < 10/* || fromUnit.getHealth() <= 5*/)
                         && !takenSpace[newPosition.getX()][newPosition.getY()]
                         && !builderMovingAtMe) {
                     closestCandidate = getMinOfTwoPositionsForRangedUnit(closestCandidate, newPosition, teamNumber);

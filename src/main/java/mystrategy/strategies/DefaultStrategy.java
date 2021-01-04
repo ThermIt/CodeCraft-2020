@@ -127,9 +127,11 @@ public class DefaultStrategy implements StrategyDelegate {
         if (!third && allEntities.getMyBuildings().stream()
                 .anyMatch(ent -> ent.isMy(EntityType.RANGED_BASE) && ent.isActive())) {
             third = true;
+/*
             if (DebugInterface.isDebugEnabled()) {
                 System.out.println(playerView.getCurrentTick() + "BR+");
             }
+*/
         }
 
         // units
@@ -262,7 +264,7 @@ public class DefaultStrategy implements StrategyDelegate {
                 }
             }
         }
-        harvestJobs.printTakenMap();
+//        harvestJobs.printTakenMap();
 
         warMap.updateFreeSpaceMaskForRangedUnits();
         for (Entity unit : allEntities.getMyUnits()) {

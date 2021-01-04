@@ -3,6 +3,7 @@ package mystrategy.maps.light;
 import model.*;
 import mystrategy.collections.AllEntities;
 import mystrategy.maps.EntitiesMap;
+import util.DebugInterface;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,14 +42,24 @@ public class BuildOrders {
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(5, 2), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 5), 0, false));
         } else {
+/*
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 2), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(5, 2), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 5), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(8, 2), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(2, 8), 0, false));
+*/
+
+            int o=0;
+            for (int i = 0; i < 10; i++) {
+                for (int j = 0; j <= i; j++) {
+                    buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(i*4, j*4), 0, false));
+                    DebugInterface.println("X"+o++, j*4, (i-j)*4,2);
+                }
+            }
         }
 /*
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(11+i*3, 0), 0, false));
             buildQueue.add(new Entity(-1, getMyId(), EntityType.HOUSE, new Coordinate(0, 12+i*3), 0, false));
 

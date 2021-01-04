@@ -5,7 +5,6 @@ import model.Entity;
 import model.EntityProperties;
 import model.PlayerView;
 import mystrategy.collections.AllEntities;
-import util.DebugInterface;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -213,15 +212,17 @@ public class EnemiesMap {
             coordinateList = coordinateListNext;
         }
 
+/*
         if (DebugInterface.isDebugEnabled()) {
             for (int i = 0; i < mapSize; i++) {
                 for (int j = 0; j < mapSize; j++) {
                     if (shootDanger[i][j] > 0) {
-                        DebugInterface.print(Integer.toString(shootDanger[i][j]), i, j);
+                        DebugInterface.println(shootDanger[i][j], i, j, 3);
                     }
                 }
             }
         }
+*/
     }
 
     public int getDangerLevel(Coordinate from) {

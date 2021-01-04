@@ -50,6 +50,7 @@ public class RangedUnitMagnet {
             waveCoordinates.add(enemyUnit.getPosition());
         }
 
+/*
         for (int i = 1; i < 3; i++) { // 2 initial steps for rangers
             for (Coordinate wave : waveCoordinates) {
                 distance[wave.getX()][wave.getY()] = i;
@@ -61,6 +62,7 @@ public class RangedUnitMagnet {
             }
             waveCoordinates.nextStep();
         }
+*/
 
         for (Entity enemyUnit : entities.getEnemyWorkers()) {
             waveCoordinates.add(enemyUnit.getPosition());
@@ -170,7 +172,9 @@ public class RangedUnitMagnet {
                         prettyprint(i, coordinate);
                         // do not attract to taken places and workers
                         boolean isFrontlineUnit = entitiesMap.getEntity(coordinate).isMy(EntityType.RANGED_UNIT)
-                                && enemiesMap.getDangerLevel(coordinate) > 0;
+                                && ((distance[coordinate.getX()][coordinate.getY()] <= 9
+                                && distance[coordinate.getX()][coordinate.getY()] > 0)
+                                || enemiesMap.getDangerLevel(coordinate) > 0);
                         if (!isBuilder(coordinate) && !isFrontlineUnit) {
                             waveCoordinates.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
                             waveCoordinates.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
@@ -191,15 +195,13 @@ public class RangedUnitMagnet {
             }
         }
 
-/*
-        for (int i = 0; i < mapSize; i++) {
-            for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled()) {
-                    DebugInterface.println(distance[i][j], i, j, 1);
-                }
-            }
-        }
-*/
+//        for (int i = 0; i < mapSize; i++) {
+//            for (int j = 0; j < mapSize; j++) {
+//                if (DebugInterface.isDebugEnabled() && distance[i][j] < 15) {
+//                    DebugInterface.println(distance[i][j], i, j, 0);
+//                }
+//            }
+//        }
     }
 
     public void fillDistancesHarass() {
@@ -216,7 +218,7 @@ public class RangedUnitMagnet {
                         && isPassable(coordinate)) {
                     int resourceCount = resources.getResourceCount(coordinate);
                     if (resourceCount > 0 && delayFuseForCalculation[coordinate.getX()][coordinate.getY()] == 0) {
-                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()] = (resourceCount-1) / 5 + 1; // magic
+                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()] = (resourceCount - 1) / 5 + 1; // magic
                     }
                     if (delayFuseForCalculation[coordinate.getX()][coordinate.getY()] > 1) {
                         delayFuseForCalculation[coordinate.getX()][coordinate.getY()]--;
@@ -226,7 +228,9 @@ public class RangedUnitMagnet {
                         prettyprint(i, coordinate);
                         // do not attract to taken places and workers
                         boolean isFrontlineUnit = entitiesMap.getEntity(coordinate).isMy(EntityType.RANGED_UNIT)
-                                && enemiesMap.getDangerLevel(coordinate) > 0;
+                                && ((distance[coordinate.getX()][coordinate.getY()] <= 9
+                                && distance[coordinate.getX()][coordinate.getY()] > 0)
+                                || enemiesMap.getDangerLevel(coordinate) > 0);
                         if (!isBuilder(coordinate) && !isFrontlineUnit) {
                             waveCoordinatesHarass.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
                             waveCoordinatesHarass.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
@@ -250,8 +254,8 @@ public class RangedUnitMagnet {
 /*
         for (int i = 0; i < mapSize; i++) {
             for (int j = 0; j < mapSize; j++) {
-                if (DebugInterface.isDebugEnabled()) {
-                    DebugInterface.println(distanceHarass[i][j], i, j, 2);
+                if (DebugInterface.isDebugEnabled() && distance[i][j] < 10) {
+                    DebugInterface.println(distanceHarass[i][j], i, j, 1);
                 }
             }
         }
@@ -259,11 +263,9 @@ public class RangedUnitMagnet {
     }
 
     public void prettyprint(int i, Coordinate coordinate) {
-/*
-        if (i <= 16) {
-            DebugInterface.println(i, coordinate, 1);
+        if (i <= 160) {
+//            DebugInterface.println(i, coordinate, 1);
         }
-*/
     }
 
     public int getDistanceToEnemy(Coordinate position, Team teamNumber) {
