@@ -64,6 +64,44 @@ public class WarMap {
         visibility.checkTick(playerView);
         resources.checkTick(playerView);
 
+        for (Entity myRanger : allEntities.getMyRangedUnits()) {
+            for (Entity enemyRanger : allEntities.getEnemyRangedUnits()) {
+                int distance = Math.abs(myRanger.getPosition().getX() - enemyRanger.getPosition().getX()) +
+                        Math.abs(myRanger.getPosition().getY() - enemyRanger.getPosition().getY());
+                if (distance == 7) {
+                    myRanger.add7Distance();
+                    enemyRanger.add7Distance();
+                }
+                if (distance == 6) {
+                    myRanger.add7Distance();
+                    enemyRanger.add7Distance();
+                    myRanger.add6Distance();
+                    enemyRanger.add6Distance();
+                }
+                if (distance <= 5) {
+                    myRanger.add7Distance();
+                    enemyRanger.add7Distance();
+                    myRanger.add6Distance();
+                    enemyRanger.add6Distance();
+                    myRanger.add5Distance();
+                    enemyRanger.add5Distance();
+                }
+            }
+        }
+
+        if (DebugInterface.isDebugEnabled()) {
+            for (Entity myRanger : allEntities.getMyRangedUnits()) {
+                DebugInterface.println(myRanger.getDistance7(), myRanger.getPosition(), 2);
+                DebugInterface.println(myRanger.getDistance6(), myRanger.getPosition(), 1);
+                DebugInterface.println(myRanger.getDistance5(), myRanger.getPosition(), 0);
+            }
+            for (Entity enemyRanger : allEntities.getEnemyRangedUnits()) {
+                DebugInterface.println(enemyRanger.getDistance7(), enemyRanger.getPosition(), 2);
+                DebugInterface.println(enemyRanger.getDistance6(), enemyRanger.getPosition(), 1);
+                DebugInterface.println(enemyRanger.getDistance5(), enemyRanger.getPosition(), 0);
+            }
+        }
+
         if (mapSize == 0) {
             if (playerView.isOneOnOne()) {
                 enemyBuildingLocations.add(new Coordinate(72, 72));
@@ -426,7 +464,7 @@ public class WarMap {
 */
         Team teamNumber;
 //        teamNumber = fromUnit.getId() % 41 > 20 ? Team.HARASSERS : Team.MAIN;
-        switch ((fromUnit.getId() % 41) % 5) {
+        switch (fromUnit.getId() % 3) {
             case 1:
                 teamNumber = Team.HARASSERS;
                 break;

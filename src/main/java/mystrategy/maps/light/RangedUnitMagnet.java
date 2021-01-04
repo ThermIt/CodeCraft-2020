@@ -82,6 +82,21 @@ public class RangedUnitMagnet {
             }
         }
 
+/*
+        for (int i = 40; i < 80; i++) {
+            Coordinate coordinate1 = new Coordinate(41, i);
+            Coordinate coordinate2 = new Coordinate(i, 41);
+            if (entitiesMap.isPassable(coordinate1)) {
+                waveCoordinates.add(coordinate1);
+                waveCoordinatesHarass.add(coordinate1);
+            }
+            if (entitiesMap.isPassable(coordinate2)) {
+                waveCoordinates.add(coordinate2);
+                waveCoordinatesHarass.add(coordinate2);
+            }
+        }
+*/
+
         for (int i = 3; i < 8; i++) { // 5 steps for everyone
             for (Coordinate wave : waveCoordinates) {
                 distance[wave.getX()][wave.getY()] = i;
@@ -174,7 +189,8 @@ public class RangedUnitMagnet {
                         boolean isFrontlineUnit = entitiesMap.getEntity(coordinate).isMy(EntityType.RANGED_UNIT)
                                 && ((distance[coordinate.getX()][coordinate.getY()] <= 9
                                 && distance[coordinate.getX()][coordinate.getY()] > 0)
-                                || enemiesMap.getDangerLevel(coordinate) > 0);
+                                || enemiesMap.getDangerLevel(coordinate) > 0
+                                || coordinate.getX()>39 || coordinate.getY() > 39);
                         if (!isBuilder(coordinate) && !isFrontlineUnit) {
                             waveCoordinates.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
                             waveCoordinates.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
@@ -230,7 +246,8 @@ public class RangedUnitMagnet {
                         boolean isFrontlineUnit = entitiesMap.getEntity(coordinate).isMy(EntityType.RANGED_UNIT)
                                 && ((distance[coordinate.getX()][coordinate.getY()] <= 9
                                 && distance[coordinate.getX()][coordinate.getY()] > 0)
-                                || enemiesMap.getDangerLevel(coordinate) > 0);
+                                || enemiesMap.getDangerLevel(coordinate) > 0
+                                || coordinate.getX()>39 || coordinate.getY() > 39);
                         if (!isBuilder(coordinate) && !isFrontlineUnit) {
                             waveCoordinatesHarass.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
                             waveCoordinatesHarass.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));

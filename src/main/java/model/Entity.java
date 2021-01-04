@@ -21,6 +21,9 @@ public class Entity {
     private int health;
     private int accumulatedDamage;
     private boolean active;
+    private int distance7;
+    private int distance6;
+    private int distance5;
 
     // attack -> build -> repair -> move
     private AttackAction attackAction = null;
@@ -279,5 +282,29 @@ public class Entity {
 
     public void setMoveDecision(Decision moveDecision) {
         this.moveDecision = moveDecision;
+    }
+
+    public void add7Distance() {
+        distance7++;
+    }
+
+    public void add6Distance() {
+        distance6++;
+    }
+
+    public void add5Distance() {
+        distance5++;
+    }
+
+    public int getDistance7() {
+        return distance7;
+    }
+
+    public int getDistance6() {
+        return distance6;
+    }
+
+    public int getDistance5() {
+        return distance5;
     }
 }

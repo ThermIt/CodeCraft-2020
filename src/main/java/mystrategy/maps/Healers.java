@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Healers {
-    public static final int NUM_HEALERS = 2;
+    public static final int NUM_HEALERS = 1;
     public static int totalHealed = 0;
     public static int id1 = -1;
     public static int id2 = -1;
