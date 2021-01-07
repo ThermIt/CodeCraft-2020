@@ -95,7 +95,11 @@ public class DefaultStrategy implements StrategyDelegate {
         maxUnits = allEntities.getMaxUnits();
         enemiesMap = new EnemiesMap(playerView, entitiesMap, allEntities);
         this.warMap.init(playerView, entitiesMap, allEntities, enemiesMap, allEntities);
-        buildOrders.init(playerView, allEntities);
+
+        simCityPlan.init(playerView, entitiesMap, allEntities, warMap, resources);
+        simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, warMap, simCityPlan);
+
+        buildOrders.init(playerView, allEntities, entitiesMap);
 
         this.healers = new Healers(playerView, entitiesMap, allEntities, warMap); // before jobs
         healerUnitMagnet = new HealerUnitMagnet(playerView, visibility, entitiesMap, allEntities, resources, warMap, healers, enemiesMap);
@@ -108,14 +112,15 @@ public class DefaultStrategy implements StrategyDelegate {
                 buildOrders,
                 warMap,
                 resources,
-                healerUnitMagnet
+                healerUnitMagnet,
+                simCityMap.isNeedBarracks(),
+                needMoreHouses(),
+                simCityPlan
         );
 
 //        resourceMap = new ResourcesMap(playerView, entitiesMap, allEntities, enemiesMap, debugInterface);
         harvestJobs = new HarvestJobsMap(playerView, entitiesMap, allEntities, enemiesMap, me, resources, jobs);
         repairMap = new RepairMap(playerView, entitiesMap, enemiesMap);
-        simCityPlan.init(playerView, entitiesMap, allEntities, warMap, resources);
-        simCityMap = new SimCityMap(playerView, entitiesMap, allEntities, warMap, simCityPlan);
 
         if (!second && allEntities.getMyBuildings().stream()
                 .anyMatch(ent1 -> ent1.isMy(EntityType.RANGED_BASE) && !ent1.isActive())) {
@@ -159,6 +164,7 @@ public class DefaultStrategy implements StrategyDelegate {
                     }
                     Coordinate buildCoordinates = simCityMap.getBuildCoordinates(unit.getPosition());
                     Coordinate rbBuildCoordinates = simCityMap.getRangedBaseBuildCoordinates(unit.getPosition());
+/*
                     if (simCityMap.isNeedBarracks() // hack
                             && me.getResource() >= playerView.getEntityProperties().get(EntityType.RANGED_BASE).getInitialCost()
                             && rbBuildCoordinates != null
@@ -171,6 +177,8 @@ public class DefaultStrategy implements StrategyDelegate {
 
                         simCityMap.setNeedBarracks(false);
                     }
+*/
+/*
                     if (needMoreHouses()
                             && buildOrders.isFreeToAdd()
                             && me.getResource() >= playerView.getEntityProperties().get(EntityType.HOUSE).getInitialCost()
@@ -181,6 +189,7 @@ public class DefaultStrategy implements StrategyDelegate {
                         buildAction = new BuildAction(EntityType.HOUSE, buildCoordinates);
                         maxUnits += playerView.getEntityProperties().get(EntityType.HOUSE).getPopulationProvide();
                     }
+*/
                 } else if (unit.getTask() == Task.BUILD) {
 //                    DebugInterface.print("B", unit.getPosition());
                     Entity order = buildOrders.getOrder(unit.getPosition());
@@ -437,7 +446,7 @@ failedLimits
                     buildPosition
             );
         } else {
-            if (entityType == EntityType.MELEE_UNIT && allEntities.getMyMeleeUnits().size() > 5) {
+            if (entityType == EntityType.MELEE_UNIT && allEntities.getMyMeleeUnits().size() >= 5) {
                 return buildAction;
             }
             Coordinate buildPosition = defaultBuildPosition;

@@ -35,7 +35,10 @@ public class WorkerJobsMap {
             BuildOrders buildOrders,
             WarMap warMap,
             VirtualResources resources,
-            HealerUnitMagnet healerUnitMagnet
+            HealerUnitMagnet healerUnitMagnet,
+            boolean needBarracks,
+            boolean needHouses,
+            SimCityPlan simCityPlan
     ) {
         this.resources = resources;
         this.healerUnitMagnet = healerUnitMagnet;
@@ -66,7 +69,7 @@ public class WorkerJobsMap {
 
         int minWorkers = 2;
         Set<Coordinate> buildCoordinates = new HashSet<>(128);
-        for (Entity order : buildOrders.updateAndGetActiveOrders(allEntities, entitiesMap, me)) {
+        for (Entity order : buildOrders.updateAndGetActiveOrders(allEntities, entitiesMap, me, needBarracks, needHouses, simCityPlan, enemiesMap)) {
             if (order.getEntityType() == EntityType.RANGED_BASE || order.getEntityType() == EntityType.MELEE_BASE) {
                 minWorkers += 7;
             } else {

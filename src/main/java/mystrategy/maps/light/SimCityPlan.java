@@ -38,7 +38,7 @@ public class SimCityPlan {
 
         for (int i = mapSize - 1; i >= 0; i--) {
             for (int j = mapSize - 1; j >= 0; j--) {
-                if (entitiesMap.isPassable(i, j) && resources.getResourceCount(i, j) == 0) {
+                if (entitiesMap.isPassable(i, j) && resources.getVisibleResourceCount(i, j) == 0) {
                     int prevFreeX = (i + 1 < mapSize) ? freeSizeX[i + 1][j] : 0;
                     int prevFreeY = (j + 1 < mapSize) ? freeSizeY[i][j + 1] : 0;
                     int prevFree = (i + 1 < mapSize) && (j + 1 < mapSize) ? freeSize[i + 1][j + 1] : 0;
@@ -51,7 +51,7 @@ public class SimCityPlan {
                     freeSizeY[i][j] = 0;
                     freeSize[i][j] = 0;
                 }
-                if (entitiesMap.isEmpty(i, j) && resources.getResourceCount(i, j) == 0) {
+                if (entitiesMap.isEmpty(i, j) && resources.getVisibleResourceCount(i, j) == 0) {
                     int prevFreeX = (i + 1 < mapSize) ? emptySizeX[i + 1][j] : 0;
                     int prevFreeY = (j + 1 < mapSize) ? emptySizeY[i][j + 1] : 0;
                     int prevFree = (i + 1 < mapSize) && (j + 1 < mapSize) ? emptySize[i + 1][j + 1] : 0;

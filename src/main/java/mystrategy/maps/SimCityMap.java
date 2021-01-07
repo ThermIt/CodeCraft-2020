@@ -23,7 +23,8 @@ public class SimCityMap {
             EntitiesMap entitiesMap,
             AllEntities allEntities,
             WarMap warMap,
-            SimCityPlan simCityPlan) {
+            SimCityPlan simCityPlan
+    ) {
         warMap.checkTick(playerView);
         mapSize = playerView.getMapSize();
         houseBuildCoordinates = new Coordinate[mapSize][mapSize];
