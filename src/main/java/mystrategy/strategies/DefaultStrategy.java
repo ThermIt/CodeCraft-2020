@@ -446,7 +446,7 @@ failedLimits
                     buildPosition
             );
         } else {
-            if (entityType == EntityType.MELEE_UNIT && allEntities.getMyMeleeUnits().size() >= 1) {
+            if (entityType == EntityType.MELEE_UNIT && allEntities.getMyMeleeUnits().size() >= 5) {
                 return buildAction;
             }
             Coordinate buildPosition = defaultBuildPosition;
