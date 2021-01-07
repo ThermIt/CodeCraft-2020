@@ -120,6 +120,10 @@ public class BuildOrders {
             }
         }
 
+        for (Entity order : buildQueue) {
+            order.getInsideCoordinates().forEach(a -> DebugInterface.println("O", a, 0));
+
+        }
         if (buildQueue.stream().anyMatch(order -> order.isMy(EntityType.RANGED_BASE))) {
             needBarracks = false;
         }
@@ -134,8 +138,8 @@ public class BuildOrders {
         maxUnits += buildQueue.stream().collect(Collectors.summarizingInt(order -> order.getProperties().getPopulationProvide())).getSum();
 
         int housesNeeded = (int) Math.ceil(((currentUnits * 1.2 + resources / (maxUnits <= 50 ? 20.0 : 50.0) - maxUnits)) / 5);
-        System.out.println(housesNeeded);
-        System.out.println(maxUnits == 0 || (maxUnits - (currentUnits + resources / (maxUnits <= 150 ? 10 : 50))) * 100 / maxUnits < 20);
+//        System.out.println(housesNeeded);
+//        System.out.println(maxUnits == 0 || (maxUnits - (currentUnits + resources / (maxUnits <= 150 ? 10 : 50))) * 100 / maxUnits < 20);
 
 /*
         allEntities.getMyBuildings().stream()
@@ -147,7 +151,8 @@ public class BuildOrders {
                         && ent.getProperties().getBuild().getOptions()[0] == EntityType.RANGED_UNIT
                         && ent.getHealth() > 30);
 
-        if (housesNeeded > 0 && !(needBarracks2 && maxUnits > 30) && resources >= 49) {
+        int UNITS_BEFORE_BARRACKS = 30 + (playerView.isFinials() ? 5 : 0);
+        if (housesNeeded > 0 && !(needBarracks2 && maxUnits >= UNITS_BEFORE_BARRACKS) && resources >= 49) {
             int[][] heat = new int[80][80];
 
             for (Entity worker : allEntities.getMyWorkers()) {
@@ -203,6 +208,16 @@ public class BuildOrders {
 */
         }
 
+        if (housesNeeded < 0) {
+            for (Iterator<Entity> iterator = buildQueue.iterator(); iterator.hasNext(); ) {
+                Entity order = iterator.next();
+                if (order.isMy(EntityType.HOUSE)) {
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+
         if (needBarracks && resources >= 490) {
             int[][] heat = new int[80][80];
 
@@ -229,6 +244,9 @@ public class BuildOrders {
             int maxQ = -1;
             for (int i = 0; i < 75; i++) {
                 for (int j = 0; j < 75; j++) {
+                    if (i < 8 && j < 8) {
+                        continue;
+                    }
                     int cheat = Math.max(Math.max(Math.max(heat[i][j], heat[i + 1][j + 1]), Math.max(heat[i + 2][j + 2], heat[i + 3][j + 3])), heat[i + 4][j + 4]);
                     if (cheat > 0 && simCityPlan.getEmptySize(i, j) >= 5) {
                         DebugInterface.println(cheat, i, j, 0);

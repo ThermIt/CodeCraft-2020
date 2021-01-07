@@ -27,6 +27,8 @@ public class AllEntities {
     private List<Entity> myMeleeBases = new ArrayList<>();
     private List<Entity> enemyAttackers = new ArrayList<>();
     private List<Entity> enemyUnits = new ArrayList<>();
+    private List<Entity> enemyEntities = new ArrayList<>();
+    private List<Entity> enemyTurrets = new ArrayList<>();
     private List<Entity> enemyBuildings = new ArrayList<>();
     private List<Entity> enemyBuilders = new ArrayList<>();
     private List<Entity> enemyRangedUnits = new ArrayList<>();
@@ -35,6 +37,18 @@ public class AllEntities {
     private List<Entity> myRangedUnits = new ArrayList<>();
     private int currentUnits;
     private int maxUnits;
+
+    public List<Entity> getEnemyEntities() {
+        return enemyEntities;
+    }
+
+    public List<Entity> getEnemyTurrets() {
+        return enemyTurrets;
+    }
+
+    public List<Entity> getEnemyBuilders() {
+        return enemyBuilders;
+    }
 
     public AllEntities(PlayerView playerView) {
         myId = playerView.getMyId();
@@ -83,11 +97,15 @@ public class AllEntities {
                 }
 
             } else if (entity.getPlayerId() != null) { // enemy
+                enemyEntities.add(entity);
                 if (entity.getProperties().getAttack() != null) {
                     enemyAttackers.add(entity);
                 }
                 if (entity.getEntityType().isBuilding()) {
                     enemyBuildings.add(entity);
+                    if (entity.getEntityType() == EntityType.TURRET) {
+                        enemyTurrets.add(entity);
+                    }
                 }
                 if (entity.getEntityType().isUnit()) {
                     if (entity.getEntityType() == EntityType.BUILDER_UNIT) {

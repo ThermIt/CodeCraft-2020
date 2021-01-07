@@ -3,7 +3,6 @@ package mystrategy.maps;
 import model.Entity;
 import model.PlayerView;
 import mystrategy.collections.AllEntities;
-import mystrategy.maps.light.WarMap;
 import util.DebugInterface;
 import util.Task;
 
@@ -23,8 +22,7 @@ public class Healers {
 
     public Healers(PlayerView playerView,
                    EntitiesMap map,
-                   AllEntities entities,
-                   WarMap warMap
+                   AllEntities entities
     ) {
         this.playerView = playerView;
         this.map = map;

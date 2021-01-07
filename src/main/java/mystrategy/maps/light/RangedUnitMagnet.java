@@ -11,6 +11,7 @@ import mystrategy.maps.EntitiesMap;
 import mystrategy.utils.Team;
 import util.DebugInterface;
 import util.Initializer;
+import util.Task;
 
 import java.util.List;
 
@@ -22,9 +23,12 @@ public class RangedUnitMagnet {
     private EnemiesMap enemiesMap;
     private int[][] distance;
     private int[][] distanceHarass;
+    private int[][] distanceAntiHarass;
+    private int antiHarassCount;
     private int mapSize = 80;
     private SingleVisitCoordinateSet waveCoordinates;
     private SingleVisitCoordinateSet waveCoordinatesHarass;
+    private SingleVisitCoordinateSet waveCoordinatesAntiHarass;
 //    private List<Coordinate> coordinates = new ArrayList<>();
 
 
@@ -42,9 +46,12 @@ public class RangedUnitMagnet {
         this.enemiesMap = enemiesMap;
         this.distance = new int[Initializer.getMapSize()][Initializer.getMapSize()];
         this.distanceHarass = new int[Initializer.getMapSize()][Initializer.getMapSize()];
+        this.distanceAntiHarass = new int[Initializer.getMapSize()][Initializer.getMapSize()];
+        this.antiHarassCount = 0;
 
         waveCoordinates = new SingleVisitCoordinateSet();
         waveCoordinatesHarass = new SingleVisitCoordinateSet();
+        waveCoordinatesAntiHarass = new SingleVisitCoordinateSet();
 
         for (Entity enemyUnit : entities.getEnemyRangedUnits()) {
             waveCoordinates.add(enemyUnit.getPosition());
@@ -73,14 +80,46 @@ public class RangedUnitMagnet {
             waveCoordinates.add(enemyUnit.getPosition());
         }
 
+        boolean onlyTurrets = entities.getEnemyTurrets().size() == entities.getEnemyEntities().size();
         for (Entity enemyBuilding : entities.getEnemyBuildings()) {
-            if (enemyBuilding.getEntityType() != EntityType.TURRET) {
+            if (onlyTurrets || enemyBuilding.getEntityType() != EntityType.TURRET) {
                 for (Coordinate position : enemyBuilding.getInsideCoordinates()) {
                     waveCoordinates.add(position);
                     waveCoordinatesHarass.add(position);
                 }
             }
         }
+
+        SingleVisitCoordinateSet waveCoordinatesAntiHarassNegative = new SingleVisitCoordinateSet();
+        for (Entity myBuilding : entities.getMyBuildings()) {
+            for (Coordinate position : myBuilding.getInsideCoordinates()) {
+                waveCoordinatesAntiHarassNegative.add(position);
+            }
+        }
+        for (Entity myWorker : entities.getMyWorkers()) {
+            if (myWorker.getTask() != Task.HEAL) {
+                waveCoordinatesAntiHarassNegative.add(myWorker.getPosition());
+            }/* else {
+                System.out.println("healer");
+            }*/
+        }
+        for (int i = 0; i < 10; i++) {
+            for (Coordinate coordinate : waveCoordinatesAntiHarassNegative) {
+                Entity entity = entitiesMap.getEntity(coordinate);
+                if (entity.isEnemy() && entity.getProperties().getAttack() != null && entity.getProperties().getAttack().getDamage() > 1) {
+                    waveCoordinatesAntiHarass.add(coordinate);
+                    antiHarassCount++;
+                    DebugInterface.println("V", coordinate, 0);
+                }
+                waveCoordinatesAntiHarassNegative.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
+                waveCoordinatesAntiHarassNegative.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
+                waveCoordinatesAntiHarassNegative.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
+                waveCoordinatesAntiHarassNegative.addOnNextStep(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
+            }
+            waveCoordinatesAntiHarassNegative.nextStep();
+        }
+
+        fillDistancesAntiHarass();
 
 /*
         for (int i = 40; i < 80; i++) {
@@ -133,6 +172,8 @@ public class RangedUnitMagnet {
             DebugInterface.println("X", pos, 0);
         }
 */
+
+
     }
 
 /*
@@ -160,6 +201,64 @@ public class RangedUnitMagnet {
 
     private boolean isBuilder(Coordinate coordinate) {
         return this.entitiesMap.getEntity(coordinate).isMy(EntityType.BUILDER_UNIT);
+    }
+
+    public void fillDistancesAntiHarass() {
+        if (entities.getMyRangedUnits().size() == 0) {
+            // TODO: stop when all rangers captured
+            return;
+        }
+
+        int[][] delayFuseForCalculation = new int[mapSize][mapSize];
+
+        for (int i = 8; !waveCoordinatesAntiHarass.isEmpty(); i++) {
+            for (Coordinate coordinate : waveCoordinatesAntiHarass) {
+                if (coordinate.isInBounds()
+                        && distanceAntiHarass[coordinate.getX()][coordinate.getY()] == 0
+                        && isPassable(coordinate)) {
+                    int resourceCount = resources.getResourceCount(coordinate);
+                    if (resourceCount > 0 && delayFuseForCalculation[coordinate.getX()][coordinate.getY()] == 0) {
+                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()] = resourceCount / 5 + 1; // magic
+                    }
+                    if (delayFuseForCalculation[coordinate.getX()][coordinate.getY()] > 1) {
+                        delayFuseForCalculation[coordinate.getX()][coordinate.getY()]--;
+                        waveCoordinatesAntiHarass.addOnNextStepByForce(coordinate);
+                    } else {
+                        distanceAntiHarass[coordinate.getX()][coordinate.getY()] = i;
+                        prettyprint(i, coordinate);
+                        // do not attract to taken places and workers
+                        boolean isFrontlineUnit = entitiesMap.getEntity(coordinate).isMy(EntityType.RANGED_UNIT)
+                                && ((distance[coordinate.getX()][coordinate.getY()] <= 9
+                                && distance[coordinate.getX()][coordinate.getY()] > 0)
+                                || enemiesMap.getDangerLevel(coordinate) > 0
+                                || coordinate.getX() > 39 || coordinate.getY() > 39);
+                        if (!isBuilder(coordinate) && !isFrontlineUnit) {
+                            waveCoordinatesAntiHarass.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
+                            waveCoordinatesAntiHarass.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
+                            waveCoordinatesAntiHarass.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() - 1));
+                            waveCoordinatesAntiHarass.addOnNextStep(new Coordinate(coordinate.getX() + 1, coordinate.getY() + 0));
+                        }
+                    }
+                }
+            }
+            waveCoordinatesAntiHarass.nextStep();
+
+            if (i > Constants.MAX_CYCLES) {
+                if (DebugInterface.isDebugEnabled()) {
+                    throw new RuntimeException("protection from endless cycles");
+                } else {
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < mapSize; i++) {
+            for (int j = 0; j < mapSize; j++) {
+                if (DebugInterface.isDebugEnabled() && distanceAntiHarass[i][j] < 15 && distanceAntiHarass[i][j] > 0) {
+                    DebugInterface.println(distanceAntiHarass[i][j], i, j, 0);
+                }
+            }
+        }
     }
 
     public void fillDistances() {
@@ -190,7 +289,7 @@ public class RangedUnitMagnet {
                                 && ((distance[coordinate.getX()][coordinate.getY()] <= 9
                                 && distance[coordinate.getX()][coordinate.getY()] > 0)
                                 || enemiesMap.getDangerLevel(coordinate) > 0
-                                || coordinate.getX()>39 || coordinate.getY() > 39);
+                                || coordinate.getX() > 39 || coordinate.getY() > 39);
                         if (!isBuilder(coordinate) && !isFrontlineUnit) {
                             waveCoordinates.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
                             waveCoordinates.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
@@ -247,7 +346,7 @@ public class RangedUnitMagnet {
                                 && ((distance[coordinate.getX()][coordinate.getY()] <= 9
                                 && distance[coordinate.getX()][coordinate.getY()] > 0)
                                 || enemiesMap.getDangerLevel(coordinate) > 0
-                                || coordinate.getX()>39 || coordinate.getY() > 39);
+                                || coordinate.getX() > 39 || coordinate.getY() > 39);
                         if (!isBuilder(coordinate) && !isFrontlineUnit) {
                             waveCoordinatesHarass.addOnNextStep(new Coordinate(coordinate.getX() - 1, coordinate.getY() + 0));
                             waveCoordinatesHarass.addOnNextStep(new Coordinate(coordinate.getX() + 0, coordinate.getY() + 1));
@@ -294,6 +393,17 @@ public class RangedUnitMagnet {
             return 0;
         }
         if (teamNumber == Team.HARASSERS || teamNumber == Team.HARASSERS2) {
+            if (antiHarassCount > 0) {
+                int dah = distanceAntiHarass[x][y] == 0 ? distance[x][y] : distanceAntiHarass[x][y];
+                int dh = distanceHarass[x][y] == 0 ? distance[x][y] : distanceHarass[x][y];
+                if (antiHarassCount >= 20) {
+                    return dah;
+                } else if (antiHarassCount >= 5) {
+                    return Math.min(dah, dh);
+                } else if (teamNumber == Team.HARASSERS) {
+                    return Math.min(dah, dh);
+                }
+            }
             return distanceHarass[x][y] == 0 ? distance[x][y] : distanceHarass[x][y];
         } else {
             return distance[x][y];

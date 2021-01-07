@@ -94,6 +94,7 @@ public class DefaultStrategy implements StrategyDelegate {
         currentUnits = allEntities.getCurrentUnits();
         maxUnits = allEntities.getMaxUnits();
         enemiesMap = new EnemiesMap(playerView, entitiesMap, allEntities);
+        this.healers = new Healers(playerView, entitiesMap, allEntities); // before jobs
         this.warMap.init(playerView, entitiesMap, allEntities, enemiesMap, allEntities);
 
         simCityPlan.init(playerView, entitiesMap, allEntities, warMap, resources);
@@ -101,7 +102,6 @@ public class DefaultStrategy implements StrategyDelegate {
 
         buildOrders.init(playerView, allEntities, entitiesMap);
 
-        this.healers = new Healers(playerView, entitiesMap, allEntities, warMap); // before jobs
         healerUnitMagnet = new HealerUnitMagnet(playerView, visibility, entitiesMap, allEntities, resources, warMap, healers, enemiesMap);
         this.jobs = new WorkerJobsMap(
                 playerView,
@@ -446,7 +446,7 @@ failedLimits
                     buildPosition
             );
         } else {
-            if (entityType == EntityType.MELEE_UNIT && allEntities.getMyMeleeUnits().size() >= 5) {
+            if (entityType == EntityType.MELEE_UNIT && allEntities.getMyMeleeUnits().size() >= 1) {
                 return buildAction;
             }
             Coordinate buildPosition = defaultBuildPosition;

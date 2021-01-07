@@ -106,9 +106,9 @@ public class WarMap {
             if (playerView.isOneOnOne()) {
                 enemyBuildingLocations.add(new Coordinate(72, 72));
             } else {
-                enemyBuildingLocations.add(new Coordinate(72, 72));
+                enemyBuildingLocations.add(new Coordinate(72+6, 72+6));
                 enemyBuildingLocations.add(new Coordinate(7, 72));
-                enemyBuildingLocations.add(new Coordinate(72, 7));
+                enemyBuildingLocations.add(new Coordinate(72+6, 7));
             }
             mapSize = playerView.getMapSize();
         }
