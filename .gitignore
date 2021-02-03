@@ -1,0 +1,10 @@
+/.idea/
+/src/main/java/*.zip
+/*.zip
+/pom.xml
+/out
+/out/
+/out/*
+/out/*.*
+/out/**/*.class
+/**/*.class
